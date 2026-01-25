@@ -38,7 +38,7 @@ project 8 - food waste prevention
 
 ### physical notes
 
-![Deciding our project](/pictures/m1-1.jpg "deciding our project")
+![Deciding our project](/pictures/m1-1.png "deciding our project")
 
 # Meeting 2 – 13/01
 
