@@ -78,7 +78,7 @@ Magnus - Pen testing/ Dev Ops.
 
 ![Users and Problems](/pictures/m2-1.png "Users and problems notes")
 ![Possible issues to be faced](/pictures/m2-2.png "Possible issues to be faced")
-![MoSCoW](/pictures/m2-3.jpg "MoSCoW teirs decided")
+![MoSCoW](/pictures/m2-3.jpg "MoSCoW tiers decided")
 
 
 # Meeting 3 – 20/01
@@ -87,7 +87,7 @@ All but Jack
 ## Overview
 We discussed user stories, establishing their importance and the tasks that need to be accomplished to achieve some of the key parts.
 We also planned out some key parts of the design choices, like languages and packages for each part of the project.
-Andrew (Technical lead) will establish a skeleton of the project to start Develoupment.
+Andrew (Technical lead) will establish a skeleton of the project to start Development.
 ## Scrum Roles:
 Product owner - Stefan
 Scrum Master - Joe
@@ -128,9 +128,29 @@ Tests needed:
 ### Attendance 
 All present, Arden 2 hours late
 ## Overview 
-We worked through as a team to get everyone's packages and enviroments set up so that we can develop on the skeleton andrew created. 
+We worked through as a team to get everyone's packages and environments set up so that we can develop on the skeleton Andrew created. 
 To summarise:
-- install pyrthon 3.14.2, node js latest, postgressql 18
+- install python 3.14.2, node js latest, postgressql 18
 - set up local DB
 - create venv 
 - start front and backend 
+
+
+# Meeting 5 - 26/01
+### Attendance
+Andrew, Arden, Alex, Stefan, Joe ,Jack
+
+## Overview 
+We started work on an ER diagram to work from on for the design of the back and front end. 
+
+# Meeting 6 - 27/01 
+### Attendance 
+Andrew, Alfie, Alex, Jack, Joe
+
+## Overview 
+we worked on the ER diagram, iterating on the design. Coming to consensus on the basic entities and their attributes, this is still to be hashed out with other team members that were not able to attend.
+We also viewed the website designs made by Alfie that will come to guide how each page should look. 
+## Details
+
+### key decisions
+We came to the decision that the search page should feature stores/shops, and that you click-through to view bundles for that particular store/shop, at least for the first demo. 
