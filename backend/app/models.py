@@ -1,6 +1,8 @@
 from typing import Optional
 from sqlmodel import SQLModel, Field, Relationship
 
+# models establishes the object types for both the database and communication with the front end 
+
 class UserBase(SQLModel):
     email: str
     role: str

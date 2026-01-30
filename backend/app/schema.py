@@ -13,7 +13,6 @@ class UserLogin(UserBase):
 class UserRead(UserBase):
     user_id:int
 
-
 # when we want to retrieve the user, the id is nice to have but the password musnt be shared
 class CustomerRead(CustomerBase):
     customer_id:int

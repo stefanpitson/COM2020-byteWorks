@@ -7,6 +7,8 @@ from passlib.context import CryptContext
 
 load_dotenv()
 
+# this module handles the password encryption and jwt tokens
+
 SECRET_KEY = os.getenv("SECRET_KEY", "")
 ALGORITHM = os.getenv("HASH_ALGORITHM", "")
 ACCESS_TOKEN_EXPIRE_MINUTES = float(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "0"))
