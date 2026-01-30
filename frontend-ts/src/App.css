@@ -1,9 +1,8 @@
-
 :root {
-    --primary: 142 69% 31.1%;
-    --primary-hover: 142 69% 38%;
-    --background: 170 45% 95%;
-    --accent: 140 58.6% 78.2%;
-    --secondary: 225 66% 70.1%;
-    --grayed: 210 20% 98%;
+  --primary: 142 69% 31.1%;
+  --primary-hover: 142 69% 38%;
+  --background: 170 45% 95%;
+  --accent: 140 58.6% 78.2%;
+  --secondary: 225 66% 70.1%;
+  --grayed: 210 20% 98%;
 }

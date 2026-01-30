@@ -1,16 +1,15 @@
 export interface User {
   user_id: number;
-  email: string
-  role: string
+  email: string;
+  role: string;
 }
-
 
 export interface Customer {
   customer_id?: number;
   name: string;
   post_code: string;
   store_credit: number;
-  carbon_saved: number
+  carbon_saved: number;
   rating?: number;
 }
 
@@ -24,8 +23,3 @@ export interface Vendor {
   carbon_saved: number;
   // validated: boolean; // Commented as it may be added in the future
 }
-
-
-
-
-

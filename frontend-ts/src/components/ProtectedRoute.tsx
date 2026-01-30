@@ -1,8 +1,11 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from "react-router-dom";
 
-
-export default function ProtectedRoute({allowedRole}: {allowedRole: string}) {
-  const token = localStorage.getItem('token');
+export default function ProtectedRoute({
+  allowedRole,
+}: {
+  allowedRole: string;
+}) {
+  const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
   // If there's no token, they aren't logged in
@@ -11,7 +14,7 @@ export default function ProtectedRoute({allowedRole}: {allowedRole: string}) {
   }
 
   if (role !== allowedRole) {
-    return <Navigate to="/" />
+    return <Navigate to="/" />;
   }
 
   return <Outlet />;
