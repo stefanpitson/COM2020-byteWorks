@@ -36,7 +36,7 @@ class Vendor(VendorBase, table=True):
     carbon_saved: int = Field(default=0)
 
     user: Optional[User] = Relationship(back_populates="vendor_profile")
-    # validated: bool = Field(default=False)   DEBATED
+    validated: bool = Field(default=False)
 
 
 class Customer(CustomerBase, table=True):

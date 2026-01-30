@@ -39,10 +39,8 @@ def register_customer(
     if session.exec(select(User).where(User.email == data.user.email)).first():
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    # 1. Hash the password using Argon2
     hashed_pw = get_password_hash(data.user.password)
     
-    # 2. Create the User object with the HASH, not the plain password
     new_user = User(
         email=data.user.email,
         password_hash=hashed_pw, # <--- Storing the hash
@@ -78,10 +76,9 @@ def register_vendor(
     if session.exec(select(User).where(User.email == data.user.email)).first():
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    # 1. Hash the password using Argon2
     hashed_pw = get_password_hash(data.user.password)
     
-    # 2. Create the User object with the HASH, not the plain password
+    
     new_user = User(
         email=data.user.email,
         password_hash=hashed_pw, # <--- Storing the hash
@@ -99,7 +96,6 @@ def register_vendor(
             street = data.vendor.street,
             phone_number = data.vendor.phone_number,
             opening_hours = data.vendor.opening_hours,
-            # validated: bool,
             photo = data.vendor.photo,
             post_code = data.vendor.post_code,
         )

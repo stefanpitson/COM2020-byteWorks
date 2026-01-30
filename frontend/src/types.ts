@@ -19,7 +19,8 @@ export interface Vendor {
   street: string;
   city: string;
   post_code: string;
+  opening_hours: string;
   phone_number: string;
   carbon_saved: number;
-  // validated: boolean; // Commented as it may be added in the future
+  validated: boolean;
 }

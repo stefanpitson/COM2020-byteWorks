@@ -1,6 +1,8 @@
 import api from "./axiosConfig";
 import type { User, Customer, Vendor } from "../types";
 
+// LOGIN
+
 export interface LoginCredentialsPayload {
   email: string;
   password: string;
@@ -18,9 +20,14 @@ export const loginUser = async (credentials: LoginCredentialsPayload) => {
   return response.data;
 };
 
+// User
+
 export interface UserSignupData extends Omit<User, "user_id"> {
   password: string;
 }
+
+// Customer
+
 export type CustomerSignupData = Omit<
   Customer,
   "customer_id" | "store_credit" | "carbon_saved" | "rating"
@@ -44,20 +51,24 @@ export const registerCustomer = async (
   return response.data;
 };
 
+// Vendor
+
+export type VendorSignupData = Omit<
+  Vendor,
+  "vendor_id" | "carbon_saved" | "validated"
+>;
+
 export interface RegisterVendorPayload {
-  user: User;
-  password: string;
-  vendor: Vendor;
+  user: UserSignupData;
+  vendor: VendorSignupData;
 }
 
 export const registerVendor = async (
-  user: User,
-  password: string,
-  vendor: Vendor,
+  user: UserSignupData,
+  vendor: VendorSignupData,
 ) => {
   const payload: RegisterVendorPayload = {
     user: user,
-    password: password,
     vendor: vendor,
   };
 

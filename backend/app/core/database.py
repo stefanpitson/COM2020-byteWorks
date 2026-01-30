@@ -21,6 +21,7 @@ def get_session():
 def reset_db():
     print("Dropping all tables")
     SQLModel.metadata.drop_all(engine)
+    create_db_and_tables()
 
 
 if __name__ == "__main__":
