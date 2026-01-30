@@ -22,5 +22,6 @@ def reset_db():
     print("Dropping all tables")
     SQLModel.metadata.drop_all(engine)
 
-if "__name__" == "__main__":
+
+if __name__ == "__main__":
     reset_db()

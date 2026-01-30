@@ -35,8 +35,8 @@ export default function CustomerSignUp () {
 
     return (
         <div className="h-screen w-screen flex items-center justify-center bg-background">
-            <div className="w-full max-w-md bg-white p-4 rounded-xl shadow-lg">
-                <form onSubmit={handleSubmit} className="space-y-4 p-4">
+            <div className="w-full max-w-md bg-white p-8 space-y-4 rounded-xl shadow-lg">
+                <form onSubmit={handleSubmit}>
 					<h2 className="text-2xl font-semibold mb-6">Create Customer</h2>
 					<label className="block mb-4">
 						<span className="text-sm text-gray-700">Email</span>

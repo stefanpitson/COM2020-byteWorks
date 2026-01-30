@@ -8,7 +8,7 @@ from app.api.deps import get_current_user
 
 router = APIRouter()
 
-@router.get("/me", response_model= Customer, tags=["customers"], summary="Retrieves all customers")
+@router.get("/me", response_model= Customer, tags=["Customers"], summary="Customer Profile")
 def get_customer_profile(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
