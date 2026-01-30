@@ -5,6 +5,7 @@ from fastapi import FastAPI, Depends
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 from fastapi.middleware.cors import CORSMiddleware
 
+
 # --- 1. LOAD SECRETS ---
 load_dotenv() # This loads the variables from .env
 

@@ -10,9 +10,7 @@ export default function MainLayout() {
 
       {/* The 'Outlet' is where the specific page content (Home, Dashboard, etc.) will appear */}
       <main className="flex-grow ">
-        <ProtectedRoute>
-            <Outlet />
-        </ProtectedRoute>
+        <Outlet />
       </main>
 
       {/* You could also put a Footer here! */}

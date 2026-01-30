@@ -1,37 +1,31 @@
-export type Token = string;
+export interface User {
+  user_id: number;
+  email: string
+  role: string
+}
+
 
 export interface Customer {
-  id: number;
+  customer_id?: number;
   name: string;
-  email: string;
-  postCode: string;
-  storeCredit: number;
-  carbonSaved: number
-  rating: number;
+  post_code: string;
+  store_credit: number;
+  carbon_saved: number
+  rating?: number;
 }
 
-export interface Seller {
-  id: number
+export interface Vendor {
+  vendor_id?: number;
   name: string;
-  email: string;
-  address: string;
-  phoneNumber: string;
-  carbonSaved: number;
+  street: string;
+  city: string;
+  post_code: string;
+  phone_number: string;
+  carbon_saved: number;
+  // validated: boolean; // Commented as it may be added in the future
 }
 
-export interface TemplateBundle {
-  id: number;
-  estimatedValue: number;
-  cost: number;
-  title: string;
-  description: string;
-  estCarbonSaved: number;
-}
 
-export interface Bundle {
-  id: number;
-  templateID: number;
-  pickedIp: boolean;
-  date: Date;
-}
+
+
 
