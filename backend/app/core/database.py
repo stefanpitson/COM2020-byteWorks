@@ -18,3 +18,9 @@ def get_session():
     with Session(engine) as session:
         yield session
 
+def reset_db():
+    print("Dropping all tables")
+    SQLModel.metadata.drop_all(engine)
+
+if "__name__" == "__name__":
+    reset_db()

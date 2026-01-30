@@ -11,20 +11,15 @@ router = APIRouter()
 @router.post("/login", response_model=LoginResponse)
 def login(credentials: LoginRequest, session: Session = Depends(get_session)):
     
-    # 1. Fetch the user by Email
     statement = select(User).where(User.email == credentials.email)
     user = session.exec(statement).first()
 
-    # 2. Verify the Password
-    # If user is None OR password check returns False, fail.
     if not user or not verify_password(credentials.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
         )
 
-    # 3. Create the JWT
-    # We pass the User ID as the subject, and the Role for frontend routing
     access_token = create_access_token(subject=user.user_id, role=user.role)
 
     # 4. Return the data
