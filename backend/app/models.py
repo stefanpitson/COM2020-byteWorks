@@ -47,3 +47,4 @@ class Customer(CustomerBase, table=True):
     rating: Optional[int] = Field(default=None)
 
     user: Optional[User] = Relationship(back_populates="customer_profile")
+

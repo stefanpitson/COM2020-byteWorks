@@ -15,10 +15,10 @@ class UserRead(UserBase):
 
 
 # when we want to retrieve the user, the id is nice to have but the password musnt be shared
-class CustomerRead(UserBase):
+class CustomerRead(CustomerBase):
     customer_id:int
 
-class VendorRead(UserBase):
+class VendorRead(VendorBase):
     vendor_id:int
 
 class LoginResponse(BaseModel):
