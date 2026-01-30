@@ -11,7 +11,7 @@ export default function Login() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // Replace with real auth call. For now, accept any non-empty credentials.
+
     const trimEmail = email.trim();
     const trimPassword = password.trim();
 
@@ -24,10 +24,6 @@ export default function Login() {
       const token: string = response.access_token;
       const token_type: string = response.token_type;
       const user: User = response.user;
-
-      // const token: Token = mockToken;
-      // const tokenType: string = "bearer"
-      // const user: User = mockUserCus;
 
       localStorage.setItem("token", token);
       localStorage.setItem("tokenType", token_type);

@@ -21,6 +21,7 @@ class CustomerRead(CustomerBase):
 class VendorRead(VendorBase):
     vendor_id:int
 
+# This is what the API actually expects to receive
 class LoginResponse(BaseModel):
     access_token: str
     token_type: str
@@ -30,8 +31,6 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
-# --- Part B: The Composite Schemas (The "Envelope") ---
-# This is what the API actually expects to receive
 class CustomerSignupRequest(BaseModel):
     user: UserCreate
     customer: CustomerBase

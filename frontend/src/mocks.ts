@@ -16,7 +16,9 @@ export const mockVendor: Vendor = {
   city: "Exeter",
   post_code: "EX4 4DE",
   phone_number: "0000000000001",
+  opening_hours: "Mon-Fri 8:00 - 18:00",
   carbon_saved: 0,
+  validated: true
 };
 
 export const mockUserCus: User = {

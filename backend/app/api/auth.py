@@ -22,7 +22,6 @@ def login(credentials: LoginRequest, session: Session = Depends(get_session)):
 
     access_token = create_access_token(subject=user.user_id, role=user.role)
 
-    # 4. Return the data
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -43,7 +42,7 @@ def register_customer(
     
     new_user = User(
         email=data.user.email,
-        password_hash=hashed_pw, # <--- Storing the hash
+        password_hash=hashed_pw,
         role=data.user.role
     )
     
@@ -63,7 +62,7 @@ def register_customer(
         return {"message": "Customer account created successfully"}
 
     except Exception as e:
-        session.rollback() # If anything fails, undo the User creation too
+        session.rollback() # If anything fails, undo the User creation 
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -81,7 +80,7 @@ def register_vendor(
     
     new_user = User(
         email=data.user.email,
-        password_hash=hashed_pw, # <--- Storing the hash
+        password_hash=hashed_pw,
         role=data.user.role
     )
     
@@ -106,5 +105,5 @@ def register_vendor(
         return {"message": "Vendor account created successfully"}
 
     except Exception as e:
-        session.rollback() # If anything fails, undo the User creation too
+        session.rollback() # If anything fails, undo the Vendor creation
         raise HTTPException(status_code=500, detail=str(e))
