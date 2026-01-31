@@ -8,12 +8,19 @@ from app.schema import LoginResponse, LoginRequest, CustomerSignupRequest, Vendo
 
 router = APIRouter()
 
+# this module handles the login and registering for users
+
 @router.post("/login", response_model=LoginResponse)
-def login(credentials: LoginRequest, session: Session = Depends(get_session)):
+def login(
+    credentials: LoginRequest, 
+    session: Session = Depends(get_session)
+    ):
     
+    # get user from db 
     statement = select(User).where(User.email == credentials.email)
     user = session.exec(statement).first()
 
+    # check credentials 
     if not user or not verify_password(credentials.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -35,11 +42,13 @@ def register_customer(
     session: Session = Depends(get_session)
     ):
     
+    # checks email hasnt already been used
     if session.exec(select(User).where(User.email == data.user.email)).first():
         raise HTTPException(status_code=400, detail="Email already registered")
 
     hashed_pw = get_password_hash(data.user.password)
     
+    # user creation happens in 2 steps, fist create a user
     new_user = User(
         email=data.user.email,
         password_hash=hashed_pw,
@@ -47,9 +56,11 @@ def register_customer(
     )
     
     try:
+        # add user to db
         session.add(new_user)
         session.flush() # this sends sql to the db so the id can be generated but the transaction isnt committed or finished yet
 
+        # now the obj is added to the db, so we can get its user id 
         new_customer = Customer(
             user_id = new_user.user_id,
             name = data.customer.name,
@@ -57,7 +68,7 @@ def register_customer(
         )
 
         session.add(new_customer)
-        session.commit()
+        session.commit() 
 
         return {"message": "Customer account created successfully"}
 
@@ -77,7 +88,7 @@ def register_vendor(
 
     hashed_pw = get_password_hash(data.user.password)
     
-    
+    # user creation happens in 2 steps, fist create a user
     new_user = User(
         email=data.user.email,
         password_hash=hashed_pw,
@@ -88,6 +99,7 @@ def register_vendor(
         session.add(new_user)
         session.flush() # this sends sql to the db so the id can be generated but the transaction isnt committed or finished yet
 
+        # now the obj is added to the db, so we can get its user id 
         new_vendor = Vendor(
             user_id = new_user.user_id,
             name = data.vendor.name,

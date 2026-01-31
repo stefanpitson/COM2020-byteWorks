@@ -1,6 +1,5 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Login2 from "./pages/Login2";
 import CustomerHome from "./pages/customers/CustomerHome";
 import VendorDashboard from "./pages/vendors/vendorDashboard";
 import "./App.css";
@@ -17,7 +16,6 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/login2" element={<Login2 />} />
 
         <Route path="/vendor/signup" element={<VendorSignUp />} />
         <Route path="/customer/signup" element={<CustomerSignUp />} />
