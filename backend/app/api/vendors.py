@@ -16,7 +16,7 @@ def get_vendor_profile(
     if current_user.role != "vendor":
         raise HTTPException(status_code=403, detail="Not a vendor account")
         
-    if not current_user.customer_profile:
+    if not current_user.customer_profile: # this might be a copy error?
         raise HTTPException(status_code=404, detail="Profile not found")
     
-    return current_user.customer_profile
+    return current_user.customer_profile # copy error? 
