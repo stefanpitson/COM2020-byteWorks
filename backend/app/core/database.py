@@ -30,9 +30,11 @@ def get_session():
 
 # drops all tables
 def reset_db():
+    from app.models import User, Customer, Vendor
     print("Dropping all tables")
     SQLModel.metadata.drop_all(engine)
-    create_db_and_tables()
-
+    print("Creating new tables")
+    SQLModel.metadata.create_all(engine)
+    
 if __name__ == "__main__":
     reset_db()
