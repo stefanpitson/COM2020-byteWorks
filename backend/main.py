@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # for local run 
-# NEEDS CHANGING FOR DEPLOYMENT 
+# NEEDS CHANGING FOR DEPLOYMENT? 
 origins = ["http://localhost:5173", "http://localhost:3000"] 
 app.add_middleware(
     CORSMiddleware,
@@ -29,8 +29,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# allows all the other calls from the other files, like a import ____ 
+# passes on requests to the correct corresponding file
 app.include_router(customers.router, prefix="/customers", tags=["Customers"])
 app.include_router(vendors.router, prefix="/vendors", tags=["Vendors"])
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])
-# ADD NEW API MODULES HERE eg. bundles 
+# ADD NEW API ROUTES HERE eg. bundles 

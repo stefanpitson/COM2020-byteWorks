@@ -4,10 +4,10 @@ from sqlmodel import SQLModel, create_engine, Session
 
 # Main functions relating to database functionality
 
-# Running this *SHOULD file will drop all tables, allowing a reset when attributes for functions change 
+# Running this file *SHOULD will drop all tables, allowing a reset when attributes for functions change 
 
 # GLOBAL
-# the code outside the functions will run once on start up when any function is first called (typically create_db_and_tables)
+# the code outside the functions will run once on start up when the file is imported (typically create_db_and_tables)
 
 load_dotenv()
 

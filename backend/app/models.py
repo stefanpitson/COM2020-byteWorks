@@ -3,9 +3,10 @@ from sqlmodel import SQLModel, Field, Relationship
 
 # models establishes the object types for both the database and communication with the front end 
 
+# Base classes contain all the attributes that are always present 
 class UserBase(SQLModel):
     email: str
-    role: str
+    
 
 class CustomerBase(SQLModel):
     name: str
@@ -24,6 +25,7 @@ class VendorBase(SQLModel):
 class User(UserBase, table=True):
     user_id: Optional[int] = Field(default=None, primary_key=True)
     password_hash:str
+    role: str
 
     vendor_profile: Optional["Vendor"] = Relationship(
         back_populates="user", sa_relationship_kwargs={"uselist": False}
