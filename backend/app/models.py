@@ -32,6 +32,7 @@ class User(UserBase, table=True):
         back_populates="user", sa_relationship_kwargs={"uselist": False}
     )
 
+
 class Vendor(VendorBase, table=True):
     vendor_id: Optional[int] = Field(default=None, primary_key=True)
     user_id: Optional[int] = Field(foreign_key="user.user_id")

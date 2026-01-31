@@ -23,7 +23,7 @@ engine = create_engine(DATABASE_URL, echo=True)
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
 
-# used on all api calls using the db, 
+# used on all api calls using the db 
 def get_session():
     with Session(engine) as session:
         yield session
