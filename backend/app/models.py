@@ -7,7 +7,6 @@ from sqlmodel import SQLModel, Field, Relationship
 class UserBase(SQLModel):
     email: str
     
-
 class CustomerBase(SQLModel):
     name: str
     post_code: str
@@ -21,6 +20,8 @@ class VendorBase(SQLModel):
     opening_hours: str # Should be JSON
     photo: str
 
+class TemplateBase(SQLModel):
+    name: str
 
 class User(UserBase, table=True):
     user_id: Optional[int] = Field(default=None, primary_key=True)
@@ -53,3 +54,14 @@ class Customer(CustomerBase, table=True):
 
     user: Optional[User] = Relationship(back_populates="customer_profile")
 
+
+class Template(TemplateBase, table=True):
+    template_id: Optional[int] = Field(default=None, primary_key=True)
+    title: str = Field(default ="title")
+    description: str = Field(default="description")
+    estimated_value: float = Field(default=0.0)
+    cost: float = Field(default= 0.0)
+    carbon_saved: float = Field(default=0.0)
+    
+    vendor: int = Field(default=None,foreign_key="vendor.vendor_id")
+    
