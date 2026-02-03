@@ -10,7 +10,7 @@ import os
 # this function will handle the start up, and shut down of the app
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # things written above yeild happen when the app starts 
+    # things written above yield happen when the app starts 
     # like creating the db
     create_db_and_tables()
     yield
