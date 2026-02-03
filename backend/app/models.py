@@ -1,13 +1,12 @@
 from typing import Optional
 from sqlmodel import SQLModel, Field, Relationship
-
+from datetime import date as Date, time as Time, datetime
 # models establishes the object types for both the database and communication with the front end 
 
 # Base classes contain all the attributes that are always present 
 class UserBase(SQLModel):
     email: str
     
-
 class CustomerBase(SQLModel):
     name: str
     post_code: str
@@ -21,6 +20,21 @@ class VendorBase(SQLModel):
     opening_hours: str # Should be JSON
     photo: str
 
+class TemplateBase(SQLModel):
+    name: str
+
+class BundleBase(SQLModel):
+    template_id: int
+
+class AllergenBase(SQLModel):
+    title:str
+
+class ReservationBase(SQLModel):
+    bundle_id: int
+
+#
+# --- REAL CLASSES ---
+#       for db
 
 class User(UserBase, table=True):
     user_id: Optional[int] = Field(default=None, primary_key=True)
@@ -53,3 +67,62 @@ class Customer(CustomerBase, table=True):
 
     user: Optional[User] = Relationship(back_populates="customer_profile")
 
+
+class Template(TemplateBase, table=True):
+    template_id: Optional[int] = Field(default=None, primary_key=True)
+    title: str = Field(default ="title")
+    description: str = Field(default="description")
+    estimated_value: float = Field(default=0.0)
+    cost: float = Field(default= 0.0)
+    
+    meatPercent: float = Field(default=0.0)
+    carbPercent: float = Field(default=0.0)
+    vegPercent: float = Field(default=0.0)
+    carbon_saved: float = Field(default=0.0)
+    weight: float = Field(default=0.0)
+    isVegan: bool = Field(default=False)
+    isVegetarian: bool = Field(default=False)
+
+    vendor: Optional[int] = Field(default=None,foreign_key="vendor.vendor_id")
+
+    allergens: list["Allergen"] = Relationship( # for the linking table
+        back_populates="templates",             # having this means we dont have to write join statements
+        link_model=Allergen_Template
+    )
+
+class Allergen(AllergenBase, table=True):
+    allergen_id: Optional[int] = Field(default=None, primary_key=True)
+    title: str = Field(default="Allergen")
+    description: str = Field(default="Description")
+
+    templates: list["Template"] = Relationship( # for the linking table
+        back_populates="allergens",             # having this means we dont have to write join statements
+        link_model=Allergen_Template
+    )
+
+class Allergen_Template(SQLModel,table=True): # linking table 
+    allergen_id: Optional[int] = Field(default=None, primary_key=True, foreign_key="allergen.allergen_id")
+    template_id: Optional[int] = Field(default = None, primary_key=True, foreign_key="template.template_id")
+
+class Bundle(BundleBase, table=True):
+    bundle_id: Optional[int] = Field(default=None, primary_key=True)
+    template_id: Optional[int] = Field( default=None, foreign_key="template.template_id")
+    picked_up: bool = Field(default= False)
+    date: Date = Field(default_factory=lambda: datetime.now().date())
+    time: Time = Field(default_factory=lambda: datetime.now().time())
+
+    purchased_by: Optional[int] = Field(default=None, foreign_key="customer.customer_id")
+
+
+class Reservation(ReservationBase, table=True):
+    reservation_id:Optional[int] = Field(default=None, primary_key=True)
+    bundle_id: Optional[int] = Field(default=None, foreign_key="bundle.bundle_id")
+    consumer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id")
+    time_created: Time = Field(default_factory=lambda:datetime.now().time())
+
+    code: Optional[int] = Field(default=None) #shouldn't have a default? 
+
+class Report(SQLModel, table=True):
+    reoprt_id: Optional[int] = Field(default=None, primary_key=True)
+    customer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id")
+    
