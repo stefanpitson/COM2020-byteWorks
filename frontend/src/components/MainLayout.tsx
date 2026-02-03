@@ -1,6 +1,5 @@
 import { Outlet } from "react-router-dom";
 import NavBar from "./NavBar";
-import ProtectedRoute from "./ProtectedRoute";
 
 export default function MainLayout() {
   return (
