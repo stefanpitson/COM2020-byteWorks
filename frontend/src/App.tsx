@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import CustomerHome from "./pages/customers/CustomerHome";
 import VendorDashboard from "./pages/vendors/vendorDashboard";
@@ -39,3 +38,4 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
