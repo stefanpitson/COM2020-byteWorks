@@ -1,13 +1,15 @@
-# import warnings
-# warnings.filterwarnings("ignore", category=DeprecationWarning, module="passlib") # removing warning for readability
-# # warnings currently not ignored
+# THIS SCRIPT MUST BE RUN FROM INSIDE BACKEND FOLDER  -> BECAUSE FUNCTION IMPORTS FROM FILES ONLY WORK FROM BACKEND FOLDER
+# WITH COMMAND python -m pytest -v -s <FULL PATH TO TEST_AUTH.PY>
+# CREATE A .env.test FILE INSIDE backend/ WITH SECRET_KEY and HASH_ALGORITHM parameters for testing
 
 from dotenv import load_dotenv
-load_dotenv(".env.test") # loads the test env variables
+load_dotenv(".env.test") # loads the test env variables, create this locally with SECRET_KEY and HASH_ALGORITHM to test
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+
+# Retrieves all the modules and functions
 from app.api.auth import router
 from app.core.database import get_session
 from app.core.security import get_password_hash
@@ -16,13 +18,12 @@ from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel, create_engine, Session
 
 
-TEST_DATABASE_URL = "sqlite://" 
+TEST_DATABASE_URL = "sqlite://"  # local database for testing
 test_engine = create_engine(
     TEST_DATABASE_URL, 
     connect_args={"check_same_thread": False}, 
     poolclass=StaticPool
 )
-
 
 def get_test_session():
     with Session(test_engine) as session:
@@ -31,12 +32,11 @@ def get_test_session():
 app = FastAPI()
 app.include_router(router)
 app.dependency_overrides[get_session] = get_test_session
-
 testClient = TestClient(app=app, base_url="https://bytework.online/")
+
 
 @pytest.fixture(autouse=True)
 def setup_test_db():
-    """Create tables before each test and drop after"""
     SQLModel.metadata.create_all(test_engine)
     yield
     SQLModel.metadata.drop_all(test_engine)
@@ -54,6 +54,8 @@ def test_user():
         session.commit()
         session.refresh(test_user)
         return test_user
+
+
 
 def test_login_success(test_user):
     response = testClient.post("/login", json={
