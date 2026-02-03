@@ -55,11 +55,9 @@ class User(UserBase, table=True):
     )
 
     badges: list["Badge"] = Relationship( # for the linking table
-        back_populates="badges",             # having this means we dont have to write join statements
+        back_populates="users",             # having this means we dont have to write join statements
         link_model=User_Badge
     )
-
-
 
 class Vendor(VendorBase, table=True):
     vendor_id: Optional[int] = Field(default=None, primary_key=True)
@@ -151,7 +149,7 @@ class Badge(SQLModel, table=True):
     userType:str = Field(default="user")
 
     users: list["User"] = Relationship( # for the linking table
-        back_populates="users",         # having this means we dont have to write join statements
+        back_populates="badges",         # having this means we dont have to write join statements
         link_model=User_Badge
     )
 
