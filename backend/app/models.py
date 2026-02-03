@@ -1,6 +1,7 @@
 from typing import Optional
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import date as Date, time as Time, datetime
+from random import random
 # models establishes the object types for both the database and communication with the front end 
 
 # Base classes contain all the attributes that are always present 
@@ -36,6 +37,11 @@ class ReservationBase(SQLModel):
 # --- REAL CLASSES ---
 #       for db
 
+
+class User_Badge(SQLModel, table=True):
+    user_id: Optional[int] = Field(default=None, primary_key=True, foreign_key="user.user_id")
+    badge_id: Optional[int] = Field(default=None, primary_key=True, foreign_key="badge.badge_id")
+
 class User(UserBase, table=True):
     user_id: Optional[int] = Field(default=None, primary_key=True)
     password_hash:str
@@ -47,6 +53,12 @@ class User(UserBase, table=True):
     customer_profile: Optional["Customer"] = Relationship(
         back_populates="user", sa_relationship_kwargs={"uselist": False}
     )
+
+    badges: list["Badge"] = Relationship( # for the linking table
+        back_populates="badges",             # having this means we dont have to write join statements
+        link_model=User_Badge
+    )
+
 
 
 class Vendor(VendorBase, table=True):
@@ -67,6 +79,9 @@ class Customer(CustomerBase, table=True):
 
     user: Optional[User] = Relationship(back_populates="customer_profile")
 
+class Allergen_Template(SQLModel,table=True): # linking table, has to come before the other entities 
+    allergen_id: Optional[int] = Field(default=None, primary_key=True, foreign_key="allergen.allergen_id")
+    template_id: Optional[int] = Field(default = None, primary_key=True, foreign_key="template.template_id")
 
 class Template(TemplateBase, table=True):
     template_id: Optional[int] = Field(default=None, primary_key=True)
@@ -100,15 +115,13 @@ class Allergen(AllergenBase, table=True):
         link_model=Allergen_Template
     )
 
-class Allergen_Template(SQLModel,table=True): # linking table 
-    allergen_id: Optional[int] = Field(default=None, primary_key=True, foreign_key="allergen.allergen_id")
-    template_id: Optional[int] = Field(default = None, primary_key=True, foreign_key="template.template_id")
+
 
 class Bundle(BundleBase, table=True):
     bundle_id: Optional[int] = Field(default=None, primary_key=True)
     template_id: Optional[int] = Field( default=None, foreign_key="template.template_id")
     picked_up: bool = Field(default= False)
-    date: Date = Field(default_factory=lambda: datetime.now().date())
+    date: Date = Field(default_factory=lambda: datetime.now().date()) # basically tells the db to use this function to populate it
     time: Time = Field(default_factory=lambda: datetime.now().time())
 
     purchased_by: Optional[int] = Field(default=None, foreign_key="customer.customer_id")
@@ -125,4 +138,45 @@ class Reservation(ReservationBase, table=True):
 class Report(SQLModel, table=True):
     reoprt_id: Optional[int] = Field(default=None, primary_key=True)
     customer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id")
-    
+    seller_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id")
+    title: str = Field(default="title")
+    complaint: str = Field(default="complaint")
+    responded: bool = Field(default=False)
+    response: str = Field(default="")
+
+class Badge(SQLModel, table=True):
+    badge_id: Optional[int] = Field(default=None, primary_key=True)
+    title:str = Field(default="title")
+    description: str = Field(default="description")
+    userType:str = Field(default="user")
+
+    users: list["User"] = Relationship( # for the linking table
+        back_populates="users",         # having this means we dont have to write join statements
+        link_model=User_Badge
+    )
+
+
+class Forecast_Input(SQLModel, table=True):
+    record_id: Optional[int] = Field(default=None, primary_key=True)
+    vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id")
+    template_id: Optional[int] = Field(default=None, foreign_key="template.template_id")
+
+    #time the bundles were posted, this should be able to grab from bundles table, but 
+    # could have issues if there aren't any
+    date: Date = Field(default_factory=lambda:datetime.now().date()) # basically tells the db to use this function to populate it
+    time: Time = Field(default_factory=lambda:datetime.now().time())
+    preciptation: float = Field(default_factory=lambda:random()) # may want to change this 
+    bundles_posted: int = Field(default=0)
+    bundles_reserved: int = Field(default=0)
+    no_shows: int = Field(default=0)
+
+class Forecast_Output(SQLModel, table=True):
+    output_id: Optional[int] = Field(default=None, primary_key=True)
+    vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id")
+    template_id: Optional[int] = Field(default=None, foreign_key="template.template_id")
+    date: Date = Field(default_factory=lambda:datetime.now().date())
+    reservation_prediction: int = Field(default=0)
+    no_show_prediction: int = Field(default=0)
+    rationale:str = Field(default="")
+    confidence:float = Field(default = 1.0)
+
