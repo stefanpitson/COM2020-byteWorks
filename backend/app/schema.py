@@ -1,63 +1,76 @@
 from pydantic import BaseModel
-from app.models import UserBase, CustomerBase, VendorBase, TemplateBase
 
-# This file defines the class/object structure for passing between the front and backend 
+# schemas contains what the frontend will send and expect in return 
 
-# when creating a new user, we need the password, email, and role
-class UserCreate(UserBase):
-    password: str
-    role: str
-
-# when logging in a user, we need the password and email 
-class UserLogin(UserBase):
-    password: str
-
+# profile reads 
 # when we want to retrieve the user, the id is nice to have but the password musnt be shared
-class UserRead(UserBase):
-    user_id:int
-    role: str
 
-# when we want to retrieve the user, the id is nice to have but the password musnt be shared
-class CustomerRead(CustomerBase):
-    customer_id:int
+class CustomerRead(BaseModel):
+    customer_id: int
+    name: str
+    post_code: str
 
-class VendorRead(VendorBase):
-    vendor_id:int
+class VendorRead(BaseModel):
+    vendor_id: int
+    name: str
+    street: str
+    city: str
+    post_code: str
+    phone_number: str
+    opening_hours: str
+    photo: str
 
-# for creating a template
-class TemplateCreate(TemplateBase):
-    name:str
-    description:str
-    estimated_value:float
-    price: float
-    carbon_saved: float
 
-class TemplateRead(TemplateBase):
-    template_id:int
+# ___AUTH SCHEMAS___  
+
+#login
+class LoginRequest(BaseModel):
+    email: str
+    password: str
 
 # This is what the API actually expects to receive
 class LoginResponse(BaseModel):
     access_token: str
     token_type: str
-    user: UserRead 
+    user: UserData
+     # Nested class to keep the JSON structure
+    class UserData(BaseModel):
+        user_id: int
+        email: str
+        role: str
 
-class LoginRequest(BaseModel):
-    email: str
-    password: str
+# sign up 
+class CustomerSignupRequest(BaseModel):
+    user: UserData
+    # Nested class to keep the JSON structure
+    class UserData(BaseModel):
+        email: str
+        password: str
+        role: str
 
-class CustomerSignupRequest(BaseModel): # could be moved into auth.py
-    user: UserCreate
-    customer: CustomerBase
+    customer: CustomerData
+    # Nested class to keep the JSON structure
+    class CustomerData(BaseModel):
+        name: str
+        post_code: str
+
 
 class VendorSignupRequest(BaseModel):
-    user: UserCreate
-    vendor: VendorBase
-    
-# for getting all of a vendors templates 
-class VendorTemplates():
-    vendr_id:int
+    user: UserData
+    # Nested class to keep the JSON structure
+    class UserData(BaseModel):
+        email: str
+        password: str
+        role: str
 
-# response with all of a vendors templates
-class TemplateList():
-    templates: list[TemplateRead]
-    total_count:int 
+    vendor: VendorData
+    # Nested class to keep the JSON structure
+    class VendorData(BaseModel):
+        name: str
+        street: str
+        city: str
+        post_code: str
+        phone_number: str
+        opening_hours: str
+        photo: str
+    
