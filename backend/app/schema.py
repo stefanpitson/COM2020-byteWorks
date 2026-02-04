@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from app.models import UserBase, CustomerBase, VendorBase, TemplateBase
+from app.models import UserBase, CustomerBase, VendorBase
 
 # This file defines the class/object structure for passing between the front and backend 
 
@@ -24,17 +24,6 @@ class CustomerRead(CustomerBase):
 class VendorRead(VendorBase):
     vendor_id:int
 
-# for creating a template
-class TemplateCreate(TemplateBase):
-    name:str
-    description:str
-    estimated_value:float
-    price: float
-    carbon_saved: float
-
-class TemplateRead(TemplateBase):
-    template_id:int
-
 # This is what the API actually expects to receive
 class LoginResponse(BaseModel):
     access_token: str
@@ -52,12 +41,3 @@ class CustomerSignupRequest(BaseModel): # could be moved into auth.py
 class VendorSignupRequest(BaseModel):
     user: UserCreate
     vendor: VendorBase
-    
-# for getting all of a vendors templates 
-class VendorTemplates():
-    vendr_id:int
-
-# response with all of a vendors templates
-class TemplateList():
-    templates: list[TemplateRead]
-    total_count:int 
