@@ -1,6 +1,7 @@
 from typing import Optional
 from sqlmodel import SQLModel, Field, Relationship
-
+from datetime import date as Date, time as Time, datetime
+from random import random
 # models establishes the object types for both the database and communication with the front end 
 
 # Base classes contain all the attributes that are always present 
@@ -35,6 +36,10 @@ class User(UserBase, table=True):
         back_populates="user", sa_relationship_kwargs={"uselist": False}
     )
 
+    badges: list["Badge"] = Relationship( # for the linking table
+        back_populates="users",             # having this means we dont have to write join statements
+        link_model=User_Badge
+    )
 
 class Vendor(VendorBase, table=True):
     vendor_id: Optional[int] = Field(default=None, primary_key=True)
