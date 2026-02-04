@@ -2,7 +2,8 @@ from typing import Optional
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import date as Date, time as Time, datetime
 from random import random
-# models establishes the object types for both the database and communication with the front end 
+
+# models establishes the object types for the database 
 
 
 class User_Badge(SQLModel, table=True):

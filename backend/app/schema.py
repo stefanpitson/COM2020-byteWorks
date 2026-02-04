@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+# schemas contains what the frontend will send and expect in return 
+
 # profile reads
 # when we want to retrieve the user, the id is nice to have but the password musnt be shared
 
@@ -72,3 +74,4 @@ class VendorSignupRequest(BaseModel):
         opening_hours: str
         photo: str
     
+# more to come vvv 
