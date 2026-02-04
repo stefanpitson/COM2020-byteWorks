@@ -5,11 +5,12 @@ from app.core.database import create_db_and_tables
 from app.api import customers, auth, vendors, bundles
 from app.core.database import engine, create_db_and_tables 
 from sqlmodel import SQLModel
+import os
 
 # this function will handle the start up, and shut down of the app
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # things written above yeild happen when the app starts 
+    # things written above yield happen when the app starts 
     # like creating the db
     create_db_and_tables()
     yield
@@ -20,7 +21,7 @@ app = FastAPI(lifespan=lifespan)
 
 # for local run 
 # NEEDS CHANGING FOR DEPLOYMENT? 
-origins = ["http://localhost:5173", "http://localhost:3000"] 
+origins = ["http://localhost:5173", "http://localhost:3000", "https://bytework.online"] 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
