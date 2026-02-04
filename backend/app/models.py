@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import date as Date, time as Time, datetime
 from random import random
@@ -23,8 +23,19 @@ class User(SQLModel, table=True):
         back_populates="user", sa_relationship_kwargs={"uselist": False}
     )
 
-    badges: list["Badge"] = Relationship( # for the linking table
+    badges: List["Badge"] = Relationship( # for the linking table
         back_populates="users",             # having this means we dont have to write join statements
+        link_model=User_Badge
+    )
+
+class Badge(SQLModel, table=True):
+    badge_id: Optional[int] = Field(default=None, primary_key=True)
+    title:str 
+    description: str
+    user_role:str = Field(default="user")
+
+    users: List["User"] = Relationship( # for the linking table
+        back_populates="badges",         # having this means we dont have to write join statements
         link_model=User_Badge
     )
 
@@ -37,7 +48,7 @@ class Vendor(SQLModel, table=True):
     post_code: str
     phone_number: str
     opening_hours: str
-    photo: str
+    photo: Optional[str]
     carbon_saved: int = Field(default=0)
     user: Optional[User] = Relationship(back_populates="vendor_profile")
     validated: bool = Field(default=False)
@@ -60,32 +71,32 @@ class Allergen_Template(SQLModel,table=True): # linking table, has to come befor
 
 class Template(SQLModel, table=True):
     template_id: Optional[int] = Field(default=None, primary_key=True)
-    title: str = Field(default ="title")
-    description: str = Field(default="description")
-    estimated_value: float = Field(default=0.0)
-    cost: float = Field(default= 0.0)
+    title: str 
+    description: str 
+    estimated_value: float 
+    cost: float 
     
-    meatPercent: float = Field(default=0.0)
-    carbPercent: float = Field(default=0.0)
-    vegPercent: float = Field(default=0.0)
-    carbon_saved: float = Field(default=0.0)
-    weight: float = Field(default=0.0)
+    meatPercent: float
+    carbPercent: float
+    vegPercent: float
+    carbon_saved: Optional[float]
+    weight: float
     isVegan: bool = Field(default=False)
     isVegetarian: bool = Field(default=False)
 
     vendor: Optional[int] = Field(default=None,foreign_key="vendor.vendor_id")
 
-    allergens: list["Allergen"] = Relationship( # for the linking table
+    allergens: List["Allergen"] = Relationship( # for the linking table
         back_populates="templates",             # having this means we dont have to write join statements
         link_model=Allergen_Template
     )
 
 class Allergen(SQLModel, table=True):
     allergen_id: Optional[int] = Field(default=None, primary_key=True)
-    title: str = Field(default="Allergen")
-    description: str = Field(default="Description")
+    title: str 
+    description: str
 
-    templates: list["Template"] = Relationship( # for the linking table
+    templates: List["Template"] = Relationship( # for the linking table
         back_populates="allergens",             # having this means we dont have to write join statements
         link_model=Allergen_Template
     )
@@ -105,7 +116,7 @@ class Bundle(SQLModel, table=True):
 class Reservation(SQLModel, table=True):
     reservation_id:Optional[int] = Field(default=None, primary_key=True)
     bundle_id: Optional[int] = Field(default=None, foreign_key="bundle.bundle_id")
-    consumer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id")
+    consumer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id") 
     time_created: Time = Field(default_factory=lambda:datetime.now().time())
 
     code: Optional[int] = Field(default=None) #shouldn't have a default? 
@@ -114,21 +125,10 @@ class Report(SQLModel, table=True):
     reoprt_id: Optional[int] = Field(default=None, primary_key=True)
     customer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id")
     seller_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id")
-    title: str = Field(default="title")
-    complaint: str = Field(default="complaint")
+    title: str
+    complaint: str
     responded: bool = Field(default=False)
-    response: str = Field(default="")
-
-class Badge(SQLModel, table=True):
-    badge_id: Optional[int] = Field(default=None, primary_key=True)
-    title:str = Field(default="title")
-    description: str = Field(default="description")
-    userType:str = Field(default="user")
-
-    users: list["User"] = Relationship( # for the linking table
-        back_populates="badges",         # having this means we dont have to write join statements
-        link_model=User_Badge
-    )
+    response: Optional[str]
 
 class Forecast_Input(SQLModel, table=True):
     record_id: Optional[int] = Field(default=None, primary_key=True)
@@ -140,17 +140,16 @@ class Forecast_Input(SQLModel, table=True):
     date: Date = Field(default_factory=lambda:datetime.now().date()) # basically tells the db to use this function to populate it
     time: Time = Field(default_factory=lambda:datetime.now().time())
     preciptation: float = Field(default_factory=lambda:random()) # may want to change this 
-    bundles_posted: int = Field(default=0)
-    bundles_reserved: int = Field(default=0)
-    no_shows: int = Field(default=0)
+    bundles_posted: int 
+    bundles_reserved: int 
+    no_shows: int 
 
 class Forecast_Output(SQLModel, table=True):
     output_id: Optional[int] = Field(default=None, primary_key=True)
     vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id")
     template_id: Optional[int] = Field(default=None, foreign_key="template.template_id")
     date: Date = Field(default_factory=lambda:datetime.now().date())
-    reservation_prediction: int = Field(default=0)
-    no_show_prediction: int = Field(default=0)
-    rationale:str = Field(default="")
-    confidence:float = Field(default = 1.0)
-
+    reservation_prediction: int 
+    no_show_prediction: int 
+    rationale:str 
+    confidence:float 
