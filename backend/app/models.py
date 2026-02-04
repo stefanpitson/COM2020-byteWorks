@@ -21,18 +21,6 @@ class VendorBase(SQLModel):
     opening_hours: str # Should be JSON
     photo: str
 
-class TemplateBase(SQLModel):
-    name: str
-
-class BundleBase(SQLModel):
-    template_id: int
-
-class AllergenBase(SQLModel):
-    title:str
-
-class ReservationBase(SQLModel):
-    bundle_id: int
-
 #
 # --- REAL CLASSES ---
 #       for db
@@ -81,7 +69,7 @@ class Allergen_Template(SQLModel,table=True): # linking table, has to come befor
     allergen_id: Optional[int] = Field(default=None, primary_key=True, foreign_key="allergen.allergen_id")
     template_id: Optional[int] = Field(default = None, primary_key=True, foreign_key="template.template_id")
 
-class Template(TemplateBase, table=True):
+class Template(SQLModel, table=True):
     template_id: Optional[int] = Field(default=None, primary_key=True)
     title: str = Field(default ="title")
     description: str = Field(default="description")
@@ -103,7 +91,7 @@ class Template(TemplateBase, table=True):
         link_model=Allergen_Template
     )
 
-class Allergen(AllergenBase, table=True):
+class Allergen(SQLModel, table=True):
     allergen_id: Optional[int] = Field(default=None, primary_key=True)
     title: str = Field(default="Allergen")
     description: str = Field(default="Description")
@@ -115,7 +103,7 @@ class Allergen(AllergenBase, table=True):
 
 
 
-class Bundle(BundleBase, table=True):
+class Bundle(SQLModel, table=True):
     bundle_id: Optional[int] = Field(default=None, primary_key=True)
     template_id: Optional[int] = Field( default=None, foreign_key="template.template_id")
     picked_up: bool = Field(default= False)
@@ -125,7 +113,7 @@ class Bundle(BundleBase, table=True):
     purchased_by: Optional[int] = Field(default=None, foreign_key="customer.customer_id")
 
 
-class Reservation(ReservationBase, table=True):
+class Reservation(SQLModel, table=True):
     reservation_id:Optional[int] = Field(default=None, primary_key=True)
     bundle_id: Optional[int] = Field(default=None, foreign_key="bundle.bundle_id")
     consumer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id")
@@ -152,7 +140,6 @@ class Badge(SQLModel, table=True):
         back_populates="badges",         # having this means we dont have to write join statements
         link_model=User_Badge
     )
-
 
 class Forecast_Input(SQLModel, table=True):
     record_id: Optional[int] = Field(default=None, primary_key=True)
