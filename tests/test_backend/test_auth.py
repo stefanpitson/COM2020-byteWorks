@@ -42,28 +42,45 @@ def setup_test_db():
     SQLModel.metadata.drop_all(test_engine)
 
 
-@pytest.fixture
-def test_user():
-    with Session(test_engine) as session:
-        test_user = User(
-            email="test@exeter.ac.uk",
-            password_hash=get_password_hash("password123"),
-            role="customer"
-        )
-        session.add(test_user)
-        session.commit()
-        session.refresh(test_user)
-        return test_user
+# @pytest.fixture
+# def test_user():
+#     with Session(test_engine) as session:
+#         test_user = User(
+#             email="test@exeter.ac.uk",
+#             password_hash=get_password_hash("password123"),
+#             role="customer"
+#         )
+#         session.add(test_user)
+#         session.commit()
+#         session.refresh(test_user)
+#         return test_user
 
+def test_register_success():
+    register_response = testClient.post("/customer/signup", 
+        json = {
+            "email": "test2@exeter.ac.uk",
+            "password": "password456",
+            "name": "tester",
+    })
+    assert register_response.status_code == 200
+    print(register_response.text)
 
-
-def test_login_success(test_user):
-    response = testClient.post("/login", json={
-        "email": "test@exeter.ac.uk", 
-        "password": "password123"
+    login_response = testClient.post("/login", json={
+        "email": "test2@exeter.ac.uk", 
+        "password": "password456"
     })
     
-    assert response.status_code == 200
-    data = response.json()
-    print(data)
+    assert login_response.status_code == 200
+
+
+
+# def test_login_success():
+#     response = testClient.post("/login", json={
+#         "email": "test@exeter.ac.uk", 
+#         "password": "password456"
+#     })
+    
+#     assert response.status_code == 200
+#     data = response.json()
+#     print(data)
 
