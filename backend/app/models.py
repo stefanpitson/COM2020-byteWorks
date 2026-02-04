@@ -76,13 +76,13 @@ class Template(SQLModel, table=True):
     estimated_value: float 
     cost: float 
     
-    meatPercent: float
-    carbPercent: float
-    vegPercent: float
+    meat_percent: float
+    carb_percent: float
+    veg_percent: float
     carbon_saved: Optional[float]
     weight: float
-    isVegan: bool = Field(default=False)
-    isVegetarian: bool = Field(default=False)
+    is_vegan: bool = Field(default=False)
+    is_vegetarian: bool = Field(default=False)
 
     vendor: Optional[int] = Field(default=None,foreign_key="vendor.vendor_id")
 
@@ -100,7 +100,6 @@ class Allergen(SQLModel, table=True):
         back_populates="allergens",             # having this means we dont have to write join statements
         link_model=Allergen_Template
     )
-
 
 
 class Bundle(SQLModel, table=True):
@@ -122,9 +121,9 @@ class Reservation(SQLModel, table=True):
     code: Optional[int] = Field(default=None) #shouldn't have a default? 
 
 class Report(SQLModel, table=True):
-    reoprt_id: Optional[int] = Field(default=None, primary_key=True)
+    report_id: Optional[int] = Field(default=None, primary_key=True)
     customer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id")
-    seller_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id")
+    vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id")
     title: str
     complaint: str
     responded: bool = Field(default=False)
@@ -139,7 +138,7 @@ class Forecast_Input(SQLModel, table=True):
     # could have issues if there aren't any
     date: Date = Field(default_factory=lambda:datetime.now().date()) # basically tells the db to use this function to populate it
     time: Time = Field(default_factory=lambda:datetime.now().time())
-    preciptation: float = Field(default_factory=lambda:random()) # may want to change this 
+    precipitation: float = Field(default_factory=lambda:random()) # may want to change this 
     bundles_posted: int 
     bundles_reserved: int 
     no_shows: int 

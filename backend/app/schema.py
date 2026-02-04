@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import List
 
 # schemas contains what the frontend will send and expect in return 
 
@@ -19,7 +20,6 @@ class VendorRead(BaseModel):
     phone_number: str
     opening_hours: str
     photo: str
-
 
 # ___AUTH SCHEMAS___  
 
@@ -73,4 +73,59 @@ class VendorSignupRequest(BaseModel):
         phone_number: str
         opening_hours: str
         photo: str
-    
+
+# ___ TEMPLATES & BUNDLES ___
+
+#templates
+class TemplateCreate(BaseModel):
+    title: str
+    description: str
+    estimated_value: float
+    cost: float
+    meatPercent: float
+    carbPercent: float
+    vegPercent: float
+    carbon_saved: float
+    weight: float
+    isVegan: bool
+    isVegetarian: bool
+    # This is the key: the frontend sends a list of existing Allergen IDs
+    allergen_ids: List[int] = []
+
+
+class TemplateRead(BaseModel):
+    template_id: int
+    title: str
+    description: str
+    cost: float
+    meat_percent: float
+    carb_percent: float
+    veg_percent: float
+    carbon_saved: float
+    isVegan: bool
+    isVegetarian: bool
+    allergens: List["AllergenRead"] = []
+    class AllergenRead(BaseModel):
+        allergen_id: int
+        title: str
+
+# list of templates returned for a specific vendor
+class TemplateList(BaseModel):
+    total_count: int
+    templates: List[TemplateData]
+    class TemplateData(BaseModel):
+        template_id: int
+        title: str
+        description: str
+        cost: float
+        meat_percent: float
+        carb_percent: float
+        veg_percent: float
+        carbon_saved: float
+        isVegan: bool
+        isVegetarian: bool
+        allergens: List["AllergenRead"] = [] 
+        class AllergenRead(BaseModel):
+            allergen_id: int
+            title: str
+
