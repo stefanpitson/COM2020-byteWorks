@@ -4,35 +4,15 @@ from datetime import date as Date, time as Time, datetime
 from random import random
 # models establishes the object types for both the database and communication with the front end 
 
-# Base classes contain all the attributes that are always present 
-class UserBase(SQLModel):
-    email: str
-    
-class CustomerBase(SQLModel):
-    name: str
-    post_code: str
-
-class VendorBase(SQLModel):
-    name: str
-    street: str
-    city: str
-    post_code: str
-    phone_number: str
-    opening_hours: str # Should be JSON
-    photo: str
-
-#
-# --- REAL CLASSES ---
-#       for db
-
 
 class User_Badge(SQLModel, table=True):
     user_id: Optional[int] = Field(default=None, primary_key=True, foreign_key="user.user_id")
     badge_id: Optional[int] = Field(default=None, primary_key=True, foreign_key="badge.badge_id")
 
-class User(UserBase, table=True):
+class User(SQLModel, table=True):
     user_id: Optional[int] = Field(default=None, primary_key=True)
     password_hash:str
+    email:str
     role: str
 
     vendor_profile: Optional["Vendor"] = Relationship(
@@ -47,18 +27,26 @@ class User(UserBase, table=True):
         link_model=User_Badge
     )
 
-class Vendor(VendorBase, table=True):
+class Vendor(SQLModel, table=True):
     vendor_id: Optional[int] = Field(default=None, primary_key=True)
     user_id: Optional[int] = Field(foreign_key="user.user_id")
+    name: str
+    street: str
+    city: str
+    post_code: str
+    phone_number: str
+    opening_hours: str
+    photo: str
     carbon_saved: int = Field(default=0)
-
     user: Optional[User] = Relationship(back_populates="vendor_profile")
     validated: bool = Field(default=False)
 
 
-class Customer(CustomerBase, table=True):
+class Customer(SQLModel, table=True):
     customer_id: Optional[int] = Field(default=None, primary_key=True)
     user_id: Optional[int] = Field(foreign_key="user.user_id")
+    name:str
+    post_code:str
     store_credit: int = Field(default=0)
     carbon_saved: int = Field(default=0)
     rating: Optional[int] = Field(default=None)
