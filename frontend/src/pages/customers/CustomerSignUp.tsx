@@ -14,7 +14,6 @@ export default function CustomerSignUp() {
   const [postCode, setPostCode] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
-    console.log("Here");
     e.preventDefault();
     try {
       await registerCustomer(

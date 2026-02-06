@@ -23,4 +23,5 @@ export interface Vendor {
   phone_number: string;
   carbon_saved: number;
   validated: boolean;
+  photo: string;
 }
