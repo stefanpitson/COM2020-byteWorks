@@ -33,7 +33,7 @@ export default function Login() {
       if (user.role === "customer") {
         navigate("/customer/home");
       } else if (user.role === "vendor") {
-        navigate("vendor/dashboard");
+        navigate("/vendor/dashboard");
       }
     }
   }
