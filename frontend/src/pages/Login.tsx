@@ -8,32 +8,44 @@ export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [shakeKey, setShakeKey] = useState(0);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-
-    const trimEmail = email.trim();
+    
+    const trimEmail = email.trim().toLowerCase();
     const trimPassword = password.trim();
 
     if (trimEmail && trimPassword) {
-      const response = await loginUser({
-        email: trimEmail,
-        password: trimPassword,
-      });
+      setIsLoading(true);
+      try {
+        const response = await loginUser({
+          email: trimEmail,
+          password: trimPassword,
+        });
 
-      const token: string = response.access_token;
-      const token_type: string = response.token_type;
-      const user: User = response.user;
+        const token: string = response.access_token;
+        const token_type: string = response.token_type;
+        const user: User = response.user;
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("tokenType", token_type);
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("role", user.role);
+        localStorage.setItem("token", token);
+        localStorage.setItem("tokenType", token_type);
+        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("role", user.role);
 
-      if (user.role === "customer") {
-        navigate("/customer/home");
-      } else if (user.role === "vendor") {
-        navigate("vendor/dashboard");
+        if (user.role === "customer") {
+          navigate("/customer/home");
+        } else if (user.role === "vendor") {
+          navigate("/vendor/dashboard");
+        }
+      } catch (error) {
+        console.error("Login failed:", error);
+        setLoginError(true);
+        setShakeKey(prev => prev + 1);
+      } finally {
+        setIsLoading(false);
       }
     }
   }
@@ -49,7 +61,7 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2"
-              placeholder="you@example.com"
+              placeholder="name@domain.com"
             />
           </label>
 
@@ -59,18 +71,30 @@ export default function Login() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2"
+              className={'mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2'}
               placeholder="••••••••"
             />
           </label>
 
+          {loginError && (
+            <div 
+              key={shakeKey}
+              className="p-3 rounded bg-red-50 border border-red-200 animate-shake">
+              <span className="text-red-700 text-sm font-medium">
+                Invalid email or password. Please try again.
+              </span>
+            </div>
+          )}
+
           <button
             type="submit"
+            disabled={isLoading}
             className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-800"
           >
-            Sign in
+            {isLoading ? "Signing in..." : "Sign in"}
           </button>
         </form>
+
         <div className="mt-6 text-center">
           <p className="text-gray-500 text-sm">
             Don't have an account?{" "}
