@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.core.database import create_db_and_tables
 from app.api import customers, auth, vendors
 from app.core.database import engine, create_db_and_tables 
@@ -18,6 +19,8 @@ async def lifespan(app: FastAPI):
 
 # starts fast api app 
 app = FastAPI(lifespan=lifespan)
+
+app.mount("/static", StaticFiles(directory="uploads"), name="static")
 
 # for local run 
 # NEEDS CHANGING FOR DEPLOYMENT? 
