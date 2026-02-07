@@ -11,7 +11,7 @@ Run the following comand inside the `tests` directory:
 pip install -r requirements.txt
 ```
 
-Create a .env.test file inside backend/ <br>
+**Create a .env.test file inside backend/** <br>
 Contents of .env.test must be: <br>
 HASH_ALGORITHM=256 <br>
 SECRET KEY= ... 
@@ -20,7 +20,7 @@ SECRET_KEY can be created in the terminal with command: python -c "import secret
 
 ### Running Tests
 
-Use the following command to run a test:
+Use the following command to run a test (run from within backend/ folder):
 
 ```bash
 python -m pytest -v -s <FULL_PATH_TO_TEST_NAME.PY> -W ignore::DeprecationWarning
