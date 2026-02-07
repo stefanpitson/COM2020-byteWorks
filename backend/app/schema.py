@@ -41,3 +41,21 @@ class CustomerSignupRequest(BaseModel): # could be moved into auth.py
 class VendorSignupRequest(BaseModel):
     user: UserCreate
     vendor: VendorBase
+
+class UserUpdate(BaseModel):
+    email: Optional[str] = None
+    oldPassword : Optional[str] = None
+    newPassword : Optional[str] = None
+    post_code: Optional[str] = None
+    name: Optional[str] = None
+
+class CustomerUpdate(UserUpdate):
+    # Do not delete - this is here for clarity sake and is used by Customer the same way Vendor uses VendorUpdate
+    pass
+
+class VendorUpdate(UserUpdate):
+    street: Optional[str] = None
+    city: Optional[str] = None
+    phone_number: Optional[str] = None
+    opening_hours: Optional[str] = None
+    photo: Optional[str] = None
