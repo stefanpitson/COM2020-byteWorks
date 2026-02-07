@@ -103,8 +103,8 @@ class TemplateRead(BaseModel):
     carb_percent: float
     veg_percent: float
     carbon_saved: float
-    isVegan: bool
-    isVegetarian: bool
+    is_vegan: bool
+    is_vegetarian: bool
     allergens: List["AllergenRead"] = []
     class AllergenRead(BaseModel):
         allergen_id: int
@@ -123,8 +123,8 @@ class TemplateList(BaseModel):
         carb_percent: float
         veg_percent: float
         carbon_saved: float
-        isVegan: bool
-        isVegetarian: bool
+        is_vegan: bool
+        is_vegetarian: bool
         allergens: List["AllergenRead"] = [] 
         class AllergenRead(BaseModel):
             allergen_id: int
