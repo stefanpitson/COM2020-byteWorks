@@ -22,14 +22,14 @@ def create_template(
     if current_user.role != "vendor":
         raise HTTPException(status_code=403, detail="Not a vendor account")
 
-    if session.exec(select(Template).where(Template.name == data.name and Template.vendor == current_user.vendor_profile.vendor_id)).first():
+    if session.exec(select(Template).where(Template.title == data.title and Template.vendor == current_user.vendor_profile.vendor_id)).first():
         raise HTTPException(status_code=400, detail="Template already registered")
     
     new_template = Template(
         title = data.title,
         description = data.description,
         estimated_value = data.estimated_value,
-        cost = data.price,
+        cost = data.cost,
 
         meat_percent = data.meat_percent,
         carb_percent = data.carb_percent,
@@ -219,7 +219,7 @@ def customer_list_bundles(
 
     return {
         "total_count":count,
-        "templates": templates
+        "bundles": templates
     }
 
 # get bundles for store view

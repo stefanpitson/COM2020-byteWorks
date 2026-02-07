@@ -83,13 +83,13 @@ class TemplateCreate(BaseModel):
     description: str
     estimated_value: float
     cost: float
-    meatPercent: float
-    carbPercent: float
-    vegPercent: float
+    meat_percent: float
+    carb_percent: float
+    veg_percent: float
     carbon_saved: float
     weight: float
-    isVegan: bool
-    isVegetarian: bool
+    is_vegan: bool
+    is_vegetarian: bool
     # This is the key: the frontend sends a list of existing Allergen IDs
     allergen_ids: List[int] = []
 
