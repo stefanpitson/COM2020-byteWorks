@@ -15,6 +15,7 @@ from fastapi.testclient import TestClient
 
 # Retrieves all the modules and functions
 from app.api.auth import router
+from app.api.customers import router as customers_router
 from app.core.database import get_session
 from app.core.security import get_password_hash
 from app.models import UserBase, User, Vendor, Customer
@@ -35,6 +36,7 @@ def get_test_session():
 
 app = FastAPI()
 app.include_router(router)
+app.include_router(customers_router, prefix="/customers")
 app.dependency_overrides[get_session] = get_test_session
 testClient = TestClient(app=app, base_url="https://bytework.online/")
 
@@ -137,4 +139,50 @@ def test_repeat_register_fail():
 
     assert register_response_2.status_code == 400
     assert register_response_2.text == "{\"detail\":\"Email already registered\"}"
+
+# VENDOR RELATED TESTS
+
+
+def test_get_profile_success():
+    # Retrieving customer profile using a valid token
+    test_email = "test2@exeter.ac.uk"
+    test_password = "password456"
+    test_name = "tester"
+    test_post_code = "ab1 2cd"
+
+    register_response = testClient.post("/register/customer", 
+        json = {
+            "user": {
+                "email": test_email,
+                "password": test_password,
+                "role": "customer"
+            },
+            "customer": {
+                "name": test_name,
+                "post_code": test_post_code
+            }
+    })
+
+    login_response = testClient.post("/login", json={
+        "email": test_email, 
+        "password": test_password
+    })
+
+    login_response_data = login_response.json()
+    token = login_response_data["access_token"]
+
+    profile_response = testClient.get(
+        "/customers/profile",
+        headers={"Authorization": "Bearer " + token}
+    )
+
+    profile_response_data = profile_response.json()
+    profile_name = profile_response_data["name"]
+    profile_post_code = profile_response_data["post_code"]
+    profile_customer_id = profile_response_data["customer_id"]
+
+    assert profile_response.status_code == 200
+    assert test_name == profile_name
+    assert test_post_code == profile_post_code
+    assert profile_customer_id > 0
 
