@@ -47,6 +47,52 @@ def setup_test_db():
     SQLModel.metadata.drop_all(test_engine) # destroy local test database
 
 
+@pytest.fixture
+def registered_vendor(test_client):
+    vendor_data = {
+        "user": {
+            "email": "vendor@exeter.ac.uk",
+            "password": "vendorPassWORD123",
+            "role": "vendor"
+        },
+        "vendor": {
+            "name": "vendorer",
+            "street": "12 Pennsylvania road",
+            "city": "Exeter",
+            "post_code": "EX4 6BH",
+            "phone_number": "44 020 1234 567",
+            "opening_hours": "..",
+            "photo": ".."
+        }
+    }
+
+    response = test_client.post("/register/vendor", json=vendor_data)
+    return {
+        "vendor_data": vendor_data,
+        "response": response,
+    }
+
+@pytest.fixture
+def registered_customer(test_client):
+    customer_data = {
+        "user": {
+            "email": "test2@exeter.ac.uk",
+            "password": "password456",
+            "role": "customer"
+        },
+        "customer": {
+            "name": "tester",
+            "post_code": "ab1 2cd"
+        }
+    }
+    response = test_client.post("/register/customer", json=customer_data)
+    return {
+        "customer_data": customer_data,
+        "response": response,
+    }
+
+
+
 # FUNCTION FOR CREATING EXISTING USERS IN THE DATABASE DIRECTLY
 # test_user() must then be passed into the test function
 # @pytest.fixture
