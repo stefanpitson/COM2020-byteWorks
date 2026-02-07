@@ -11,9 +11,9 @@ Run the following comand inside the `tests` directory:
 pip install -r requirements.txt
 ```
 
-Create a .env.test file inside backend/
-Contents of .env.test must be:
-HASH_ALGORITHM=256
+Create a .env.test file inside backend/ <br>
+Contents of .env.test must be: <br>
+HASH_ALGORITHM=256 <br>
 SECRET KEY= ... 
 
 SECRET_KEY can be created in the terminal with command: python -c "import secrets; print(secrets.token_urlsafe(32))" 
