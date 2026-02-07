@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import List
+from datetime import date, time
 
 # schemas contains what the frontend will send and expect in return 
 
@@ -134,6 +135,14 @@ class BundleCreate(BaseModel):
     template_id: int
     amount: int
 
+#for viewing one bundle
+class BundleRead(BaseModel):
+    bundle_id: int
+    template_id: int
+    picked_up: bool 
+    date: date
+    time: time
+    purchased_by: int
 
 # for the customer view of a vendor page
 class CustBundleList(BaseModel):
@@ -146,3 +155,14 @@ class CustBundleList(BaseModel):
         cost: float 
         available_count: int
 
+# for the vendor view of their bundles 
+class VendBundleList(BaseModel):
+    total_count:int
+    bundles: List[BundleData]
+    class BundleData(BaseModel):
+        bundle_id: int
+        template_id: int
+        picked_up: bool 
+        date: date
+        time: time
+        purchased_by: int

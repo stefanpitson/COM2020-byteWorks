@@ -118,6 +118,12 @@ class Reservation(SQLModel, table=True):
     consumer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id") 
     time_created: Time = Field(default_factory=lambda:datetime.now().time()) 
 
+    # status either:
+    # 'booked' - reservation made, not collected 
+    # 'collected' - the customer collects 
+    # 'no_show' - the customer is a no show 
+    status: str = Field(default="booked") 
+
     code: Optional[int] = Field(default=None) #shouldn't have a default? 
 
 class Report(SQLModel, table=True):
