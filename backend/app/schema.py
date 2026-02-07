@@ -165,4 +165,4 @@ class VendBundleList(BaseModel):
         picked_up: bool 
         date: date
         time: time
-        purchased_by: int
+        purchased_by: int | None

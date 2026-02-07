@@ -4,7 +4,7 @@ from sqlmodel import Session, select, func
 from app.core.database import get_session
 from app.models import Template, Allergen, Bundle, Reservation
 from app.core.security import get_password_hash, verify_password, create_access_token
-from app.schema import TemplateCreate, TemplateList, TemplateRead, BundleCreate, CustBundleList, BundleRead
+from app.schema import TemplateCreate, TemplateList, TemplateRead, BundleCreate, CustBundleList, BundleRead, VendBundleList
 from app.api.deps import get_current_user
 #from sqlalchemy import func
 from datetime import date as Date, time as Time, datetime
@@ -165,14 +165,13 @@ def bundle_read(
 def customer_list_bundles(
     vendor_id: int,
     session: Session = Depends(get_session),
-    current_user = Depends(get_current_user)
+    current_user = Depends(get_current_user) # keep this as it does some checks
     ):
     
     today = datetime.now().date()
 
     # get templates
-    # tricky statement 
-    # may have issues 
+    # this statement may not show as functioning but it does seem to work  
     statement = (
         select(
             Template.template_id,
@@ -223,8 +222,9 @@ def customer_list_bundles(
     }
 
 # get bundles for store view
-@router.get("/mystore")
+@router.get("/mystore/{vendor_id}", response_model=VendBundleList)
 def vendor_list_bundles(
+    vendor_id:int,
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
     ):
@@ -233,23 +233,23 @@ def vendor_list_bundles(
         raise HTTPException(status_code=403, detail="Not a vendor account")
     
     today = datetime.now().date()
-    vendor = current_user.vendor_profile.vendor_id
+    #vendor = current_user.vendor_profile.vendor_id
 
     statement = (select(Bundle)
             .join(Reservation, Bundle.bundle_id == Reservation.bundle_id, isouter=True)
             .join(Template, Bundle.template_id == Template.template_id)
-            .where(Template.vendor == vendor)
+            .where(Template.vendor == current_user.vendor_profile.vendor_id)
             .where(Bundle.picked_up.is_(False))
             .where(Bundle.date == today)
-            # .where(Reservation.status == "booked") do we want checks
+            # .where(Reservation.status == "booked") do we want checks 
         )
     bundles = session.exec(statement).all()
     count = len(bundles)
 
-    if count ==0:
+    if count == 0:
         return {
             "total_count":0,
-            "templates":[]
+            "bundles":[]
         }
 
     return{
