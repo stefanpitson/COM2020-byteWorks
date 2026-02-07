@@ -35,7 +35,7 @@ def test_customer_login_fail(test_client):
     assert login_response.status_code == 401
     assert login_response.text == "{\"detail\":\"Incorrect email or password\"}"
 
-def test_repeat_register_fail(test_client, registered_customer):
+def test_customer_repeat_register_fail(test_client, registered_customer):
     '''Register user with same details twice'''
 
     register_response_1 = registered_customer["response"]
@@ -83,3 +83,14 @@ def test_vendor_login_success(test_client, registered_vendor): # registered vend
     assert login_response_data["user"]["email"] == vendor["user"]["email"]
     assert login_response_data["user"]["role"] == "vendor"
     assert login_response.status_code == 200
+
+
+def test_vendor_login_success(test_client): # registered vendor is a fixture in conftest.py
+    login_response = test_client.post("/login", json={
+        "email": "vendor@exeter.ac.uk", 
+        "password": "passwrod31"
+    })
+
+    assert login_response.status_code == 401
+    assert login_response.text == "{\"detail\":\"Incorrect email or password\"}"
+
