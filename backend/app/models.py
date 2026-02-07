@@ -116,7 +116,7 @@ class Reservation(SQLModel, table=True):
     reservation_id:Optional[int] = Field(default=None, primary_key=True)
     bundle_id: Optional[int] = Field(default=None, foreign_key="bundle.bundle_id")
     consumer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id") 
-    time_created: Time = Field(default_factory=lambda:datetime.now().time())
+    time_created: Time = Field(default_factory=lambda:datetime.now().time()) 
 
     code: Optional[int] = Field(default=None) #shouldn't have a default? 
 

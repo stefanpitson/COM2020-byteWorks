@@ -129,3 +129,20 @@ class TemplateList(BaseModel):
             allergen_id: int
             title: str
 
+# bundle create is small as all the detail is auto generated on back end or in template
+class BundleCreate(BaseModel):
+    template_id: int
+    amount: int
+
+
+# for the customer view of a vendor page
+class CustBundleList(BaseModel):
+    total_count: int
+    bundles: List[BundleData]
+    class BundleData(BaseModel):
+        template_id: int
+        title: str
+        estimated_value: float 
+        cost: float 
+        available_count: int
+
