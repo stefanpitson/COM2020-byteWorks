@@ -105,6 +105,8 @@ def get_list_of_templates(
         "total_count":count
     }
     
+# gets the count of how many bundles there are for a template
+# expected use when getting a displaying full bundle/template information 
 @router.get("/count/{template_id}", response_model = int, tags=["Template"], summary="Get the count of available bundles for a specified template.")
 def count_bundles(
     template_id: int,

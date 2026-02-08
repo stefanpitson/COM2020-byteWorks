@@ -5,7 +5,7 @@ from datetime import date, time
 # schemas contains what the frontend will send and expect in return 
 
 # profile reads 
-# when we want to retrieve the user, the id is nice to have but the password musnt be shared
+# when we want to retrieve the user, the id is nice to have but the password mustn't be shared
 
 class CustomerRead(BaseModel):
     customer_id: int
