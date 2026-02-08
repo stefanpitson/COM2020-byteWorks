@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 # schemas contains what the frontend will send and expect in return 
 
@@ -54,7 +55,6 @@ class CustomerSignupRequest(BaseModel):
         name: str
         post_code: str
 
-
 class VendorSignupRequest(BaseModel):
     user: UserData
     # Nested class to keep the JSON structure
@@ -73,4 +73,37 @@ class VendorSignupRequest(BaseModel):
         phone_number: str
         opening_hours: str
         photo: str
-    
+
+
+class CustomerUpdate(BaseModel):
+    user: UserUpdateData
+
+    class UserUpdateData(BaseModel):
+        email: Optional[str] = None
+        old_password : Optional[str] = None
+        new_password : Optional[str] = None
+
+    customer: CustomerUpdateData
+
+    class CustomerUpdateData(BaseModel):
+        name: Optional[str] = None
+        post_code: Optional[str] = None
+
+class VendorUpdate(BaseModel):
+    user: UserUpdateData
+
+    class UserUpdateData(BaseModel):
+        email: Optional[str] = None
+        old_password : Optional[str] = None
+        new_password : Optional[str] = None
+
+    vendor: VendorUpdateData
+
+    class VendorUpdateData(BaseModel):
+        name: Optional[str] = None
+        post_code: Optional[str] = None
+        street: Optional[str] = None
+        city: Optional[str] = None
+        phone_number: Optional[str] = None
+        opening_hours: Optional[str] = None
+        photo: Optional[str] = None
