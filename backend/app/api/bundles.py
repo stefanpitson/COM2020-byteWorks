@@ -42,7 +42,7 @@ def create_bundles(
     
 # read details on a specific bundle,
 # vendor only as we dont want other customers to see who is other customers details?  
-@router.get("/b={bundle_id}", response_model=BundleRead, tags=["bundles"], summary="Get the info on a specific bundle listing, for Vendors only")
+@router.get("/{bundle_id}", response_model=BundleRead, tags=["bundles"], summary="Get the info on a specific bundle listing, for Vendors only")
 def bundle_read(
     bundle_id: int,
     session: Session = Depends(get_session),
@@ -61,73 +61,9 @@ def bundle_read(
 
     return bundle
     
-
-# get a list of bundles for the corresponding vendor
-# for customer view at store page 
-@router.get("/v={vendor_id}",response_model=CustBundleList,tags=["bundles"], summary="gets a list of simple details for a stores bundles")
-def customer_list_bundles(
-    vendor_id: int,
-    session: Session = Depends(get_session),
-    current_user = Depends(get_current_user) # keep this as it does some checks
-    ):
-    
-    today = datetime.now().date()
-
-    # get templates
-    # this statement may not show as functioning but it does seem to work  
-    statement = (
-        select(
-            Template.template_id,
-            Template.title,
-            Template.estimated_value,
-            Template.cost,
-            func.count(Bundle.bundle_id).label("available_count")
-        )
-        # join bundles to templates 
-        .join(Bundle, Template.template_id == Bundle.template_id) 
-        # left join reservations to bundles
-        .join(Reservation, Bundle.bundle_id == Reservation.bundle_id, isouter=True)
-        .where(Template.vendor == vendor_id)
-        .where(Bundle.picked_up.is_(False))
-        .where(Reservation.bundle_id.is_(None)) # this means there is no reservation for the bundle
-        .where(Bundle.date == today) # only fresh bundles 
-        .group_by(Template.template_id,  # count up the total for each template
-                  Template.title, 
-                  Template.estimated_value, 
-                  Template.cost 
-                  )
-    )
-
-    rows = session.exec(statement).all()
-    count = len(rows)
-
-    templates = [
-    {
-        "template_id": row.template_id,
-        "title": row.title,
-        "estimated_value": row.estimated_value,
-        "cost": row.cost,
-        "available_count": row.available_count,
-    }
-    for row in rows
-    ]
-
-
-    if count ==0:
-        return {
-            "total_count":0,
-            "templates":[]
-        }
-
-    return {
-        "total_count":count,
-        "bundles": templates
-    }
-
-# get bundles for store view
-@router.get("/mystore/{vendor_id}", response_model=VendBundleList, tags=["bundles"], summary="Gets a list of bundles that are current, and not picked up yet")
+# get bundles for store view 
+@router.get("/mystore/", response_model=VendBundleList, tags=["bundles"], summary="Gets a list of bundles that are current, and not picked up yet")
 def vendor_list_bundles(
-    vendor_id:int,
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
     ):

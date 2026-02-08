@@ -62,7 +62,7 @@ def create_template(
         raise HTTPException(status_code=500, detail=str(e))
     
 # get a specific template
-@router.get("/t={template_id}", response_model= TemplateRead, tags=["Templates"], summary="Get one templates details")
+@router.get("/{template_id}", response_model= TemplateRead, tags=["Templates"], summary="Get one templates details")
 def get_template(
     template_id:int,
     session: Session = Depends(get_session),
@@ -77,7 +77,7 @@ def get_template(
 
     
 # get a list of templates 
-@router.get("/v={vendor_id}", response_model = TemplateList, tags=["Templates"], summary="Get a list of template details for a specific vendor")
+@router.get("/vendor/{vendor_id}", response_model = TemplateList, tags=["Templates"], summary="Get a list of template details for a specific vendor")
 def get_list_of_templates(
     # doesn't need verification? as anyone can see the templates?
     vendor_id: int,
@@ -85,6 +85,9 @@ def get_list_of_templates(
     current_user = Depends(get_current_user) # conducts basic security checks even though the variable isn't used
     ):
     
+    if current_user.role == "vendor" and vendor_id != current_user.vendor_profile.vendor_id:
+        return HTTPException(status_code=403, detail="Not the correct vendor")
+
     statement = select(Template).where(Template.vendor == vendor_id)
     templates = session.exec(statement).all()
     
@@ -102,7 +105,7 @@ def get_list_of_templates(
         "total_count":count
     }
     
-@router.get("/count/t={template_id}", response_model = int, tags=["Template"], summary="Get the count of available bundles for a specified template.")
+@router.get("/count/{template_id}", response_model = int, tags=["Template"], summary="Get the count of available bundles for a specified template.")
 def count_bundles(
     template_id: int,
     session: Session = Depends(get_session),
