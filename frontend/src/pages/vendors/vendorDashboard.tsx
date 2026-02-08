@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Vendor } from "../../types";
 
@@ -36,3 +36,5 @@ export default function VendorDashboard() {
     </div>
   );
 }
+
+
