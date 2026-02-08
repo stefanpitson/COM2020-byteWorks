@@ -79,14 +79,15 @@ class UserUpdate(BaseModel):
     email: Optional[str] = None
     oldPassword : Optional[str] = None
     newPassword : Optional[str] = None
-    post_code: Optional[str] = None
-    name: Optional[str] = None
+
 
 class CustomerUpdate(UserUpdate):
-    # Do not delete - this is here for clarity sake and is used by Customer the same way Vendor uses VendorUpdate
-    pass
+    name: Optional[str] = None
+    post_code: Optional[str] = None
 
 class VendorUpdate(UserUpdate):
+    name: Optional[str] = None
+    post_code: Optional[str] = None
     street: Optional[str] = None
     city: Optional[str] = None
     phone_number: Optional[str] = None

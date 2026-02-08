@@ -45,9 +45,9 @@ def update_customer_profile(
     if data.newPassword != None and data.oldPassword != None:
         if verify_password(data.oldPassword, current_user.password_hash):
             current_user.password_hash = get_password_hash(data.newPassword)
-    if data.newPassword == None and data.oldPassword != None:
-        raise HTTPException(status_code=400, detail="Old password is required to change new password")
     if data.newPassword != None and data.oldPassword == None:
+        raise HTTPException(status_code=400, detail="Old password is required to change new password")
+    if data.newPassword == None and data.oldPassword != None:
         raise HTTPException(status_code=400, detail="New password is missing")
     
     if data.post_code != None:
