@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 # Retrieves all the modules and functions
 from app.api.auth import router as auth_router
 from app.api.customers import router as customers_router
+from app.api.vendors import router as vendors_router
 from app.core.database import get_session
 from app.core.security import get_password_hash
 from app.models import User, Vendor, Customer # UserBase no longer exists
@@ -33,6 +34,7 @@ def app():
     app = FastAPI()
     app.include_router(auth_router)
     app.include_router(customers_router, prefix="/customers")
+    app.include_router(vendors_router, prefix="/vendors")
     app.dependency_overrides[get_session] = get_test_session
     return app
 
