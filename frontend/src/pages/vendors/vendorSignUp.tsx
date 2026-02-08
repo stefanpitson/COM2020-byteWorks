@@ -6,7 +6,10 @@ import type { User } from "../../types";
 export default function VendorSignUp() {
   const navigate = useNavigate();
 
+  // Step is used to keep track what part of the sign up page is being displayed
   const [step, setStep] = useState(1);
+
+  // Form data contains all the sign up data in a single object
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -22,7 +25,9 @@ export default function VendorSignUp() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const steps = ["User Details", "Vendor Details", "Image"];
+
+  // The title of each page section
+  const steps = ["User Details", "Vendor Details", "Photo"];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -93,21 +98,36 @@ export default function VendorSignUp() {
     <div className="h-screen w-screen flex items-start justify-center bg-background pt-20 md:pt-[20vh]">
       <div className="w-full max-w-md bg-white p-8 space-y-4 rounded-xl shadow-lg transition-all duration-300">
 
-        <div className="relative pt-1">
-          <div className="flex mb-2 items-center justify-between">
-            <span className="text-xs font-semibold inline-block text-green-600 uppercase">
-              Step {step} of {steps.length}
-            </span>
-          </div>
-          <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
-            <div
-              style={{ width: `${((step) / steps.length) * 100}%` }}
-              className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500 transition-all duration-500"
-            ></div>
+        {/* Defines the progress tabs at the top */}
+        <div className="relative pt-8"> 
+          {/* The Container for the 3 sections */}
+          <div className="flex gap-2 h-2 mb-4">
+            {steps.map((label, index) => {
+              const isCurrent = step === index + 1;
+              const isCompletedOrCurrent = step >= index + 1;
+
+              return (
+                <div key={index} className="flex-1 relative flex flex-col items-center">
+                  {/* 1. THE TITLE: Only show if it's the current step */}
+                  {isCurrent && (
+                    <span className="absolute -top-6 text-[13px] font-bold text-green-600 uppercase whitespace-nowrap animate-fadeIn">
+                      {label}
+                    </span>
+                  )}
+
+                  {/* 2. THE BAR */}
+                  <div
+                    className={`w-full rounded h-full transition-all duration-500 ${
+                      isCompletedOrCurrent ? "bg-green-500" : "bg-gray-200"
+                    }`}
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
 
-
+        {/* Creates the form for sign up data */}
         <form onSubmit={handleSubmit}>
         
         {/* Page 1: User Details */}
@@ -198,7 +218,7 @@ export default function VendorSignUp() {
             <h2 className="text-xl font-bold">Upload your logo to be used</h2>
             
               <div className="flex flex-col items-center gap-4">
-                {/* Circle imagePreview Area */}
+                {/* Image preview */}
                 <div className="w-52 h-32 rounded-3xl overflow-hidden border-2 border-gray-300 relative">
                   {imagePreview ? (
                     <img src={imagePreview} alt="imagePreview" className="w-full h-full object-cover" />
@@ -209,7 +229,7 @@ export default function VendorSignUp() {
                   )}
                 </div>
 
-                {/* Hidden Input + Custom Button */}
+                {/* Button to choose image */}
                 <label className="cursor-pointer text-green-700 px-4 rounded hover:bg-gray-200">
                   Select Image
                   <input 
@@ -224,7 +244,7 @@ export default function VendorSignUp() {
           </div>
         )}
 
-        {/* NAVIGATION BUTTONS */}
+        {/* Next, Previous, and Submit buttons */}
         <div className="flex justify-between mt-8">
           <button
             type="button"
