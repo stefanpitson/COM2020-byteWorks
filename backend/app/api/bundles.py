@@ -1,112 +1,15 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status, Query 
+from fastapi import APIRouter, Depends, HTTPException 
 from sqlmodel import Session, select, func
 from app.core.database import get_session
 from app.models import Template, Allergen, Bundle, Reservation
-from app.core.security import get_password_hash, verify_password, create_access_token
-from app.schema import TemplateCreate, TemplateList, TemplateRead, BundleCreate, CustBundleList, BundleRead, VendBundleList
+from app.schema import BundleCreate, CustBundleList, BundleRead, VendBundleList
 from app.api.deps import get_current_user
-#from sqlalchemy import func
-from datetime import date as Date, time as Time, datetime
+from datetime import datetime
 
 router = APIRouter()
 
-# for creating a new template
-@router.post("/templates")
-def create_template(
-    data: TemplateCreate,
-    session: Session = Depends(get_session),
-    current_user = Depends(get_current_user)
-    ):
-    
-    if current_user.role != "vendor":
-        raise HTTPException(status_code=403, detail="Not a vendor account")
-
-    if session.exec(select(Template).where(Template.title == data.title and Template.vendor == current_user.vendor_profile.vendor_id)).first():
-        raise HTTPException(status_code=400, detail="Template already registered")
-    
-    new_template = Template(
-        title = data.title,
-        description = data.description,
-        estimated_value = data.estimated_value,
-        cost = data.cost,
-
-        meat_percent = data.meat_percent,
-        carb_percent = data.carb_percent,
-        veg_percent = data.veg_percent,
-        carbon_saved = data.carbon_saved,
-        weight= data.weight,
-        is_vegan = data.is_vegan,
-        is_vegetarian = data.is_vegetarian,
-
-        vendor = current_user.vendor_profile.vendor_id
-    )
-
-    # for the allergens it is a bit more complex, we need to get 
-    if data.allergen_ids:
-        statement = select(Allergen).where(Allergen.allergen_id.in_(data.allergen_ids))
-        allergens = session.exec(statement).all()
-        
-        # check they match 
-        if len(allergens) != len(data.allergen_ids):
-            raise HTTPException(status_code=400, detail="One or more Allergen IDs are invalid")
-
-        # adds the allergen ids to the template 
-        new_template.allergens = allergens
-    
-    try:
-        session.add(new_template)
-        session.commit()
-        
-        return {"message": "Template created successfully", "template_id":new_template.template_id}
-            
-    except Exception as e:
-        session.rollback() # If anything fails, undo the Vendor creation
-        raise HTTPException(status_code=500, detail=str(e))
-    
-# get a specific template
-@router.get("/templates/{template_id}", response_model= TemplateRead)
-def get_template(
-    template_id:int,
-    session: Session = Depends(get_session),
-    current_user = Depends(get_current_user)
-):
-    statement = select(Template).where(Template.template_id == template_id)
-    template = session.exec(statement).first()
-    if not template:
-        raise HTTPException(status_code=404, detail="Template not found")
-    
-    return template
-
-    
-# get a list of templates 
-@router.get("/templates/{vendor_id}", response_model = TemplateList)
-def get_list_of_templates(
-    # doesn't need verification? as anyone can see the templates?
-    vendor_id: int,
-    session: Session = Depends(get_session)
-    ):
-    
-    statement = select(Template).where(Template.vendor == vendor_id)
-    templates = session.exec(statement).all()
-    
-    # if empty send this
-    if not templates:
-        return {
-            "templates":[],
-            "total_count":0
-        }
-        
-    count = len(templates) 
-    # else return items 
-    return {
-        "templates": templates,
-        "total_count":count
-    }
-    
-
 # post a bundle 
-@router.post("/create")
+@router.post("/create", tags=["bundles"], summary="Create an amount of bundles for a specified template")
 def create_bundles(
     data: BundleCreate,
     session: Session = Depends(get_session),
@@ -137,9 +40,9 @@ def create_bundles(
         session.rollback() # If anything fails, undo the Vendor creation
         raise HTTPException(status_code=500, detail=str(e))
     
-# who should be able to see the raw info on one bundle? 
-# lets say just the vendor
-@router.get("/bundle/{bundle_id}", response_model=BundleRead)
+# read details on a specific bundle,
+# vendor only as we dont want other customers to see who is other customers details?  
+@router.get("/b={bundle_id}", response_model=BundleRead, tags=["bundles"], summary="Get the info on a specific bundle listing, for Vendors only")
 def bundle_read(
     bundle_id: int,
     session: Session = Depends(get_session),
@@ -161,7 +64,7 @@ def bundle_read(
 
 # get a list of bundles for the corresponding vendor
 # for customer view at store page 
-@router.get("/{vendor_id}",response_model=CustBundleList)
+@router.get("/v={vendor_id}",response_model=CustBundleList,tags=["bundles"], summary="gets a list of simple details for a stores bundles")
 def customer_list_bundles(
     vendor_id: int,
     session: Session = Depends(get_session),
@@ -222,7 +125,7 @@ def customer_list_bundles(
     }
 
 # get bundles for store view
-@router.get("/mystore/{vendor_id}", response_model=VendBundleList)
+@router.get("/mystore/{vendor_id}", response_model=VendBundleList, tags=["bundles"], summary="Gets a list of bundles that are current, and not picked up yet")
 def vendor_list_bundles(
     vendor_id:int,
     session: Session = Depends(get_session),
