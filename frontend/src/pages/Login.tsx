@@ -89,7 +89,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-800"
+            className="w-full bg-primary text-white py-2 rounded hover:bg-primaryHover"
           >
             {isLoading ? "Signing in..." : "Sign in"}
           </button>
