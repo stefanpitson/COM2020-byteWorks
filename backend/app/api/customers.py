@@ -31,27 +31,27 @@ def update_customer_profile(
 
     # User is already a customer 
 
-    if data.email != None:
+    if data.user.email != None:
         # Ensures email has not already been used
-        if session.exec(select(User).where(User.email == data.email)).first():
+        if session.exec(select(User).where(User.email == data.user.email)).first():
             raise HTTPException(status_code=400, detail="Email already registered")
-        current_user.email = data.email
+        current_user.email = data.user.email
 
-    if data.name != None:
-        current_user.customer_profile.name = data.name
+    if data.customer.name != None:
+        current_user.customer_profile.name = data.customer.name
 
     # Ensures both new and old password are inputted when trying to change password but does not provide an error 
     # if neither are inputted (e.g: password is not trying to be changed)
-    if data.newPassword != None and data.oldPassword != None:
-        if verify_password(data.oldPassword, current_user.password_hash):
-            current_user.password_hash = get_password_hash(data.newPassword)
-    if data.newPassword != None and data.oldPassword == None:
+    if data.user.new_password != None and data.user.old_password != None:
+        if verify_password(data.user.old_password, current_user.password_hash):
+            current_user.password_hash = get_password_hash(data.user.new_password)
+    if data.user.new_password != None and data.user.old_password == None:
         raise HTTPException(status_code=400, detail="Old password is required to change new password")
-    if data.newPassword == None and data.oldPassword != None:
+    if data.user.new_password == None and data.user.old_password != None:
         raise HTTPException(status_code=400, detail="New password is missing")
     
-    if data.post_code != None:
-        current_user.customer_profile.post_code = data.post_code
+    if data.customer.post_code != None:
+        current_user.customer_profile.post_code = data.customer.post_code
 
     session.add(current_user)
     session.commit()

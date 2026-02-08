@@ -75,21 +75,35 @@ class VendorSignupRequest(BaseModel):
         photo: str
 
 
-class UserUpdate(BaseModel):
-    email: Optional[str] = None
-    oldPassword : Optional[str] = None
-    newPassword : Optional[str] = None
+class CustomerUpdate(BaseModel):
+    user: UserUpdateData
 
+    class UserUpdateData(BaseModel):
+        email: Optional[str] = None
+        old_password : Optional[str] = None
+        new_password : Optional[str] = None
 
-class CustomerUpdate(UserUpdate):
-    name: Optional[str] = None
-    post_code: Optional[str] = None
+    customer: CustomerUpdateData
 
-class VendorUpdate(UserUpdate):
-    name: Optional[str] = None
-    post_code: Optional[str] = None
-    street: Optional[str] = None
-    city: Optional[str] = None
-    phone_number: Optional[str] = None
-    opening_hours: Optional[str] = None
-    photo: Optional[str] = None
+    class CustomerUpdateData(BaseModel):
+        name: Optional[str] = None
+        post_code: Optional[str] = None
+
+class VendorUpdate(BaseModel):
+    user: UserUpdateData
+
+    class UserUpdateData(BaseModel):
+        email: Optional[str] = None
+        old_password : Optional[str] = None
+        new_password : Optional[str] = None
+
+    vendor: VendorUpdateData
+
+    class VendorUpdateData(BaseModel):
+        name: Optional[str] = None
+        post_code: Optional[str] = None
+        street: Optional[str] = None
+        city: Optional[str] = None
+        phone_number: Optional[str] = None
+        opening_hours: Optional[str] = None
+        photo: Optional[str] = None
