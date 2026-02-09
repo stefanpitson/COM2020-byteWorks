@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { User } from "../types";
+import EyeIcon from "../assets/icons/eye.svg?react";
+import EyeOffIcon from "../assets/icons/eye-off.svg?react";
 
 import { loginUser } from "../api/auth";
 
@@ -11,6 +13,7 @@ export default function Login() {
   const [loginError, setLoginError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [shakeKey, setShakeKey] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -50,6 +53,13 @@ export default function Login() {
     }
   }
 
+    const getInputClass = () => { return `
+      mt-1 block w-full rounded shadow-sm p-2
+      border border-transparent
+      ring-0 focus:ring-2 focus:ring-primary focus:outline-none
+    `;
+  };
+
   return (
     <div className="h-screen w-screen flex items-center justify-center bg-background">
       <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg">
@@ -60,20 +70,30 @@ export default function Login() {
             <input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2"
+              className={getInputClass()}
               placeholder="name@domain.com"
             />
           </label>
 
           <label className="block mb-6">
             <span className="text-sm text-gray-700">Password</span>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={'mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2'}
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={getInputClass()}
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => setShowPassword(prev => !prev)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? <EyeOffIcon/> : <EyeIcon/>}
+              </button>
+            </div>
           </label>
 
           {loginError && (
