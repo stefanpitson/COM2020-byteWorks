@@ -1,29 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerCustomer } from "../../api/auth";
-
-type PasswordStrength = "very-weak" | "weak" | "medium" | "strong" | "very-strong";
-
-function getPasswordStrength(password: string): PasswordStrength {
-  const length = password.length;
-  const hasUpper = /[A-Z]/.test(password);
-  const hasNumber = /\d/.test(password);
-  const hasSymbol = /[^A-Za-z0-9]/.test(password);
-
-  if (length < 8 || !hasUpper || !hasNumber ) {
-    if (length < 4) {
-      return "very-weak";
-    } else {
-      return "weak";
-    }
-  } else if (length < 12 && !hasSymbol) {
-    return "medium";
-  } else if (length > 11 && hasSymbol) {
-    return "very-strong";
-  } else {
-    return "strong";
-  }
-}
+import EyeIcon from "../../assets/icons/eye.svg?react";
+import EyeOffIcon from "../../assets/icons/eye-off.svg?react";
+import BackButton from "../../assets/icons/back-button.svg?react";
 
 export default function CustomerSignUp() {
   const navigate = useNavigate();
@@ -40,7 +20,10 @@ export default function CustomerSignUp() {
   const [isLoading, setIsLoading] = useState(false);
   const [shakeKey, setShakeKey] = useState(0);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>("very-weak");
+
+  type PasswordStrength = "very-weak" | "weak" | "medium" | "strong" | "very-strong";
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -66,7 +49,7 @@ export default function CustomerSignUp() {
       const passwordIssues: string[] = [];
 
       if (password.length < 8) {
-        passwordIssues.push("Password must exceed 8 charactors");
+        passwordIssues.push("Password must exceed 8 characters");
       }  
       if (password.length > 64) {
         passwordIssues.push("Password cannot exceed 64 characters");
@@ -108,10 +91,29 @@ export default function CustomerSignUp() {
       navigate("/login");
     } catch (error) {
       console.error("Signup failed:" + error);
-      setSignUpError(true);
-      setShakeKey(prev => prev + 1);
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  function getPasswordStrength(password: string): PasswordStrength {
+    const length = password.length;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSymbol = /[^A-Za-z0-9]/.test(password);
+
+    if (length < 8 || !hasUpper || !hasNumber ) {
+      if (length < 4) {
+        return "very-weak";
+      } else {
+        return "weak";
+      }
+    } else if (length < 12 && !hasSymbol) {
+      return "medium";
+    } else if (length > 11 && hasSymbol) {
+      return "very-strong";
+    } else {
+      return "strong";
     }
   }
 
@@ -123,12 +125,15 @@ export default function CustomerSignUp() {
     "very-strong": { label: "Very strong", color: "bg-green-700" },
   };
 
-  const getInputClass = (error?: string) => {
-  return `mt-1 block w-full rounded shadow-sm p-2 ${
-    error
-      ? "border-red-500 focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50"
-      : "border-gray-300 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-  }`;
+  const getInputClass = (error?: string) => { return `
+    mt-1 block w-full rounded shadow-sm p-2
+    border
+    ${error ? "border-red-500" : "border-transparent"}
+    ring-0
+    focus:ring-2
+    ${error ? "focus:ring-red-500 focus:border-transparent" : "focus:ring-primary"}
+    focus:outline-none
+  `;
 };
 
   return (
@@ -139,9 +144,7 @@ export default function CustomerSignUp() {
           onClick={() => navigate("/login")}
           className="rounded-full hover:bg-gray-100 transition-colors"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
-          </svg>
+          <BackButton/>
         </button>
         
         <div className="p-4 space-y-4">
@@ -154,7 +157,6 @@ export default function CustomerSignUp() {
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
-                if (errors.name) setErrors({...errors, name: ""});
               }}
               className={getInputClass(errors.name)}
               placeholder="Name"
@@ -170,7 +172,6 @@ export default function CustomerSignUp() {
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
-                if (errors.email) setErrors({...errors, email: ""});
               }}
               className={getInputClass(errors.email)}
               placeholder="name@domain.com"
@@ -182,18 +183,30 @@ export default function CustomerSignUp() {
 
           <label className="block mb-4">
             <span className="text-sm text-gray-700">Password</span>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => {
-                const value = e.target.value;
-                setPassword(value);
-                setPasswordStrength(getPasswordStrength(value));
-                if (errors.password) setErrors({...errors, password: ""});
-              }}
-              className={getInputClass(errors.password)}
-              placeholder="••••••••"
-            />
+
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setPassword(value);
+                  setPasswordStrength(getPasswordStrength(value));
+                }}
+                className={`${getInputClass(errors.password)} pr-10`}
+                placeholder="••••••••"
+              />
+
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()} // stops focus border from flashing when button is clicked
+                onClick={() => setShowPassword(prev => !prev)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? <EyeOffIcon/> : <EyeIcon/>}
+              </button>
+            </div>
+
             {errors.password && (
                 <p className="text-red-500 text-xs mt-1 whitespace-pre-line">{errors.password}</p>
               )}
@@ -226,7 +239,6 @@ export default function CustomerSignUp() {
               value={postCode}
               onChange={(e) => {
                 setPostCode(e.target.value);
-                if (errors.postCode) setErrors({...errors, postCode: ""});
               }}
               className={getInputClass(errors.postCode)}
               placeholder="EX0 0EX"
@@ -235,16 +247,6 @@ export default function CustomerSignUp() {
                 <p className="text-red-500 text-xs mt-1">{errors.postCode}</p>
               )}
           </label>
-
-          {signUpError && (
-            <div 
-              key={shakeKey}
-              className="p-3 rounded bg-red-50 border border-red-200 animate-shake">
-              <span className="text-red-700 text-sm font-medium">
-                Generic placeholder error message
-              </span>
-            </div>
-          )}
 
           <button
             type="submit"
