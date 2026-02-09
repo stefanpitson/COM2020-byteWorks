@@ -22,6 +22,19 @@ def create_template(
     if session.exec(select(Template).where(Template.title == data.title and Template.vendor == current_user.vendor_profile.vendor_id)).first():
         raise HTTPException(status_code=400, detail="Template already registered")
     
+    percents = data.meat_percent + data.carb_percent + data.veg_percent\
+    
+    if percents > 105 or percents < 90:
+        raise HTTPException(status_code=400, detail="Percentages do not add up to 100")
+
+
+    # calculating the bundle carbon 
+    meat_carbon = data.weight * (data.meat_percent/100) *12.4 # see backend chat
+    carb_carbon = data.weight * (data.carb_percent/100) *1 
+    veg_carbon = data.weight * ( data.meat_percent/100) *0.2 
+
+    calc_carbon_saved = meat_carbon +carb_carbon +veg_carbon
+    
     new_template = Template(
         title = data.title,
         description = data.description,
@@ -31,7 +44,7 @@ def create_template(
         meat_percent = data.meat_percent,
         carb_percent = data.carb_percent,
         veg_percent = data.veg_percent,
-        carbon_saved = data.carbon_saved,
+        carbon_saved = calc_carbon_saved,
         weight= data.weight,
         is_vegan = data.is_vegan,
         is_vegetarian = data.is_vegetarian,

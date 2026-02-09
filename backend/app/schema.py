@@ -116,7 +116,7 @@ class TemplateCreate(BaseModel):
     meat_percent: float
     carb_percent: float
     veg_percent: float
-    carbon_saved: float
+    # carbon save removed and now calculated
     weight: float
     is_vegan: bool
     is_vegetarian: bool
@@ -143,22 +143,7 @@ class TemplateRead(BaseModel):
 # list of templates returned for a specific vendor
 class TemplateList(BaseModel):
     total_count: int
-    templates: List[TemplateData]
-    class TemplateData(BaseModel):
-        template_id: int
-        title: str
-        description: str
-        cost: float
-        meat_percent: float
-        carb_percent: float
-        veg_percent: float
-        carbon_saved: float
-        is_vegan: bool
-        is_vegetarian: bool
-        allergens: List["AllergenRead"] = [] 
-        class AllergenRead(BaseModel):
-            allergen_id: int
-            title: str
+    templates: List[TemplateRead]
 
 # bundle create is small as all the detail is auto generated on back end or in template
 class BundleCreate(BaseModel):
@@ -172,7 +157,7 @@ class BundleRead(BaseModel):
     picked_up: bool 
     date: date
     time: time
-    purchased_by: int
+    purchased_by: int | None
 
 # for the customer view of a vendor page
 class CustBundleList(BaseModel):
@@ -188,7 +173,7 @@ class CustBundleList(BaseModel):
 # for the vendor view of their bundles 
 class VendBundleList(BaseModel):
     total_count:int
-    bundles: List[BundleData]
+    bundles: List[BundleRead]
     class BundleData(BaseModel):
         bundle_id: int
         template_id: int
@@ -196,3 +181,4 @@ class VendBundleList(BaseModel):
         date: date
         time: time
         purchased_by: int | None
+
