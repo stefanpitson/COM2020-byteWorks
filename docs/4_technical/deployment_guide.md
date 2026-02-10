@@ -72,7 +72,7 @@ in sql shell enter through and give the password
 
 then run:
 
-DROP TABLE IF EXISTS vendor, customer, "user" CASCADE;
+DROP TABLE IF EXISTS vendor, customer, "user", templates, bundles CASCADE;
 
 
 
