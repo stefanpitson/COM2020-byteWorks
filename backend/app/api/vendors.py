@@ -74,8 +74,8 @@ def customer_list_bundles(
         "cost": row.cost,
         "available_count": row.available_count,
     }
-    for row in rows
-    ]
+    for row in rows # this loops through and converts the rows into the json format expected 
+    ]               # like saying [x*2 for x in range(10)]
 
 
     if count ==0:
