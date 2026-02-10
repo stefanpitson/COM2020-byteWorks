@@ -55,7 +55,7 @@ export const registerCustomer = async (
 
 export type VendorSignupData = Omit<
   Vendor,
-  "vendor_id" | "carbon_saved" | "validated"
+  "vendor_id" | "carbon_saved" | "validated" | "photo"
 >;
 
 export interface RegisterVendorPayload {
@@ -75,3 +75,15 @@ export const registerVendor = async (
   const response = await api.post("/auth/register/vendor", payload);
   return response.data;
 };
+
+export const uploadImage = async (
+  image: FormData
+) => {
+  const response = await api.post("/vendors/upload-image", image, {
+    headers: {
+      "Content-Type": "multipart/form-data", 
+    },
+  });
+
+  return response.data;
+}
