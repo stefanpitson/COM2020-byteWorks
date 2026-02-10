@@ -47,6 +47,7 @@ export default function Login() {
         console.error("Login failed:", error);
         setLoginError(true);
         setShakeKey(prev => prev + 1);
+        localStorage.clear();
       } finally {
         setIsLoading(false);
       }

@@ -48,9 +48,7 @@ export default function VendorDashboard() {
           {profile?.photo ? (
             <img src={`${API_BASE_URL}/${profile.photo}`} alt="imagePreview" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
-              No Image
-            </div>
+            <img src={`${API_BASE_URL}/static/placeholder.jpg`} alt="imagePreview" className="w-full h-full object-cover" />
           )}
         </div>
         
