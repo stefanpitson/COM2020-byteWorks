@@ -24,14 +24,14 @@ def create_template(
     
     percents = data.meat_percent + data.carb_percent + data.veg_percent\
     
-    if percents > 105 or percents < 90:
+    if percents > 1.05 or percents < 0.90:
         raise HTTPException(status_code=400, detail="Percentages do not add up to 100")
 
 
     # calculating the bundle carbon 
-    meat_carbon = data.weight * (data.meat_percent/100) *12.4 # see backend chat
-    carb_carbon = data.weight * (data.carb_percent/100) *1 
-    veg_carbon = data.weight * ( data.meat_percent/100) *0.2 
+    meat_carbon = data.weight * (data.meat_percent) *12.4 # see backend chat
+    carb_carbon = data.weight * (data.carb_percent) *1 
+    veg_carbon = data.weight * ( data.meat_percent) *0.2 
 
     calc_carbon_saved = meat_carbon +carb_carbon +veg_carbon
     
