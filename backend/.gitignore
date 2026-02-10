@@ -4,4 +4,4 @@
 .vscode/
 /uploads/*
 # Exception: do not ignore keeper.txt
-!/uploads/keeper.txt
+!/uploads/placeholder.jpg
