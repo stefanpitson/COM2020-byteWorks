@@ -16,9 +16,7 @@ export default function CustomerSignUp() {
   const [name, setName] = useState("");
   const [postCode, setPostCode] = useState("");
 
-  const [signUpError, setSignUpError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [shakeKey, setShakeKey] = useState(0);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>("very-weak");
