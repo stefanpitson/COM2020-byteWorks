@@ -72,7 +72,6 @@ class VendorSignupRequest(BaseModel):
         post_code: str
         phone_number: str
         opening_hours: str
-        photo: str
 
 
 class CustomerUpdate(BaseModel):

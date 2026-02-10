@@ -107,7 +107,6 @@ def register_vendor(
             street = data.vendor.street,
             phone_number = data.vendor.phone_number,
             opening_hours = data.vendor.opening_hours,
-            photo = data.vendor.photo,
             post_code = data.vendor.post_code,
         )
 
