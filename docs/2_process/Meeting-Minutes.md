@@ -142,15 +142,42 @@ Andrew, Arden, Alex, Stefan, Joe ,Jack
 
 ## Overview 
 We started work on an ER diagram to work from on for the design of the back and front end. 
+This can be accessed at:
+https://www.figma.com/design/HXzXN460ZO1xMGQeSDfb3Y/group-project?node-id=0-1&p=f
 
 # Meeting 6 - 27/01 
 ### Attendance 
 Andrew, Alfie, Alex, Jack, Joe
 
 ## Overview 
-we worked on the ER diagram, iterating on the design. Coming to consensus on the basic entities and their attributes, this is still to be hashed out with other team members that were not able to attend.
+We worked on the ER diagram, iterating on the design. Coming to consensus on the basic entities and their attributes, this is still to be hashed out with other team members that were not able to attend.
 We also viewed the website designs made by Alfie that will come to guide how each page should look. 
 ## Details
 
 ### key decisions
 We came to the decision that the search page should feature stores/shops, and that you click-through to view bundles for that particular store/shop, at least for the first demo. 
+
+
+# Meeting 7 - 30/01
+### Attendance 
+All present
+
+## Overview 
+
+
+
+# Meeting 8 - 03/02
+### Attendance 
+All present
+
+## Overview
+
+
+
+# Meeting 9 - 06/02
+### Attendance 
+All but Alfie 
+
+## Overview
+
+
