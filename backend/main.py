@@ -20,6 +20,8 @@ async def lifespan(app: FastAPI):
 # starts fast api app 
 app = FastAPI(lifespan=lifespan)
 
+# This sets the uploads folder as a static folder available to FastAPI that allows access to its contents
+# during runtime under the directory name /static
 app.mount("/static", StaticFiles(directory="uploads"), name="static")
 
 # for local run 
