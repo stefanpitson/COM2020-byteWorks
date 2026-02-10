@@ -22,7 +22,6 @@ export default function VendorDashboard() {
       } catch (error) {
         console.error("Failed to load profile", error);
       }
-      }
     };
 
     fetchVendorProfile();
