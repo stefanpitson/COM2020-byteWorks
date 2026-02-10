@@ -1,8 +1,9 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.core.database import create_db_and_tables
-from app.api import customers, auth, vendors
+from app.api import customers, auth, vendors, bundles, templates
 from app.core.database import engine, create_db_and_tables 
 from sqlmodel import SQLModel
 import os
@@ -19,6 +20,10 @@ async def lifespan(app: FastAPI):
 # starts fast api app 
 app = FastAPI(lifespan=lifespan)
 
+# This sets the uploads folder as a static folder available to FastAPI that allows access to its contents
+# during runtime under the directory name /static
+app.mount("/static", StaticFiles(directory="uploads"), name="static")
+
 # for local run 
 # NEEDS CHANGING FOR DEPLOYMENT? 
 origins = ["http://localhost:5173", "http://localhost:3000", "https://bytework.online"] 
@@ -34,4 +39,6 @@ app.add_middleware(
 app.include_router(customers.router, prefix="/customers", tags=["Customers"])
 app.include_router(vendors.router, prefix="/vendors", tags=["Vendors"])
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])
+app.include_router(templates.router, prefix="/templates", tags=["Templates"])
+app.include_router(bundles.router, prefix="/bundles", tags=["Bundles"])
 # ADD NEW API ROUTES HERE eg. bundles 

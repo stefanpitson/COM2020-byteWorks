@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Vendor } from "../../types";
+import { getVendorProfile } from "../../api/vendors";
+import { API_BASE_URL } from "../../api/axiosConfig";
 
 export default function VendorDashboard() {
   const navigate = useNavigate();
@@ -10,13 +12,26 @@ export default function VendorDashboard() {
 
   const [name] = useState(vendor?.name);
 
+  const [profile, setProfile] = useState<Vendor | null>(null);
+
+  useEffect(() => {
+    const fetchVendorProfile = async () => {
+      try {
+        const data = await getVendorProfile();
+        setProfile(data);
+      } catch (error) {
+        console.error("Failed to load profile", error);
+      }
+    };
+
+    fetchVendorProfile();
+  }, []);
+
   function handleLogout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("loggedIn");
     localStorage.clear();
     navigate("/login");
   }
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -24,8 +39,16 @@ export default function VendorDashboard() {
         <h1 className="text-3xl font-bold mb-4">Vendor Dashboard</h1>
         <p className="text-black mb-2">Hello {name}</p>
         <p className="text-gray-700 mb-8">
-          You are signed in. This is the dashbaord.
+          You are signed in. This is the dashboard.
         </p>
+        <div className="w-52 h-32 rounded-3xl overflow-hidden border-2 border-gray-300 relative">
+          {profile?.photo ? (
+            <img src={`${API_BASE_URL}/${profile.photo}`} alt="imagePreview" className="w-full h-full object-cover" />
+          ) : (
+            <img src={`${API_BASE_URL}/static/placeholder.jpg`} alt="imagePreview" className="w-full h-full object-cover" />
+          )}
+        </div>
+        
         <button
           onClick={handleLogout}
           className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
