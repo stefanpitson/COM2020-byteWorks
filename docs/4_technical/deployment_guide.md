@@ -19,9 +19,6 @@ press enter and give the password
 write 'create database byteworks;' 
 
 
-
-
-
 git clone the repo
 
 add a '.env' file to backend

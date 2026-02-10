@@ -260,7 +260,7 @@ export default function CustomerSignUp() {
           <p className="text-gray-500 text-sm">
             Are you a vendor?{" "}
             <button
-              onClick={() => navigate("/customer/signup")}
+              onClick={() => navigate("/vendor/signup")}
               className="text-primary font-bold hover:underline hover:text-primaryHover "
             >
               Create vendor account
