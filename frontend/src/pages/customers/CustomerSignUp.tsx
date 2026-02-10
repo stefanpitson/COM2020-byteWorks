@@ -79,7 +79,7 @@ export default function CustomerSignUp() {
     if (!validateForm()) {
       return;
     }
-    console.log("Here");
+
     setIsLoading(true);
     try {
       await registerCustomer(
