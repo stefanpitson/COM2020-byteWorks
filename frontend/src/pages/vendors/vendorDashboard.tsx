@@ -13,7 +13,6 @@ export default function VendorDashboard() {
   const [name] = useState(vendor?.name);
 
   const [profile, setProfile] = useState<Vendor | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchVendorProfile = async () => {
@@ -22,8 +21,7 @@ export default function VendorDashboard() {
         setProfile(data);
       } catch (error) {
         console.error("Failed to load profile", error);
-      } finally {
-        setLoading(false);
+      }
       }
     };
 
