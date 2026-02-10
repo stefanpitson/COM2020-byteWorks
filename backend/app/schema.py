@@ -121,7 +121,7 @@ class TemplateCreate(BaseModel):
     is_vegan: bool
     is_vegetarian: bool
     # This is the key: the frontend sends a list of existing Allergen IDs
-    allergen_ids: List[int] = []
+    allergen_titles: List[str] = []
 
 
 class TemplateRead(BaseModel):

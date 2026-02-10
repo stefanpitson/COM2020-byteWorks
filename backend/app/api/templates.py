@@ -53,13 +53,13 @@ def create_template(
     )
 
     # for the allergens it is a bit more complex, we need to get 
-    if data.allergen_ids:
-        statement = select(Allergen).where(Allergen.allergen_id.in_(data.allergen_ids))
+    if data.allergen_titles:
+        statement = select(Allergen).where(Allergen.title.in_(data.allergen_titles))
         allergens = session.exec(statement).all()
         
         # check they match 
-        if len(allergens) != len(data.allergen_ids):
-            raise HTTPException(status_code=400, detail="One or more Allergen IDs are invalid")
+        if len(allergens) != len(data.allergen_titles):
+            raise HTTPException(status_code=400, detail="One or more Allergen titles are invalid")
 
         # adds the allergen ids to the template 
         new_template.allergens = allergens
