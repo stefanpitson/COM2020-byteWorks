@@ -148,8 +148,33 @@ def test_patch_profile_same_name_fail(test_client, registered_customer):
     )
     profile_response_data = profile_response.json()
     assert profile_response.status_code == 400
-    assert profile_response_data["message"] == "Name already registered"
+    assert profile_response_data["detail"] == "Name already registered"
 
+def test_patch_profile_same_email_fail(test_client, registered_customer):
+
+    customer = registered_customer["customer_data"]
+    login_response = test_client.post("/login", json={
+        "email": customer["user"]["email"], 
+        "password": customer["user"]["password"]
+    })
+
+    login_response_data = login_response.json()
+    token = login_response_data["access_token"]
+    profile_response = test_client.patch(
+        "/customers/profile",
+        headers={"Authorization": "Bearer " + token},
+        json=
+        {
+            "user": 
+            {
+                "email": customer["user"]["email"]
+            },
+            "customer": {}
+        }
+    )
+    profile_response_data = profile_response.json()
+    assert profile_response.status_code == 400
+    assert profile_response_data["detail"] == "Email already registered"
 
 
 
