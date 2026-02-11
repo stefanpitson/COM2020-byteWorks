@@ -188,6 +188,7 @@ class VendorList(BaseModel):
     total_count:int
     vendors: List[VendorData]
     class VendorData(BaseModel):
+        vendor_id: int
         name:str
         photo: str | None # may not have a photo
         post_code: str

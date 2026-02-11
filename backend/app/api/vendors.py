@@ -1,8 +1,8 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from sqlmodel import Session, select, func
+from sqlmodel import Session, select, func, case
 from app.core.database import get_session
-from app.models import User, Bundle, Template, Reservation
+from app.models import User, Bundle, Template, Reservation, Vendor
 from app.schema import VendorRead, CustBundleList, VendorList
 from app.api.deps import get_current_user
 import uuid
@@ -75,7 +75,7 @@ def customer_list_bundles(
         "title": row.title,
         "estimated_value": row.estimated_value,
         "cost": row.cost,
-        "available_count": row.available_count,
+        "available_count": row.available_count
     }
     for row in rows # this loops through and converts the rows into the json format expected 
     ]               # like saying [x*2 for x in range(10)]
@@ -126,4 +126,54 @@ def get_all_vendors(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
     ):
-    return 0 
+    today = datetime.now().date()
+    # get all vendors 
+    statement = ( 
+        select(
+            Vendor.vendor_id,
+            Vendor.name,
+            Vendor.photo,
+            Vendor.post_code,
+            func.count(Bundle.bundle_id).label("bundle_count"),
+            func.max(Template.isVegan).label("has_vegan"),
+            func.max(Template.isVegetarian).label("has_veg")
+        )
+        .join(Template,Template.vendor == Vendor.vendor_id)
+        .join(Bundle, Bundle.template_id == Template.template_id)
+        .join(Reservation, Bundle.bundle_id == Reservation.bundle_id, isouter=True)
+        .where(Template.vendor == Vendor.vendor_id)
+        .where(Bundle.picked_up.is_(False))
+        .where(Reservation.bundle_id.is_(None)) # this means there is no reservation for the bundle
+        .where(Bundle.date == today) # only fresh bundles 
+        .group_by(Vendor.name, # count the 
+                Vendor.post_code,
+                Vendor.photo 
+                )
+    )
+
+    rows = session.exec(statement).all()
+    count = len(rows)
+
+    vendors = [
+    {
+        "name": row.name,
+        "photo": row.photo,
+        "post_code":row.post_code,
+        "bundle_count":row.bundle_count,
+        "has_vegan": row.has_vegan,
+        "has_vegetarian": row. has_vegetarian
+    }
+    for row in rows # this loops through and converts the rows into the json format expected 
+    ]  
+
+    if count ==0:
+        return {
+            "total_count":0,
+            "vendors":[]
+        }
+
+    return {
+        "total_count":count,
+        "vendors":vendors
+    }
+
