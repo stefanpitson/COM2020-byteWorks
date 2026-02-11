@@ -36,7 +36,10 @@ export default function NavBar() {
     <header>
       <nav className="fixed top-0 right-0 w-full flex justify-between items-center bg-gray-200 p-2 shadow-md shadow-black/5">
         <div>
-          <Link to="/" className="text-red-700">
+          <Link 
+            to={localStorage.getItem('role') === 'vendor' ? '/vendor/dashboard' : '/customer/home'} 
+            className="text-red-700"
+          >
             <HomeIcon />
           </Link>
         </div>
@@ -46,16 +49,16 @@ export default function NavBar() {
             className="relative bg-gray-400 p-2 rounded-xl hover:bg-gray-300 transition-colors">
             <UserIcon />
             {isSettingsOpen && (
-              <div className="absolute left-0 mt-2 w-max bg-white border rounded-xl shadow-lg z-50">
+              <div className="absolute right-0 mt-2 w-max bg-white border rounded-xl shadow-lg z-50">
                 <ul className="py-2 text-gray-700 text-left">
-                  <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center">
+                  <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-left">
                     <SettingsIcon />
                     Settings
                   </li>
                   <hr></hr>
                   <li 
                   onClick={handleLogout}
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600 flex items-center">
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600 flex items-left">
                     <ExitIcon />
                     Logout
                   </li>
