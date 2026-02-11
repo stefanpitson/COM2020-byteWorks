@@ -93,6 +93,24 @@ def registered_customer(test_client):
         "response": response,
     }
 
+@pytest.fixture
+def customer_login_response(test_client, registered_customer):
+    customer = registered_customer["customer_data"]
+    response = test_client.post("/login", json={
+        "email": customer["user"]["email"],
+        "password": customer["user"]["password"]
+    })
+    return response.json()
+
+@pytest.fixture
+def vendor_login_response(test_client, registered_vendor):
+    vendor = registered_vendor["vendor_data"]
+    response = test_client.post("/login", json={
+        "email": vendor["user"]["email"],
+        "password": vendor["user"]["password"]
+    })
+    return response.json()
+
 
 
 # FUNCTION FOR CREATING EXISTING USERS IN THE DATABASE DIRECTLY

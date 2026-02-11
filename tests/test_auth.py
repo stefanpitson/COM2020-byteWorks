@@ -1,4 +1,5 @@
 ## All function parameters can be found within conftest.py
+import pytest
 
 def test_customer_register_success(test_client, registered_customer):
     '''Register a customer account with valid details'''
@@ -6,7 +7,6 @@ def test_customer_register_success(test_client, registered_customer):
 
     assert register_response.text == "{\"message\":\"Customer account created successfully\"}"
     assert register_response.status_code == 200
-    
 
 def test_customer_login_success(test_client, registered_customer):
     '''Login with a registered account'''
@@ -23,6 +23,28 @@ def test_customer_login_success(test_client, registered_customer):
     assert login_response_data["user"]["role"] == "customer"
     assert login_response.status_code == 200
 
+@pytest.mark.parametrize("input_value, expected", [
+    ("InvalidEmail", True),
+    ("InvalidEmail@",True),
+    ("@InvalidEmail",True),
+    ("a"*255 + "@example.com", True),
+])
+def test_invalid_email_register_fail(test_client, input_value, expected):    
+    customer_data = {
+        "user": {
+            "email": "InvalidEmail",
+            "password": "password456",
+            "role": "customer"
+        },
+        "customer": {
+            "name": "tester",
+            "post_code": "ab1 2cd"
+        }
+    }
+    register_response = test_client.post("/register/customer", json=customer_data)
+    
+    assert register_response.text == "{\"message\":\"Invalid email\"}"
+    assert register_response.status_code == 400
 
 def test_customer_login_fail(test_client):
     '''Login without an existing account'''

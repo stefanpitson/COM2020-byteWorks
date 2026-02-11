@@ -1,15 +1,9 @@
 import json
 
 
-def test_get_profile_success(test_client, registered_customer):
+def test_get_profile_success(test_client, registered_customer, customer_login_response):
     customer = registered_customer["customer_data"]
-    login_response = test_client.post("/login", json={
-        "email": customer["user"]["email"], 
-        "password": customer["user"]["password"]
-    })
-
-    login_response_data = login_response.json()
-    token = login_response_data["access_token"]
+    token = customer_login_response["access_token"]
     profile_response = test_client.get(
         "/customers/profile",
         headers={"Authorization": "Bearer " + token}
@@ -24,15 +18,9 @@ def test_get_profile_success(test_client, registered_customer):
     assert customer["customer"]["post_code"] == profile_post_code
     assert profile_customer_id > 0
 
-def test_get_profile_wrong_role_fail(test_client ,registered_vendor):
+def test_get_profile_wrong_role_fail(test_client ,registered_vendor, vendor_login_response):
     vendor = registered_vendor["vendor_data"]
-    login_response = test_client.post("/login", json={
-        "email": vendor["user"]["email"], 
-        "password": vendor["user"]["password"]
-    })
-
-    login_response_data = login_response.json()
-    token = login_response_data["access_token"]
+    token = vendor_login_response["access_token"]
 
     profile_response = test_client.get(
         "/customers/profile",
@@ -43,16 +31,10 @@ def test_get_profile_wrong_role_fail(test_client ,registered_vendor):
     assert profile_response.status_code == 403
 
 
-def test_patch_profile_password_success(test_client, registered_customer):
+def test_patch_profile_password_success(test_client, registered_customer, customer_login_response):
 
     customer = registered_customer["customer_data"]
-    login_response = test_client.post("/login", json={
-        "email": customer["user"]["email"], 
-        "password": customer["user"]["password"]
-    })
-
-    login_response_data = login_response.json()
-    token = login_response_data["access_token"]
+    token = customer_login_response["access_token"]
     profile_response = test_client.patch(
         "/customers/profile",
         headers={"Authorization": "Bearer " + token},
@@ -71,16 +53,10 @@ def test_patch_profile_password_success(test_client, registered_customer):
     assert profile_response.status_code == 200
     assert profile_response_data["message"] == "Customer updated successfully"
 
-def test_patch_profile_email_success(test_client, registered_customer):
+def test_patch_profile_email_success(test_client, registered_customer, customer_login_response):
 
     customer = registered_customer["customer_data"]
-    login_response = test_client.post("/login", json={
-        "email": customer["user"]["email"], 
-        "password": customer["user"]["password"]
-    })
-
-    login_response_data = login_response.json()
-    token = login_response_data["access_token"]
+    token = customer_login_response["access_token"]
     profile_response = test_client.patch(
         "/customers/profile",
         headers={"Authorization": "Bearer " + token},
@@ -98,16 +74,10 @@ def test_patch_profile_email_success(test_client, registered_customer):
     assert profile_response.status_code == 200
     assert profile_response_data["message"] == "Customer updated successfully"
 
-def test_patch_profile_name_success(test_client, registered_customer):
+def test_patch_profile_name_success(test_client, registered_customer, customer_login_response):
 
     customer = registered_customer["customer_data"]
-    login_response = test_client.post("/login", json={
-        "email": customer["user"]["email"], 
-        "password": customer["user"]["password"]
-    })
-
-    login_response_data = login_response.json()
-    token = login_response_data["access_token"]
+    token = customer_login_response["access_token"]
     profile_response = test_client.patch(
         "/customers/profile",
         headers={"Authorization": "Bearer " + token},
@@ -124,16 +94,10 @@ def test_patch_profile_name_success(test_client, registered_customer):
     assert profile_response.status_code == 200
     assert profile_response_data["message"] == "Customer updated successfully"
 
-def test_patch_profile_same_name_fail(test_client, registered_customer):
+def test_patch_profile_post_code_success(test_client, registered_customer, customer_login_response):
 
     customer = registered_customer["customer_data"]
-    login_response = test_client.post("/login", json={
-        "email": customer["user"]["email"], 
-        "password": customer["user"]["password"]
-    })
-
-    login_response_data = login_response.json()
-    token = login_response_data["access_token"]
+    token = customer_login_response["access_token"]
     profile_response = test_client.patch(
         "/customers/profile",
         headers={"Authorization": "Bearer " + token},
@@ -142,24 +106,59 @@ def test_patch_profile_same_name_fail(test_client, registered_customer):
             "user": {},
             "customer": 
             {
-                "name": customer["customer"]["name"]
+                "post_code": "XY9 8WS"
             }
         }
     )
     profile_response_data = profile_response.json()
-    assert profile_response.status_code == 400
-    assert profile_response_data["detail"] == "Name already registered"
+    assert profile_response.status_code == 200
+    assert profile_response_data["message"] == "Customer updated successfully"
 
-def test_patch_profile_same_email_fail(test_client, registered_customer):
+
+def test_patch_profile_missing_new_password_fail(test_client, registered_customer, customer_login_response):
+    customer = registered_customer["customer_data"]
+    token = customer_login_response["access_token"]
+    profile_response = test_client.patch(
+        "/customers/profile",
+        headers={"Authorization": "Bearer " + token},
+        json=
+        {
+            "user": 
+            {
+                "old_password": customer["user"]["password"]
+            },
+
+            "customer": {}
+        }
+    )
+    profile_response_data = profile_response.json()
+    assert profile_response.status_code == 400
+    assert profile_response_data["detail"] == "New password is missing"
+ 
+def test_patch_profile_missing_old_password_fail(test_client, registered_customer, customer_login_response):
+    customer = registered_customer["customer_data"]
+    token = customer_login_response["access_token"]
+    profile_response = test_client.patch(
+        "/customers/profile",
+        headers={"Authorization": "Bearer " + token},
+        json=
+        {
+            "user": 
+            {
+                "new_password": "myNewPassword123"
+            },
+
+            "customer": {}
+        }
+    )
+    profile_response_data = profile_response.json()
+    assert profile_response.status_code == 400
+    assert profile_response_data["detail"] == "Old password is required to change new password"
+
+def test_patch_profile_same_email_fail(test_client, registered_customer, customer_login_response):
 
     customer = registered_customer["customer_data"]
-    login_response = test_client.post("/login", json={
-        "email": customer["user"]["email"], 
-        "password": customer["user"]["password"]
-    })
-
-    login_response_data = login_response.json()
-    token = login_response_data["access_token"]
+    token = customer_login_response["access_token"]
     profile_response = test_client.patch(
         "/customers/profile",
         headers={"Authorization": "Bearer " + token},
@@ -176,7 +175,45 @@ def test_patch_profile_same_email_fail(test_client, registered_customer):
     assert profile_response.status_code == 400
     assert profile_response_data["detail"] == "Email already registered"
 
+def test_patch_profile_same_name_fail(test_client, registered_customer, customer_login_response):
 
+    customer = registered_customer["customer_data"]
+    token = customer_login_response["access_token"]
+    profile_response = test_client.patch(
+        "/customers/profile",
+        headers={"Authorization": "Bearer " + token},
+        json=
+        {
+            "user": {},
+            "customer": 
+            {
+                "name": customer["customer"]["name"]
+            }
+        }
+    )
+    profile_response_data = profile_response.json()
+    assert profile_response.status_code == 400
+    assert profile_response_data["detail"] == "Name already registered"
+
+def test_patch_profile_same_post_code_fail(test_client, registered_customer, customer_login_response):
+
+    customer = registered_customer["customer_data"]
+    token = customer_login_response["access_token"]
+    profile_response = test_client.patch(
+        "/customers/profile",
+        headers={"Authorization": "Bearer " + token},
+        json=
+        {
+            "user": {},
+            "customer": 
+            {
+                "post_code": customer["customer"]["post_code"]
+            }
+        }
+    )
+    profile_response_data = profile_response.json()
+    assert profile_response.status_code == 400
+    assert profile_response_data["message"] == "Post code already registered"
 
 # def test_get_profile_with_no_account_fail(test_client, registered_customer):
 #     '''Login, recieve JWT token, delete account (if that functiontionality is added), then attempt get profile'''
