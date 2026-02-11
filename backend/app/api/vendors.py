@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlmodel import Session, select, func
 from app.core.database import get_session
 from app.models import User, Bundle, Template, Reservation
-from app.schema import VendorRead, CustBundleList 
+from app.schema import VendorRead, CustBundleList, VendorList
 from app.api.deps import get_current_user
 import uuid
 import shutil
@@ -121,3 +121,9 @@ async def upload_image(
     
     return {"status": "success", "image_url": current_user.vendor_profile.photo}
     
+@router.get("", response_model= VendorList, tags=["Vendors"],summary="Gets all the Vendors for Customer View")
+def get_all_vendors(
+    session: Session = Depends(get_session),
+    current_user = Depends(get_current_user)
+    ):
+    return 0 
