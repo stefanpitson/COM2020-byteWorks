@@ -108,6 +108,8 @@ def register_vendor(
             phone_number = data.vendor.phone_number,
             opening_hours = data.vendor.opening_hours,
             post_code = data.vendor.post_code,
+            photo = data.vendor.photo,
+
         )
 
         session.add(new_vendor)
