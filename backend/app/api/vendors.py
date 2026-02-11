@@ -84,7 +84,7 @@ def customer_list_bundles(
     if count ==0:
         return {
             "total_count":0,
-            "templates":[]
+            "bundles":[]
         }
 
     return {
@@ -97,7 +97,7 @@ async def upload_image(
     image: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session)
-):
+    ):
     # If the image is malformed, throw a 400 error
     if not image.filename:
         raise HTTPException(status_code=400, detail="Invalid filename")
@@ -135,8 +135,8 @@ def get_all_vendors(
             Vendor.photo,
             Vendor.post_code,
             func.count(Bundle.bundle_id).label("bundle_count"),
-            func.max(Template.isVegan).label("has_vegan"),
-            func.max(Template.isVegetarian).label("has_veg")
+            func.count(case((Template.is_vegan == True, Bundle.bundle_id))).label("has_vegan"),
+            func.count(case((Template.is_vegetarian == True, Bundle.bundle_id))).label("has_vegetarian")
         )
         .join(Template,Template.vendor == Vendor.vendor_id)
         .join(Bundle, Bundle.template_id == Template.template_id)
@@ -145,7 +145,9 @@ def get_all_vendors(
         .where(Bundle.picked_up.is_(False))
         .where(Reservation.bundle_id.is_(None)) # this means there is no reservation for the bundle
         .where(Bundle.date == today) # only fresh bundles 
-        .group_by(Vendor.name, # count the 
+        .group_by(
+                Vendor.vendor_id,
+                Vendor.name, # count the number of bundles per vendor
                 Vendor.post_code,
                 Vendor.photo 
                 )
@@ -156,12 +158,13 @@ def get_all_vendors(
 
     vendors = [
     {
+        "vendor_id": row.vendor_id,
         "name": row.name,
         "photo": row.photo,
         "post_code":row.post_code,
         "bundle_count":row.bundle_count,
-        "has_vegan": row.has_vegan,
-        "has_vegetarian": row. has_vegetarian
+        "has_vegan": bool(row.has_vegan),
+        "has_vegetarian": bool(row.has_vegetarian)
     }
     for row in rows # this loops through and converts the rows into the json format expected 
     ]  

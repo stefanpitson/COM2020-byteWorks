@@ -25,7 +25,7 @@ def create_template(
     percents = data.meat_percent + data.carb_percent + data.veg_percent\
     
     if percents > 1.05 or percents < 0.90:
-        raise HTTPException(status_code=400, detail="Percentages do not add up to 100")
+        raise HTTPException(status_code=400, detail="Percentages do not add up to 1")
 
 
     # calculating the bundle carbon 
@@ -75,7 +75,7 @@ def create_template(
         raise HTTPException(status_code=500, detail=str(e))
     
 # get a specific template
-@router.get("/{template_id}", response_model= TemplateRead, tags=["Templates"], summary="Get one templates details")
+@router.get("/{template_id}", response_model = TemplateRead, tags=["Templates"], summary="Get one templates details")
 def get_template(
     template_id:int,
     session: Session = Depends(get_session),
@@ -99,7 +99,7 @@ def get_list_of_templates(
     ):
     
     if current_user.role == "vendor" and vendor_id != current_user.vendor_profile.vendor_id:
-        return HTTPException(status_code=403, detail="Not the correct vendor")
+        raise HTTPException(status_code=403, detail="Not the correct vendor")
 
     statement = select(Template).where(Template.vendor == vendor_id)
     templates = session.exec(statement).all()
