@@ -38,6 +38,8 @@ def update_customer_profile(
         current_user.email = data.user.email
 
     if data.customer.name != None:
+        if current_user.customer_profile.name == data.customer.name:
+            raise HTTPException(status_code=400, detail="Name already registered")
         current_user.customer_profile.name = data.customer.name
 
     # Ensures both new and old password are inputted when trying to change password but does not provide an error 
@@ -51,6 +53,8 @@ def update_customer_profile(
         raise HTTPException(status_code=400, detail="New password is missing")
     
     if data.customer.post_code != None:
+        if  current_user.customer_profile.post_code == data.customer.post_code:
+            raise HTTPException(status_code=400, detail="Post code already registered")
         current_user.customer_profile.post_code = data.customer.post_code
 
     session.add(current_user)
