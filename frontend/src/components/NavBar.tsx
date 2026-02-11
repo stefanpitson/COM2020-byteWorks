@@ -40,7 +40,7 @@ export default function NavBar() {
             to={localStorage.getItem('role') === 'vendor' ? '/vendor/dashboard' : '/customer/home'} 
             className="text-red-700"
           >
-            <HomeIcon />
+            <HomeIcon className="size-8"/>
           </Link>
         </div>
         <div ref={menuRef}>
@@ -52,14 +52,14 @@ export default function NavBar() {
               <div className="absolute right-0 mt-2 w-max bg-white border rounded-xl shadow-lg z-50">
                 <ul className="py-2 text-gray-700 text-left">
                   <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-left">
-                    <SettingsIcon />
+                    <SettingsIcon className="size-6"/>
                     Settings
                   </li>
                   <hr></hr>
                   <li 
                   onClick={handleLogout}
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600 flex items-left">
-                    <ExitIcon />
+                    <ExitIcon className="size-6" />
                     Logout
                   </li>
                 </ul>

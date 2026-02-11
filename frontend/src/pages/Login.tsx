@@ -92,7 +92,7 @@ export default function Login() {
                 onClick={() => setShowPassword(prev => !prev)}
                 className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
               >
-                {showPassword ? <EyeOffIcon/> : <EyeIcon/>}
+                {showPassword ? <EyeOffIcon className="size-6"/> : <EyeIcon className="size-6"/>}
               </button>
             </div>
           </label>
