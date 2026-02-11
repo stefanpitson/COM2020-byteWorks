@@ -240,7 +240,7 @@ export default function CustomerSignUp() {
                 setPostCode(normalized);
               }}
               className={getInputClass(errors.postCode)}
-              placeholder="EX0 0EX"
+              placeholder="EX01EX"
             />
             {errors.postCode && (
                 <p className="text-red-500 text-xs mt-1">{errors.postCode}</p>
