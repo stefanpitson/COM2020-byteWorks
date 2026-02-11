@@ -19,7 +19,7 @@ def create_template(
     if current_user.role != "vendor":
         raise HTTPException(status_code=403, detail="Not a vendor account")
 
-    if session.exec(select(Template).where(Template.title == data.title and Template.vendor == current_user.vendor_profile.vendor_id)).first():
+    if session.exec(select(Template).where(Template.title == data.title, Template.vendor == current_user.vendor_profile.vendor_id)).first():
         raise HTTPException(status_code=400, detail="Template already registered")
     
     percents = data.meat_percent + data.carb_percent + data.veg_percent\
@@ -31,7 +31,7 @@ def create_template(
     # calculating the bundle carbon 
     meat_carbon = data.weight * (data.meat_percent) *12.4 # see backend chat
     carb_carbon = data.weight * (data.carb_percent) *1 
-    veg_carbon = data.weight * ( data.meat_percent) *0.2 
+    veg_carbon = data.weight * ( data.veg_percent) *0.2 
 
     calc_carbon_saved = meat_carbon +carb_carbon +veg_carbon
     
