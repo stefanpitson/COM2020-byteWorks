@@ -4,6 +4,7 @@ import type { Customer, Vendor } from "../../types";
 import { getCustomerProfile } from "../../api/customers";
 import { getAllVendors } from "../../api/vendors";
 import { API_BASE_URL } from "../../api/axiosConfig"; 
+import { clearAuthSession } from "../../utils/authSession";
 
 export default function CustomerHome() {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ export default function CustomerHome() {
   }, [navigate]);
 
   function handleLogout() {
-    localStorage.clear();
+    clearAuthSession();
     navigate("/login");
   }
 
