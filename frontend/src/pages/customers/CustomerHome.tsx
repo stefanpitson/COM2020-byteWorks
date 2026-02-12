@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Customer } from "../../types";
 import { getCustomerProfile } from "../../api/customers";
+import { clearAuthSession } from "../../utils/authSession";
 
 export default function CustomerHome() {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ export default function CustomerHome() {
   }, []);
 
   function handleLogout() {
-    localStorage.clear();
+    clearAuthSession();
     navigate("/login");
   }
 
