@@ -38,7 +38,55 @@ export default function CustomerHome() {
     navigate("/login");
   }
 
+  const availableVendors = vendors.filter((v) => v.bundle_count > 0);
+  const soldOutVendors = vendors.filter((v) => v.bundle_count === 0);
+
+  const VendorCard = ({ vendor, isSoldOut }: { vendor: Vendor; isSoldOut?: boolean }) => (
+    <div
+      key={vendor.vendor_id}
+      className={`bg-white rounded-xl shadow-lg transition p-4 text-left flex flex-col aspect-[7/6]
+        ${isSoldOut ? "saturate-50 opacity-75 pointer-events-none" : "hover:shadow-xl"}
+      `}
+    >
+      <div className="flex-1 flex justify-center items-center rounded-lg overflow-hidden border border-white bg-white mb-4">
+        <img
+          src={
+            vendor.photo
+              ? `${API_BASE_URL}/${vendor.photo}`
+              : `${API_BASE_URL}/static/placeholder.jpg`
+          }
+          alt={vendor.name}
+          className="rounded-lg max-w-full max-h-full object-contain"
+        />
+      </div>
+      <div className="mt-auto">
+        <div className="flex justify-between items-start gap-2">
+          <h2 className="text-lg font-semibold truncate">{vendor.name}</h2>
+
+          <div className="flex gap-1 shrink-0">
+            {vendor.has_vegan && (
+              <span className="bg-green-100 text-green-700 text-[10px] font-bold px-1.5 py-0.5 rounded border border-green-200">
+                VE
+              </span>
+            )}
+            {vendor.has_vegetarian && (
+              <span className="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-1.5 py-0.5 rounded border border-emerald-200">
+                V
+              </span>
+            )}
+          </div>
+        </div>
+        <p className={`${isSoldOut ? "text-red-400 font-medium" : "text-gray-600"} mt-1`}>
+          {isSoldOut
+            ? "Sold Out"
+            : `${vendor.bundle_count} ${vendor.bundle_count === 1 ? "bundle" : "bundles"} remaining`}
+        </p>
+      </div>
+    </div>
+  );
+
   if (loading) return <div>Loading...</div>;
+  
 
   return (
     <div className="min-h-screen bg-gray-100 pt-20 p-6">
@@ -51,47 +99,32 @@ export default function CustomerHome() {
           Log out
         </button>
       </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {vendors.map((vendor) => (
-          <div
-            key={vendor.vendor_id}
-            className="bg-white rounded-xl shadow-lg hover:shadow-xl transition p-4 text-left flex flex-col"
-            style={{ minHeight: "400px", maxHeight: "400px" }}
-          >
-             <div className="flex-1 flex justify-center items-center rounded-lg overflow-hidden border border-white bg-white mb-4">
-              <img
-                src={
-                  vendor.photo
-                    ? `${API_BASE_URL}/${vendor.photo}` 
-                    : `${API_BASE_URL}/static/placeholder.jpg` 
-                }
-                alt={vendor.name}
-                className="rounded-lg max-w-full max-h-full object-contain"
-              />
-            </div>
-            <div className="mt-auto">
-              <div className="flex justify-between items-start gap-2">
-                <h2 className="text-lg font-semibold truncate">{vendor.name}</h2>
-
-                <div className="flex gap-1 shrink-0">
-                  {vendor.has_vegan && (
-                    <span className="bg-green-100 text-green-700 text-[10px] font-bold px-1.5 py-0.5 rounded border border-green-200">
-                      VE
-                    </span>
-                  )}
-                  {vendor.has_vegetarian && (
-                    <span className="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-1.5 py-0.5 rounded border border-emerald-200">
-                      V
-                    </span>
-                  )}
-                </div>
-              </div>
-              <p className="text-gray-600 mt-1">{vendor.bundle_count} bundles remaining</p>
-            </div>
+      {availableVendors.length > 0 && (
+        <>
+          <h2 className="text-xl font-bold text-black mb-6 pl-2">Available Bundles</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {availableVendors.map((vendor) => (
+              <VendorCard key={vendor.vendor_id} vendor={vendor} />
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
+
+      {soldOutVendors.length > 0 && (
+        <>
+          {availableVendors.length > 0 && (
+            <div className="w-11/12 mx-auto border-t-2 border-gray-300 my-12" />
+          )} 
+
+          <h2 className="text-xl font-bold text-gray-400 mb-6 pl-2">Sold Out</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {soldOutVendors.map((vendor) => (
+              <VendorCard key={vendor.vendor_id} vendor={vendor} isSoldOut={true} />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
