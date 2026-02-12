@@ -2,9 +2,15 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerVendor, loginUser, uploadImage} from "../../api/auth";
 import type { User } from "../../types";
+import EyeIcon from "../../assets/icons/eye.svg?react";
+import EyeOffIcon from "../../assets/icons/eye-off.svg?react";
+import { getPasswordStrength, type PasswordStrength, strengthConfig } from "../../utils/password";
 
 export default function VendorSignUp() {
   const navigate = useNavigate();
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>("very-weak");
 
   // Step is used to keep track what part of the sign up page is being displayed
   const [step, setStep] = useState(1);
@@ -146,23 +152,62 @@ export default function VendorSignUp() {
             <p>Email:</p>
             <input
               name="email"
-              placeholder="Vendor@example.com"
+              placeholder="vendor@domain.com"
               className="w-full border p-2 rounded"
               value={formData.email}
               onChange={handleChange}
               required
             />
             <p>Password:</p>
-            <input
-              name="password"
-              placeholder="Password"
-              type="password"
-              className="w-full border p-2 rounded"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
+            <div className="relative">
+              <input
+                name="password"
+                placeholder="••••••••"
+                type={showPassword ? "text" : "password"}
+                className="w-full border p-2 rounded pr-10"
+                value={formData.password}
+                onChange={(e) => {
+                  handleChange(e);
+                  setPasswordStrength(getPasswordStrength(e.target.value));
+                }}
+                required
+              />
+
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+              </button>
+            </div>
+            {formData.password && (
+              <>
+                <div className="h-3" />
+
+                <div className="mt-2">
+                  <div className="h-2 w-full rounded bg-gray-200">
+                    <div
+                      className={`h-2 rounded transition-all ${strengthConfig[passwordStrength].color}`}
+                      style={{
+                        width:
+                          passwordStrength === "very-weak" ? "20%" :
+                          passwordStrength === "weak" ? "40%" :
+                          passwordStrength === "medium" ? "60%" :
+                          passwordStrength === "strong" ? "80%" :
+                          "100%",
+                      }}
+                    />
+                  </div>
+                  <p className="text-xs mt-1 text-gray-600">
+                    {strengthConfig[passwordStrength].label}
+                  </p>
+                </div>
+              </>
+            )}
           </div>
+          
         )}
 
         {/* Page 2: Vendor Details */}
