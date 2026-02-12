@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { User } from "../types";
 import EyeIcon from "../assets/icons/eye.svg?react";
 import EyeOffIcon from "../assets/icons/eye-off.svg?react";
+import { saveAuthSession, clearAuthSession, getRedirectPath } from "../utils/authSession";
 
 import { loginUser } from "../api/auth";
 
@@ -29,25 +29,14 @@ export default function Login() {
           password: trimPassword,
         });
 
-        const token: string = response.access_token;
-        const token_type: string = response.token_type;
-        const user: User = response.user;
+        saveAuthSession(response);
+        navigate(getRedirectPath(response.user.role));
 
-        localStorage.setItem("token", token);
-        localStorage.setItem("tokenType", token_type);
-        localStorage.setItem("user", JSON.stringify(user));
-        localStorage.setItem("role", user.role);
-
-        if (user.role === "customer") {
-          navigate("/customer/home");
-        } else if (user.role === "vendor") {
-          navigate("/vendor/dashboard");
-        }
       } catch (error) {
         console.error("Login failed:", error);
         setLoginError(true);
         setShakeKey(prev => prev + 1);
-        localStorage.clear();
+        clearAuthSession();
       } finally {
         setIsLoading(false);
       }
