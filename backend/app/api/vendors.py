@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from sqlmodel import Session, select, func, case
+from sqlmodel import Session, select, func, case, and_
 from app.core.database import get_session
 from app.models import User, Bundle, Template, Reservation, Vendor
 from app.schema import VendorRead, CustBundleList, VendorList
@@ -134,17 +134,20 @@ def get_all_vendors(
             Vendor.name,
             Vendor.photo,
             Vendor.post_code,
-            func.count(Bundle.bundle_id).label("bundle_count"),
+            func.count(case((
+                and_( # count all the correct bundles 
+                        Bundle.picked_up.is_(False),
+                        Reservation.bundle_id.is_(None),
+                        Bundle.date == today
+                    ),
+                    Bundle.bundle_id
+            ))).label("bundle_count"),
             func.count(case((Template.is_vegan == True, Bundle.bundle_id))).label("has_vegan"),
             func.count(case((Template.is_vegetarian == True, Bundle.bundle_id))).label("has_vegetarian")
         )
-        .join(Template,Template.vendor == Vendor.vendor_id)
-        .join(Bundle, Bundle.template_id == Template.template_id)
-        .join(Reservation, Bundle.bundle_id == Reservation.bundle_id, isouter=True)
-        .where(Template.vendor == Vendor.vendor_id)
-        .where(Bundle.picked_up.is_(False))
-        .where(Reservation.bundle_id.is_(None)) # this means there is no reservation for the bundle
-        .where(Bundle.date == today) # only fresh bundles 
+        .outerjoin(Template,Template.vendor == Vendor.vendor_id)
+        .outerjoin(Bundle, Bundle.template_id == Template.template_id)
+        .outerjoin(Reservation, Bundle.bundle_id == Reservation.bundle_id)
         .group_by(
                 Vendor.vendor_id,
                 Vendor.name, # count the number of bundles per vendor
