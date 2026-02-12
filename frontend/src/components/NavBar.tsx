@@ -47,7 +47,7 @@ export default function NavBar() {
           <button
             onClick={() => setSettingsOpen(!isSettingsOpen)}
             className="relative bg-gray-400 p-2 rounded-xl hover:bg-gray-300 transition-colors">
-            <UserIcon />
+            <UserIcon className="size-6"/>
             {isSettingsOpen && (
               <div className="absolute right-0 mt-2 w-max bg-white border rounded-xl shadow-lg z-50">
                 <ul className="py-2 text-gray-700 text-left">
