@@ -63,7 +63,7 @@ export default function CustomerSignUp() {
       }
     }
       
-    const postCodeRegex = /^[a-zA-Z]{1,2}\d[a-zA-Z\d]?\s\d[a-zA-Z]{2}$/;
+    const postCodeRegex = /^[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2}$/;
     if (!postCode.trim()) {
       newErrors.postCode = "Post Code is required";
     } else if (!postCodeRegex.test(postCode)) {
@@ -84,7 +84,7 @@ export default function CustomerSignUp() {
     try {
       await registerCustomer(
         { email: email.toLowerCase(), password: password, role: "customer" },
-        { name: name, post_code: postCode },
+        { name: name, post_code: postCode.toUpperCase().replace(/\s+/g, "")},
       );
       navigate("/login");
     } catch (error) {
@@ -142,7 +142,7 @@ export default function CustomerSignUp() {
           onClick={() => navigate("/login")}
           className="rounded-full hover:bg-gray-100 transition-colors"
         >
-          <BackButton/>
+          <BackButton className="size-6"/>
         </button>
         
         <div className="p-4 space-y-4">
@@ -150,14 +150,14 @@ export default function CustomerSignUp() {
           <h2 className="text-2xl font-semibold mb-6">Create Customer</h2>
           
           <label className="block mb-4">
-            <span className="text-sm text-gray-700">Name</span>
+            <span className="text-sm text-gray-700">Username</span>
             <input
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
               }}
               className={getInputClass(errors.name)}
-              placeholder="Name"
+              placeholder="Username"
             />
             {errors.name && (
                 <p className="text-red-500 text-xs mt-1">{errors.name}</p>
@@ -201,7 +201,7 @@ export default function CustomerSignUp() {
                 onClick={() => setShowPassword(prev => !prev)}
                 className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
               >
-                {showPassword ? <EyeOffIcon/> : <EyeIcon/>}
+                {showPassword ? <EyeOffIcon className="size-6"/> : <EyeIcon className="size-6"/>}
               </button>
             </div>
 
@@ -236,10 +236,11 @@ export default function CustomerSignUp() {
             <input
               value={postCode}
               onChange={(e) => {
-                setPostCode(e.target.value);
+                const normalized = e.target.value.toUpperCase().replace(/\s+/g, "");
+                setPostCode(normalized);
               }}
               className={getInputClass(errors.postCode)}
-              placeholder="EX0 0EX"
+              placeholder="EX01EX"
             />
             {errors.postCode && (
                 <p className="text-red-500 text-xs mt-1">{errors.postCode}</p>
