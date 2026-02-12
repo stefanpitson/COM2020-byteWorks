@@ -145,9 +145,9 @@ def get_all_vendors(
             func.count(case((Template.is_vegan == True, Bundle.bundle_id))).label("has_vegan"),
             func.count(case((Template.is_vegetarian == True, Bundle.bundle_id))).label("has_vegetarian")
         )
-        .join(Template,Template.vendor == Vendor.vendor_id, isouter=True)
-        .join(Bundle, Bundle.template_id == Template.template_id, isouter=True)
-        .join(Reservation, Bundle.bundle_id == Reservation.bundle_id, isouter=True)
+        .outerjoin(Template,Template.vendor == Vendor.vendor_id)
+        .outerjoin(Bundle, Bundle.template_id == Template.template_id)
+        .outerjoin(Reservation, Bundle.bundle_id == Reservation.bundle_id)
         .group_by(
                 Vendor.vendor_id,
                 Vendor.name, # count the number of bundles per vendor
