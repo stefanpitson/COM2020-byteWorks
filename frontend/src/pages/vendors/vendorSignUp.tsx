@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerVendor, loginUser, uploadImage} from "../../api/auth";
-import type { User } from "../../types";
+import { saveAuthSession } from "../../utils/authSession";
 import EyeIcon from "../../assets/icons/eye.svg?react";
 import EyeOffIcon from "../../assets/icons/eye-off.svg?react";
 import { getPasswordStrength, type PasswordStrength, strengthConfig } from "../../utils/password";
@@ -49,7 +49,7 @@ export default function VendorSignUp() {
     try {
       // 1. register the vendor
       await registerVendor(
-        { email: formData.email, password: formData.password, role: "vendor" },
+        { email: formData.email.trim().toLowerCase(), password: formData.password.trim(), role: "vendor" },
         {   name: formData.name,
             street: formData.street,
             city: formData.city,
@@ -61,25 +61,16 @@ export default function VendorSignUp() {
       
       // 2. Automatically login in the background
       const loginResponse = await loginUser({
-        email: formData.email, 
-        password:formData.password
+        email: formData.email.trim().toLowerCase(), 
+        password: formData.password.trim()
       });
 
-      const token: string = loginResponse.access_token;
-      const token_type: string = loginResponse.token_type;
-      const user: User = loginResponse.user;
-
-      localStorage.setItem("token", token);
-      localStorage.setItem("tokenType", token_type);
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("role", user.role);
-
-
+      saveAuthSession(loginResponse);
       // Upload the image
       if (selectedImage) {
       const imageData = new FormData();
       imageData.append("image", selectedImage);
-      uploadImage(imageData);
+      await uploadImage(imageData);
     }
 
     // Navigate to dashboard
