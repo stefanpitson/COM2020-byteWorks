@@ -56,8 +56,8 @@ export default function CustomerHome() {
         {vendors.map((vendor) => (
           <div
             key={vendor.vendor_id}
-            className="bg-white rounded-xl shadow-lg hover:shadow-xl transition p-4 text-center flex flex-col"
-            style={{ minHeight: "320px" }}
+            className="bg-white rounded-xl shadow-lg hover:shadow-xl transition p-4 text-left flex flex-col"
+            style={{ minHeight: "400px", maxHeight: "400px" }}
           >
              <div className="flex-1 flex justify-center items-center rounded-lg overflow-hidden border border-white bg-white mb-4">
               <img
@@ -67,11 +67,26 @@ export default function CustomerHome() {
                     : `${API_BASE_URL}/static/placeholder.jpg` 
                 }
                 alt={vendor.name}
-                className="max-w-full max-h-full object-contain"
+                className="rounded-lg max-w-full max-h-full object-contain"
               />
             </div>
             <div className="mt-auto">
-              <h2 className="text-lg font-semibold truncate">{vendor.name}</h2>
+              <div className="flex justify-between items-start gap-2">
+                <h2 className="text-lg font-semibold truncate">{vendor.name}</h2>
+
+                <div className="flex gap-1 shrink-0">
+                  {vendor.has_vegan && (
+                    <span className="bg-green-100 text-green-700 text-[10px] font-bold px-1.5 py-0.5 rounded border border-green-200">
+                      VE
+                    </span>
+                  )}
+                  {vendor.has_vegetarian && (
+                    <span className="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-1.5 py-0.5 rounded border border-emerald-200">
+                      V
+                    </span>
+                  )}
+                </div>
+              </div>
               <p className="text-gray-600 mt-1">{vendor.bundle_count} bundles remaining</p>
             </div>
           </div>
