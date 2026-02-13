@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select, func
 from app.core.database import get_session
-from app.models import Template, Allergen, Bundle, Reservation
+from app.models import Template, Allergen, Bundle, Reservation, Customer, Vendor
 from app.schema import ReservationRead
 from app.api.deps import get_current_user
 from datetime import datetime
@@ -75,7 +75,7 @@ def get_reservation(
 
 @router.post("???", tags=["reservations"], summary="Cancel an already booked reservation")
 def cancel_reservation(
-    template_id: int,
+    reservation_id: int,
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
     ):
@@ -161,12 +161,15 @@ def finalise_reservation(
     reservation.status = "collected"
     customer.store_credit -= cost
 
+    statement = select(Vendor).where(Vendor.vendor_id == current_user.vendor_profile.vendor_id)
+    vendor = session.exec(statement).first()
+
     customer.carbon_saved += carbon_saved
-    current_user.vendor_profile.carbon_saved += carbon_saved
+    vendor.carbon_saved += carbon_saved
 
     session.add(reservation)
     session.add(customer)
-    session.add(current_user)
+    session.add(vendor)
     session.commit()
 
 
