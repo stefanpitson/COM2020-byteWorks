@@ -197,7 +197,7 @@ def get_reservation(
     statement = select(Template.vendor).where(Template.template_id == Bundle.template_id 
                                               and Bundle.bundle_id == reservation.bundle_id)
 
-    reserveVendorID = session.exec(statement)
+    reserveVendorID = session.exec(statement).first()
 
     # Checks if either the vendor that made the bundle that has the reservation or
     # the customer that created the reservation is trying to get the reservation
@@ -227,7 +227,7 @@ def cancel_reservation(
     statement = select(Template.vendor).where(Template.template_id == Bundle.template_id 
                                               and Bundle.bundle_id == reservation.bundle_id)
 
-    reserveVendorID = session.exec(statement)
+    reserveVendorID = session.exec(statement).first()
 
     # Checks if either the vendor that made the bundle that has the reservation or
     # the customer that created the reservation is trying to get the reservation
@@ -245,7 +245,7 @@ def cancel_reservation(
     # ensure that it is the vendor or the customer
 
     statement = select(Bundle).where(Bundle.template_id == reservation.bundle_id)
-    bundle = session.exec(statement)
+    bundle = session.exec(statement).first()
 
     bundle.purchased_by = None
 
@@ -256,5 +256,54 @@ def cancel_reservation(
     return {"message": "Bundle created successfully"}
 
 # need to do accept reservation (when they pick it up)
+@router.post("???", tags=["reservations"], summary="Finalise a reservation")
+def finalise_reservation(
+    reservation_id: int,
+    pickup_code : int,
+    session: Session = Depends(get_session),
+    current_user = Depends(get_current_user)
+    ):
+
+    statement = select(Reservation).where(Reservation.reservation_id == reservation_id)
+    reservation = session.exec(statement).first()
+
+    # Gets the ID of the vendor that is responsible for the reservation
+    statement = select(Template.vendor).where(Template.template_id == Bundle.template_id 
+                                              and Bundle.bundle_id == reservation.bundle_id)
+
+    reserveVendorID = session.exec(statement).first()
+
+    if current_user.role == "vendor":  
+        if current_user.vendor_profile.vendor_id != reserveVendorID:
+            raise HTTPException(status_code=403, detail="Not the correct vendor")
+        
+    statement = select(Customer).where(Customer.customer_id == reservation.consumer_id)
+    customer = session.exec(statement).first()
+
+    statement = select(Template.cost).where(Template.template_id == Bundle.template_id 
+                                              and Bundle.bundle_id == reservation.bundle_id)
+    cost = session.exec(statement).first()
+
+    if pickup_code != reservation.code:
+        raise HTTPException(status_code=403, detail="Customer does not the correct accepting code")
+
+    if customer.store_credit < cost:
+        raise HTTPException(status_code=403, detail="Customer does not have enough credit to purchase")
+
+    statement = select(Template.carbon_saved).where(Template.template_id == Bundle.template_id 
+                                              and Bundle.bundle_id == reservation.bundle_id)
+
+    carbon_saved = session.exec(statement).first()
+
+    reservation.status = "collected"
+    customer.store_credit -= cost
+
+    customer.carbon_saved += carbon_saved
+    vendor.carbon_saved += carbon_saved
+
+
+
+
+
 
 # need to do set no-show if they don't turn up 
