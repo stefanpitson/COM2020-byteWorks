@@ -66,9 +66,6 @@ export default function VendorSignUp() {
             post_code: formData.post_code.toUpperCase().replace(/\s+/g, ""),
             opening_hours: formData.opening_hours,
             phone_number: formData.phone_number,
-            bundle_count: 0,
-            has_vegan: false,
-            has_vegetarian: false,
         },
       );
       
