@@ -11,6 +11,7 @@ export default function VendorSignUp() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>("very-weak");
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Step is used to keep track what part of the sign up page is being displayed
   const [step, setStep] = useState(1);
@@ -39,11 +40,18 @@ export default function VendorSignUp() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleNext = () => setStep((s) => s + 1);
-  const handlePrev = () => setStep((s) => s - 1);
+  const handleNext = () => {
+    if (validateStep(step)) {
+      setErrors({});
+      setStep((s) => s + 1);
+    }
+  }
+  const handlePrev = () => {step === 1 ? navigate("/customer/signup") : setStep((s) => s - 1)};
 
   async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
+
+    if (!validateStep(step)) return;
     if (step < steps.length) return;
 
     try {
@@ -56,6 +64,9 @@ export default function VendorSignUp() {
             post_code: formData.post_code,
             opening_hours: formData.opening_hours,
             phone_number: formData.phone_number,
+            bundle_count: 0,
+            has_vegan: false,
+            has_vegetarian: false,
         },
       );
       
@@ -89,6 +100,53 @@ export default function VendorSignUp() {
       setImagePreview(URL.createObjectURL(file));
     }
   };
+
+  const getInputClass = (error?: string) => { return `
+    mt-1 block w-full rounded shadow-sm p-2
+    border
+    ${error ? "border-red-500" : "border-transparent"}
+    ring-0
+    focus:ring-2
+    ${error ? "focus:ring-red-500 focus:border-transparent" : "focus:ring-primary"}
+    focus:outline-none
+  `};
+  
+
+  const validateStep = (step: number) => {
+   const newErrors: { [key: string]: string } = {};
+
+  if (step === 1) { 
+    if (!formData.name.trim()) newErrors.name = "Name is required";
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (formData.email && !emailRegex.test(formData.email))
+      newErrors.email = "Please enter a valid email";
+    if (!formData.password.trim()) newErrors.password = "Password is required";
+    else {
+      const pwIssues: string[] = [];
+      if (formData.password.length < 8) pwIssues.push("Password must exceed 8 characters");
+      if (formData.password.length > 64) pwIssues.push("Password cannot exceed 64 characters");
+      if (!/[A-Z]/.test(formData.password)) pwIssues.push("Password must contain at least one capital letter");
+      if (!/\d/.test(formData.password)) pwIssues.push("Password must contain at least one number");
+      if (pwIssues.length > 0) newErrors.password = pwIssues.join("\n");
+    }
+  }
+
+  if (step === 2) { 
+    if (!formData.street.trim()) newErrors.street = "Street is required";
+    if (!formData.city.trim()) newErrors.city = "City is required";
+    const postCodeRegex = /^[a-zA-Z]{1,2}\d[a-zA-Z\d]?\s\d[a-zA-Z]{2}$/;
+    if (!formData.post_code.trim()) newErrors.post_code = "Post Code is required";
+    else if (!postCodeRegex.test(formData.post_code)) newErrors.post_code = "Invalid Post Code format";
+    if (!formData.phone_number.trim()) newErrors.phone_number = "Phone number is required";
+    if (!formData.opening_hours.trim()) newErrors.opening_hours = "Opening hours are required";
+  }
+
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
+
+
 
 
   return (
@@ -140,6 +198,8 @@ export default function VendorSignUp() {
               onChange={handleChange}
               required
             />
+            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+
             <p>Email:</p>
             <input
               name="email"
@@ -149,6 +209,8 @@ export default function VendorSignUp() {
               onChange={handleChange}
               required
             />
+            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+
             <p>Password:</p>
             <div className="relative">
               <input
@@ -173,6 +235,7 @@ export default function VendorSignUp() {
                 {showPassword ? <EyeOffIcon /> : <EyeIcon />}
               </button>
             </div>
+            {errors.password && <p className="text-red-500 text-xs mt-1 whitespace-pre-line">{errors.password}</p>}
             {formData.password && (
               <>
                 <div className="h-3" />
@@ -213,6 +276,7 @@ export default function VendorSignUp() {
               onChange={handleChange}
               required
             />
+            {errors.street && <p className="text-red-500 text-xs mt-1">{errors.street}</p>}
             <input
               name="city"
               placeholder="City"
@@ -221,6 +285,7 @@ export default function VendorSignUp() {
               onChange={handleChange}
               required
             />
+            {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
             <input
               name="post_code"
               placeholder="Post Code"
@@ -229,6 +294,7 @@ export default function VendorSignUp() {
               onChange={handleChange}
               required
             />
+            {errors.post_code && <p className="text-red-500 text-xs mt-1">{errors.post_code}</p>}
             <input
               name="opening_hours"
               placeholder="Opening Hours"
@@ -237,6 +303,7 @@ export default function VendorSignUp() {
               onChange={handleChange}
               required
             />
+            {errors.opening_hours && <p className="text-red-500 text-xs mt-1">{errors.opening_hours}</p>}
             <input
               name="phone_number"
               placeholder="+44 xxxx xxx xxx"
@@ -245,6 +312,7 @@ export default function VendorSignUp() {
               onChange={handleChange}
               required
             />
+            {errors.phone_number && <p className="text-red-500 text-xs mt-1">{errors.phone_number}</p>}
           </div>
         )}
 
@@ -286,8 +354,7 @@ export default function VendorSignUp() {
             type="button"
             key="back-button"
             onClick={handlePrev}
-            disabled={step === 1}
-            className={`px-4 py-2 rounded ${step === 1 ? 'bg-gray-300' : 'bg-gray-500 text-white'}`}
+            className={"px-4 py-2 rounded bg-gray-500 text-white"}
           >
             Previous
           </button>
