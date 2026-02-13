@@ -7,9 +7,15 @@ export const getVendorProfile = async () => {
   return response.data;
 };
 
+type HomeVendor = Vendor & {
+  bundle_count: number;
+  has_vegan: boolean;
+  has_vegetarian: boolean;
+};
+
 interface VendorResponse {
   total_count: number;
-  vendors: Vendor[];
+  vendors: HomeVendor[];
 }
 
 export const getAllVendors = async (): Promise<VendorResponse> => {

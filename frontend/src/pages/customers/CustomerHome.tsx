@@ -6,11 +6,17 @@ import { getAllVendors } from "../../api/vendors";
 import { API_BASE_URL } from "../../api/axiosConfig"; 
 import { clearAuthSession } from "../../utils/authSession";
 
+type HomeVendor = Vendor & {
+  bundle_count: number;
+  has_vegan: boolean;
+  has_vegetarian: boolean;
+};
+
 export default function CustomerHome() {
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState<Customer | null>(null);
-  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [vendors, setVendors] = useState<HomeVendor[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -42,7 +48,7 @@ export default function CustomerHome() {
   const availableVendors = vendors.filter((v) => v.bundle_count > 0);
   const soldOutVendors = vendors.filter((v) => v.bundle_count === 0);
 
-  const VendorCard = ({ vendor, isSoldOut }: { vendor: Vendor; isSoldOut?: boolean }) => (
+  const VendorCard = ({ vendor, isSoldOut }: { vendor: HomeVendor; isSoldOut?: boolean }) => (
     <div
       key={vendor.vendor_id}
       className={`bg-white rounded-xl shadow-lg transition p-4 text-left flex flex-col aspect-[7/6]

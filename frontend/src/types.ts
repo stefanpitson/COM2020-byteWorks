@@ -24,7 +24,4 @@ export interface Vendor {
   carbon_saved: number;
   validated: boolean;
   photo: string;
-  bundle_count: number;
-  has_vegan: boolean;
-  has_vegetarian: boolean;
 }
