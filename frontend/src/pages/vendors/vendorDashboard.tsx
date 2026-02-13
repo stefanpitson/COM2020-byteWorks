@@ -44,7 +44,7 @@ export default function VendorDashboard() {
         </p>
         <div className="w-52 h-32 rounded-3xl overflow-hidden border-2 border-gray-300 relative">
           {profile?.photo ? (
-            <img src={`${API_BASE_URL}/${profile.photo}`} alt="imagePreview" className="w-full h-full object-cover" />
+            <img src={`${API_BASE_URL}${profile.photo}`} alt="imagePreview" className="w-full h-full object-cover" />
           ) : (
             <img src={placeholder} alt="imagePreview" className="w-full h-full object-cover" />
           )}

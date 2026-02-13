@@ -58,7 +58,7 @@ export default function CustomerHome() {
     >
       <div className="flex-1 flex justify-center items-center rounded-lg overflow-hidden border border-white bg-white mb-4">
         <img
-          src={vendor.photo ? `${API_BASE_URL}/${vendor.photo}` : placeholder}
+          src={vendor.photo ? `${API_BASE_URL}${vendor.photo}` : placeholder}
           alt={vendor.name}
           className="rounded-lg max-w-full max-h-full object-contain"
         />
