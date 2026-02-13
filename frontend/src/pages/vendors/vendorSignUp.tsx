@@ -37,7 +37,9 @@ export default function VendorSignUp() {
   const steps = ["User Details", "Vendor Details", "Photo"];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === "post_code") setFormData({ ...formData, [name]: value.toUpperCase().replace(/\s+/g, "") });
+    else setFormData({ ...formData, [name]: value})
   };
 
   const handleNext = () => {
@@ -61,7 +63,7 @@ export default function VendorSignUp() {
         {   name: formData.name,
             street: formData.street,
             city: formData.city,
-            post_code: formData.post_code,
+            post_code: formData.post_code.toUpperCase().replace(/\s+/g, ""),
             opening_hours: formData.opening_hours,
             phone_number: formData.phone_number,
             bundle_count: 0,
@@ -135,19 +137,18 @@ export default function VendorSignUp() {
   if (step === 2) { 
     if (!formData.street.trim()) newErrors.street = "Street is required";
     if (!formData.city.trim()) newErrors.city = "City is required";
-    const postCodeRegex = /^[a-zA-Z]{1,2}\d[a-zA-Z\d]?\s\d[a-zA-Z]{2}$/;
+    const postCodeRegex = /^[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2}$/;
     if (!formData.post_code.trim()) newErrors.post_code = "Post Code is required";
     else if (!postCodeRegex.test(formData.post_code)) newErrors.post_code = "Invalid Post Code format";
+    const phoneRegex = /^\+\d{1,3}\s\d{3,4}\s\d{6,7}$/;
     if (!formData.phone_number.trim()) newErrors.phone_number = "Phone number is required";
+    else if (!phoneRegex.test(formData.phone_number)) newErrors.phone_number = "Invalid phone number format. Use +44 xxxx xxxxxx";
     if (!formData.opening_hours.trim()) newErrors.opening_hours = "Opening hours are required";
   }
 
   setErrors(newErrors);
   return Object.keys(newErrors).length === 0;
 };
-
-
-
 
   return (
     <div className="h-screen w-screen flex items-start justify-center bg-background pt-20 md:pt-[20vh]">
@@ -193,10 +194,9 @@ export default function VendorSignUp() {
             <input
               name="name"
               placeholder="Vendor Name"
-              className="w-full border p-2 rounded"
+              className={getInputClass(errors.name)}
               value={formData.name}
               onChange={handleChange}
-              required
             />
             {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
 
@@ -204,10 +204,9 @@ export default function VendorSignUp() {
             <input
               name="email"
               placeholder="vendor@domain.com"
-              className="w-full border p-2 rounded"
+              className={getInputClass(errors.email)}
               value={formData.email}
               onChange={handleChange}
-              required
             />
             {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
 
@@ -217,13 +216,12 @@ export default function VendorSignUp() {
                 name="password"
                 placeholder="••••••••"
                 type={showPassword ? "text" : "password"}
-                className="w-full border p-2 rounded pr-10"
+                className={getInputClass(errors.password)}
                 value={formData.password}
                 onChange={(e) => {
                   handleChange(e);
                   setPasswordStrength(getPasswordStrength(e.target.value));
                 }}
-                required
               />
 
               <button
@@ -266,51 +264,46 @@ export default function VendorSignUp() {
 
         {/* Page 2: Vendor Details */}
         {step === 2 && (
-          <div className="space-y-4 animate-fadeIn">
+          <div className="space-y-1 animate-fadeIn">
             <h2 className="text-xl font-bold">Where are you?</h2>
             <input
               name="street"
               placeholder="Street"
-              className="w-full border p-2 rounded"
+              className={getInputClass(errors.street)}
               value={formData.street}
               onChange={handleChange}
-              required
             />
             {errors.street && <p className="text-red-500 text-xs mt-1">{errors.street}</p>}
             <input
               name="city"
               placeholder="City"
-              className="w-full border p-2 rounded"
+              className={getInputClass(errors.city)}
               value={formData.city}
               onChange={handleChange}
-              required
             />
             {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
             <input
               name="post_code"
               placeholder="Post Code"
-              className="w-full border p-2 rounded"
+              className={getInputClass(errors.post_code)}
               value={formData.post_code}
               onChange={handleChange}
-              required
             />
             {errors.post_code && <p className="text-red-500 text-xs mt-1">{errors.post_code}</p>}
             <input
               name="opening_hours"
               placeholder="Opening Hours"
-              className="w-full border p-2 rounded"
+              className={getInputClass(errors.opening_hours)}
               value={formData.opening_hours}
               onChange={handleChange}
-              required
             />
             {errors.opening_hours && <p className="text-red-500 text-xs mt-1">{errors.opening_hours}</p>}
             <input
               name="phone_number"
-              placeholder="+44 xxxx xxx xxx"
-              className="w-full border p-2 rounded"
+              placeholder="+44 xxxx xxxxxx"
+              className={getInputClass(errors.phone_number)}
               value={formData.phone_number}
               onChange={handleChange}
-              required
             />
             {errors.phone_number && <p className="text-red-500 text-xs mt-1">{errors.phone_number}</p>}
           </div>
