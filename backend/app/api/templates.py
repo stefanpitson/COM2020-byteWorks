@@ -299,7 +299,7 @@ def finalise_reservation(
     customer.store_credit -= cost
 
     customer.carbon_saved += carbon_saved
-    vendor.carbon_saved += carbon_saved
+    current_user.vendor_profile.carbon_saved += carbon_saved
 
 
 
