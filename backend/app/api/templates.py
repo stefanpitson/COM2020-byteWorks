@@ -301,7 +301,10 @@ def finalise_reservation(
     customer.carbon_saved += carbon_saved
     current_user.vendor_profile.carbon_saved += carbon_saved
 
-
+    session.add(reservation)
+    session.add(customer)
+    session.add(current_user)
+    session.commit()
 
 
 
