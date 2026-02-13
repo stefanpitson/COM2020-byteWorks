@@ -114,7 +114,7 @@ async def upload_image(
         raise HTTPException(status_code=400, detail="User is not a vendor")
     
     # Set the vendor photo to the saved filepath
-    current_user.vendor_profile.photo = f"static/{unique_filename}"
+    current_user.vendor_profile.photo = f"/static/{unique_filename}"
 
     session.add(current_user.vendor_profile)
     session.commit()
