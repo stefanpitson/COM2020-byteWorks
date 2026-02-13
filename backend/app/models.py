@@ -121,7 +121,8 @@ class Reservation(SQLModel, table=True):
     # status either:
     # 'booked' - reservation made, not collected 
     # 'collected' - the customer collects 
-    # 'no_show' - the customer is a no show 
+    # 'no_show' - the customer is a no show (when booked and not cancelled and they didn't turn up)
+    # 'cancelled' - the customer/vendor cancelled the booking (when booked and purposefully cancelled - different to no show)
     status: str = Field(default="booked") 
 
     code: Optional[int] = Field(default=None) #shouldn't have a default? 

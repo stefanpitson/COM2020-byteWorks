@@ -183,3 +183,10 @@ class VendBundleList(BaseModel):
         time: time
         purchased_by: int | None
 
+class ReservationRead(BaseModel):
+    reservation_id : int
+    bundle_id : int
+    consumer_id : int
+    time_created : time
+    code : int
+    status : str
