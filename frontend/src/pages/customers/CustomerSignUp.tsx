@@ -44,22 +44,11 @@ export default function CustomerSignUp() {
       newErrors.password = "Password is required";
     } else {
       const passwordIssues: string[] = [];
-
-      if (password.length < 8) {
-        passwordIssues.push("Password must exceed 8 characters");
-      }  
-      if (password.length > 64) {
-        passwordIssues.push("Password cannot exceed 64 characters");
-      }  
-      if (!/[A-Z]/.test(password)) {
-        passwordIssues.push("Password must contain at least one capital letter");
-      } 
-      if (!/\d/.test(password)) {
-        passwordIssues.push("Password must contain at least one number");
-      }
-      if (passwordIssues.length > 0) {
-        newErrors.password = passwordIssues.join("\n");
-      }
+      if (password.length < 8) passwordIssues.push("Password must exceed 8 characters");
+      if (password.length > 64) passwordIssues.push("Password cannot exceed 64 characters");
+      if (!/[A-Z]/.test(password))  passwordIssues.push("Password must contain at least one capital letter");
+      if (!/\d/.test(password)) passwordIssues.push("Password must contain at least one number");
+      if (passwordIssues.length > 0) newErrors.password = passwordIssues.join("\n");
     }
       
     const postCodeRegex = /^[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2}$/;
