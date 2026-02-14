@@ -36,7 +36,7 @@ def create_reservation(
                                   code = randint(0,9999))
     
             
-    statement = select(Customer).where(Customer.customer_id == new_reservation.consumer_id)
+    statement = select(Customer).where(Customer.customer_id == new_reservation.customer_id)
     customer = session.exec(statement).first()
 
     statement = select(Template).where(Template.template_id == template_id)
@@ -124,7 +124,7 @@ def get_list_of_reservations_customer(
     if current_user.role == "customer":
         raise HTTPException(status_code=403, detail = "Not customer")
 
-    statement = select(Reservation).where(Reservation.consumer_id == current_user.customer_profile.customer_id)
+    statement = select(Reservation).where(Reservation.customer_id == current_user.customer_profile.customer_id)
     reservations = session.exec(statement).all()
 
     count = len(reservations)
@@ -134,7 +134,7 @@ def get_list_of_reservations_customer(
     for reservation in reservations:
         customer_reservations.append(CustReservationRead(reservation_id = reservation.reservation_id, 
                                    bundle_id = reservation.bundle_id, 
-                                   consumer_id = reservation.consumer_id,
+                                   customer_id = reservation.customer_id,
                                    time_created = reservation.time_created,
                                    code = reservation.code,
                                    status = reservation.status))
@@ -166,7 +166,7 @@ def get_list_of_reservations_vendor(
     for reservation in reservations:
         vendor_reservations.append(VendReservationRead(reservation_id = reservation.reservation_id, 
                                    bundle_id = reservation.bundle_id, 
-                                   consumer_id = reservation.consumer_id,
+                                   customer_id = reservation.customer_id,
                                    time_created = reservation.time_created,
                                    status = reservation.status))
     
@@ -208,7 +208,7 @@ def cancel_reservation(
 
     reservation.status = "cancelled"
 
-    statement = select(Customer).where(Customer.customer_id == reservation.consumer_id)
+    statement = select(Customer).where(Customer.customer_id == reservation.customer_id)
     customer = session.exec(statement).first()
     
     statement = select(Template.cost).where(Bundle.template_id == Template.template_id 
