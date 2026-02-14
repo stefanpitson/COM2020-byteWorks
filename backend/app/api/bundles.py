@@ -9,7 +9,7 @@ from datetime import datetime
 router = APIRouter()
 
 # post a bundle 
-@router.post("/create", tags=["bundles"], summary="Create an amount of bundles for a specified template")
+@router.post("/create", tags=["Bundles"], summary="Create an amount of bundles for a specified template")
 def create_bundles(
     data: BundleCreate,
     session: Session = Depends(get_session),
@@ -42,7 +42,7 @@ def create_bundles(
     
 # read details on a specific bundle,
 # vendor only as we dont want other customers to see who is other customers details?  
-@router.get("/{bundle_id}", response_model=BundleRead, tags=["bundles"], summary="Get the info on a specific bundle listing, for Vendors only")
+@router.get("/{bundle_id}", response_model=BundleRead, tags=["Bundles"], summary="Get the info on a specific bundle listing, for Vendors only")
 def bundle_read(
     bundle_id: int,
     session: Session = Depends(get_session),
@@ -62,7 +62,7 @@ def bundle_read(
     return bundle
     
 # get bundles for store view 
-@router.get("/mystore/", response_model=VendBundleList, tags=["bundles"], summary="Gets a list of bundles that are current, and not picked up yet")
+@router.get("/mystore/", response_model=VendBundleList, tags=["Bundles"], summary="Gets a list of bundles that are current, and not picked up yet")
 def vendor_list_bundles(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
@@ -72,7 +72,6 @@ def vendor_list_bundles(
         raise HTTPException(status_code=403, detail="Not a vendor account")
     
     today = datetime.now().date()
-    #vendor = current_user.vendor_profile.vendor_id
 
     statement = (select(Bundle)
             .join(Reservation, Bundle.bundle_id == Reservation.bundle_id, isouter=True)
