@@ -28,7 +28,7 @@ def get_vendor_profile(
 
 # get a list of bundles for the corresponding vendor
 # for customer view at store page 
-@router.get("/bundles/{vendor_id}",response_model=CustBundleList,tags=["bundles"], summary="gets a list of simple details for a stores bundles")
+@router.get("/bundles/{vendor_id}",response_model=CustBundleList,tags=["Bundles"], summary="gets a list of simple details for a stores bundles")
 def customer_list_bundles(
     vendor_id: int,
     session: Session = Depends(get_session),
@@ -116,10 +116,14 @@ async def upload_image(
     # Set the vendor photo to the saved filepath
     current_user.vendor_profile.photo = f"static/{unique_filename}"
 
-    session.add(current_user.vendor_profile)
-    session.commit()
+    try:
+        session.add(current_user.vendor_profile)
+        session.commit()
+        return {"status": "success", "image_url": current_user.vendor_profile.photo}
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     
-    return {"status": "success", "image_url": current_user.vendor_profile.photo}
     
 @router.get("", response_model= VendorList, tags=["Vendors"],summary="Gets all the Vendors for Customer View")
 def get_all_vendors(

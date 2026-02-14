@@ -1,4 +1,3 @@
-from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from app.core.database import get_session
@@ -22,7 +21,7 @@ def get_customer_profile(
     
     return current_user.customer_profile
 
-@router.patch("/profile")
+@router.patch("/profile", tags=["Customers"], summary="Update customer information")
 def update_customer_profile(
     data: CustomerUpdate, 
     session: Session = Depends(get_session),
@@ -53,7 +52,11 @@ def update_customer_profile(
     if data.customer.post_code != None:
         current_user.customer_profile.post_code = data.customer.post_code
 
-    session.add(current_user)
-    session.commit()
-    return {"message": "Customer updated successfully"}
+    try: 
+        session.add(current_user)
+        session.commit()
+        return {"message": "Customer updated successfully"}
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     
