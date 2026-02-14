@@ -39,7 +39,7 @@ def create_reservation(
     statement = select(Customer).where(Customer.customer_id == new_reservation.consumer_id)
     customer = session.exec(statement).first()
 
-    statement = select(Template).where(Template.template_id == bundle.template_id)
+    statement = select(Template).where(Template.template_id == template_id)
     template = session.exec(statement).first()
     
     if customer.store_credit < template.cost:
@@ -211,11 +211,13 @@ def cancel_reservation(
     statement = select(Customer).where(Customer.customer_id == reservation.consumer_id)
     customer = session.exec(statement).first()
     
+    statement = select(Template.cost).where(Bundle.template_id == Template.template_id 
+                                     and Bundle.bundle_id == reservation.bundle_id
+                                     and reservation.reservation_id == reservation_id)
+    cost = session.exec(statement).first()
+
     customer.store_credit += cost
 
-    # cancel reservation by changing status
-    # change bundle that was reserved "PurchasedBy" back to none
-    # ensure that it is the vendor or the customer
 
     statement = select(Bundle).where(Bundle.template_id == reservation.bundle_id)
     bundle = session.exec(statement).first()
