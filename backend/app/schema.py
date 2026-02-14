@@ -20,7 +20,7 @@ class VendorRead(BaseModel):
     post_code: str
     phone_number: str
     opening_hours: str
-    photo: str
+    photo: Optional[str]
 
 # ___AUTH SCHEMAS___  
 
@@ -205,3 +205,15 @@ class CustReservationList(BaseModel):
 class VendReservationList(BaseModel):
     total_count:int
     bundles: List[VendReservationRead]
+# get all stores
+class VendorList(BaseModel):
+    total_count:int
+    vendors: List[VendorData]
+    class VendorData(BaseModel):
+        vendor_id: int
+        name:str
+        photo: str | None # may not have a photo
+        post_code: str
+        bundle_count: int
+        has_vegan: bool
+        has_vegetarian: bool
