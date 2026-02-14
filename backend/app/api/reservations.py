@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select, func
 from app.core.database import get_session
 from app.models import Template, Allergen, Bundle, Reservation, Customer, Vendor
-from app.schema import ReservationRead
+from app.schema import VendReservationRead, CustReservationRead
 from app.api.deps import get_current_user
 from datetime import datetime
 from random import randint
@@ -42,8 +42,8 @@ def create_reservation(
 
     return {"message": "Bundle created successfully"}
 
-@router.get("????????", response_model= ReservationRead, tags=["Reservation"], summary="Get one reservation details")
-def get_reservation(
+@router.get("????????", response_model= VendReservationRead, tags=["Reservation"], summary="Get one reservation details")
+def get_reservation_vendor(
     reservation_id:int,
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
@@ -62,16 +62,43 @@ def get_reservation(
 
     reserveVendorID = session.exec(statement).first()
 
-    # Checks if either the vendor that made the bundle that has the reservation or
-    # the customer that created the reservation is trying to get the reservation
+    # Checks if the vendor that made the bundle that has the reservation is trying to get the reservation
     if current_user.role == "vendor":  
         if current_user.vendor_profile.vendor_id != reserveVendorID:
             raise HTTPException(status_code=403, detail="Not the correct vendor")
+    
+    return VendReservationRead(reservation_id = reservation_id, 
+                                   bundle_id = reservation.bundle_id, 
+                                   consumer_id = reservation.consumer_id,
+                                   time_created = reservation.time_created,
+                                   status = reservation.status)
+
+@router.get("????????", response_model= CustReservationRead, tags=["Reservation"], summary="Get one reservation details")
+def get_reservation_customer(
+    reservation_id:int,
+    session: Session = Depends(get_session),
+    current_user = Depends(get_current_user)
+    ):
+    
+
+    statement = select(Reservation).where(Reservation.reservation_id == reservation_id)
+    reservation = session.exec(statement).first()
+
+    if not reservation:
+        raise HTTPException(status_code=404, detail="Reservation not found")
+    
+
+    # Ensures only the customer that created the reservation can access it
     if current_user.role == "customer":
         if current_user.customer_profile.customer_id != reservation.consumer_id:
             raise HTTPException(status_code=403, detail = "Not correct customer")
     
-    return reservation
+    return CustReservationRead(reservation_id = reservation_id, 
+                                   bundle_id = reservation.bundle_id, 
+                                   consumer_id = reservation.consumer_id,
+                                   time_created = reservation.time_created,
+                                   code = reservation.code,
+                                   status = reservation.status)
 
 @router.post("???", tags=["reservations"], summary="Cancel an already booked reservation")
 def cancel_reservation(
