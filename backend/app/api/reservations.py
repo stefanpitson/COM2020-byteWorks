@@ -32,7 +32,7 @@ def create_reservation(
     bundle.purchased_by = current_user.customer_profile.customer_id
 
     new_reservation = Reservation(bundle_id = bundle.bundle_id, 
-                                  consumer_id = current_user.customer_profile.customer_id,
+                                  customer_id = current_user.customer_profile.customer_id,
                                   code = randint(0,9999))
 
     # Update the bought bundle and add the new reservation
@@ -69,7 +69,7 @@ def get_reservation_vendor(
     
     return VendReservationRead(reservation_id = reservation_id, 
                                    bundle_id = reservation.bundle_id, 
-                                   consumer_id = reservation.consumer_id,
+                                   customer_id = reservation.customer_id,
                                    time_created = reservation.time_created,
                                    status = reservation.status)
 
@@ -90,12 +90,12 @@ def get_reservation_customer(
 
     # Ensures only the customer that created the reservation can access it
     if current_user.role == "customer":
-        if current_user.customer_profile.customer_id != reservation.consumer_id:
+        if current_user.customer_profile.customer_id != reservation.customer_id:
             raise HTTPException(status_code=403, detail = "Not correct customer")
     
     return CustReservationRead(reservation_id = reservation_id, 
                                    bundle_id = reservation.bundle_id, 
-                                   consumer_id = reservation.consumer_id,
+                                   customer_id = reservation.customer_id,
                                    time_created = reservation.time_created,
                                    code = reservation.code,
                                    status = reservation.status)
@@ -125,7 +125,7 @@ def cancel_reservation(
         if current_user.vendor_profile.vendor_id != reserveVendorID:
             raise HTTPException(status_code=403, detail="Not the correct vendor")
     if current_user.role == "customer":
-        if current_user.customer_profile.customer_id != reservation.consumer_id:
+        if current_user.customer_profile.customer_id != reservation.customer_id:
             raise HTTPException(status_code=403, detail = "Not correct customer")
 
     reservation.status = "cancelled"
@@ -167,7 +167,7 @@ def finalise_reservation(
         if current_user.vendor_profile.vendor_id != reserveVendorID:
             raise HTTPException(status_code=403, detail="Not the correct vendor")
         
-    statement = select(Customer).where(Customer.customer_id == reservation.consumer_id)
+    statement = select(Customer).where(Customer.customer_id == reservation.customer_id)
     customer = session.exec(statement).first()
 
     statement = select(Template.cost).where(Template.template_id == Bundle.template_id 

@@ -115,7 +115,7 @@ class Bundle(SQLModel, table=True):
 class Reservation(SQLModel, table=True):
     reservation_id:Optional[int] = Field(default=None, primary_key=True)
     bundle_id: Optional[int] = Field(default=None, foreign_key="bundle.bundle_id")
-    consumer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id") 
+    customer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id") 
     time_created: Time = Field(default_factory=lambda:datetime.now().time()) 
 
     # status either:
