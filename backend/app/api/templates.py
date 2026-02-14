@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlmodel import Session, select, func
 from app.core.database import get_session
 from app.models import Template, Allergen, Bundle, Reservation
 from app.schema import TemplateCreate, TemplateList, TemplateRead 
 from app.api.deps import get_current_user
 from datetime import datetime
+import uuid
+import shutil
 
 router = APIRouter()
 
@@ -74,6 +76,42 @@ def create_template(
     except Exception as e:
         session.rollback() # If anything fails, undo the Vendor creation
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.post("/upload-image/{template_id}", tags=["Templates"], summary="Post an image to be stored on the server and set it to be the Template photo")
+async def upload_image(
+    template_id:int,
+    image: UploadFile = File(...),
+    current_user = Depends(get_current_user),
+    session: Session = Depends(get_session)
+    ):
+    # If the image is malformed, throw a 400 error
+    if not image.filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    
+    file_extension = image.filename.split(".")[-1]
+    unique_filename = f"{uuid.uuid4()}.{file_extension}"
+    file_location = f"uploads/{unique_filename}"
+
+    # Copy the file information to the /uploads folder
+    with open(file_location, "wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
+
+    if not current_user.vendor_profile:
+        raise HTTPException(status_code=400, detail="User is not a vendor")
+    
+    template = session.exec(select(Template).where(Template.template_id == template_id))
+
+    # Set the vendor photo to the saved filepath
+    template.photo = f"static/{unique_filename}"
+
+    try:
+        session.add(template)
+        session.commit()
+        return {"status": "success", "image_url":template.photo}
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
     
 # get a specific template
 @router.get("/{template_id}", response_model = TemplateRead, tags=["Templates"], summary="Get one templates details")

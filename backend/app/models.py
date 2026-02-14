@@ -86,6 +86,8 @@ class Template(SQLModel, table=True):
 
     vendor: Optional[int] = Field(default=None,foreign_key="vendor.vendor_id")
 
+    photo: Optional[str] = Field(default=None)
+
     allergens: List["Allergen"] = Relationship( # for the linking table
         back_populates="templates",             # having this means we dont have to write join statements
         link_model=Allergen_Template
@@ -124,7 +126,7 @@ class Reservation(SQLModel, table=True):
     # 'no_show' - the customer is a no show 
     status: str = Field(default="booked") 
 
-    code: Optional[int] = Field(default=None) #shouldn't have a default? 
+    code: Optional[int] = Field(default=None) #shouldn't have a default 
 
 class Report(SQLModel, table=True):
     report_id: Optional[int] = Field(default=None, primary_key=True)
