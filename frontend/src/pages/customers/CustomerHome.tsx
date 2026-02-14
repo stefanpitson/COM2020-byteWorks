@@ -50,7 +50,7 @@ export default function CustomerHome() {
 
   const VendorCard = ({ vendor, isSoldOut }: { vendor: HomeVendor; isSoldOut?: boolean }) => (
     <div
-      key={vendor.vendor_id}
+      onClick={() => !isSoldOut && navigate(`/vendor/${vendor.vendor_id}`)}
       className={`bg-white rounded-xl shadow-lg transition p-4 text-left flex flex-col aspect-[7/6]
         ${isSoldOut ? "saturate-50 opacity-75 pointer-events-none" : "hover:shadow-xl"}
       `}
