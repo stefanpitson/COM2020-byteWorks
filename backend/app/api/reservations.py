@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select, func
 from app.core.database import get_session
 from app.models import Template, Allergen, Bundle, Reservation, Customer, Vendor
-from app.schema import VendReservationRead, CustReservationRead
+from app.schema import VendReservationRead, CustReservationRead, CustReservationList, VendReservationList
 from app.api.deps import get_current_user
 from datetime import datetime
 from random import randint
@@ -34,15 +34,31 @@ def create_reservation(
     new_reservation = Reservation(bundle_id = bundle.bundle_id, 
                                   consumer_id = current_user.customer_profile.customer_id,
                                   code = randint(0,9999))
+    
+            
+    statement = select(Customer).where(Customer.customer_id == new_reservation.consumer_id)
+    customer = session.exec(statement).first()
+
+    statement = select(Template).where(Template.template_id == bundle.template_id)
+    template = session.exec(statement).first()
+    
+    if customer.store_credit < template.cost:
+        raise HTTPException(status_code=403, detail="Customer does not have enough credit to purchase")
+    customer.store_credit -= template.cost
+    
 
     # Update the bought bundle and add the new reservation
-    session.add(bundle)
-    session.add(new_reservation)
-    session.commit()
+    try:
+        session.add(bundle)
+        session.add(new_reservation)
+        session.commit()
+    except Exception as e:
+        session.rollback() # If anything fails
+        raise HTTPException(status_code=500, detail=str(e))
 
-    return {"message": "Bundle created successfully"}
+    return {"message": "Reservation created successfully"}
 
-@router.get("????????", response_model= VendReservationRead, tags=["Reservation"], summary="Get one reservation details")
+@router.get("/{reservation_id}/vendor", response_model= VendReservationRead, tags=["Reservation"], summary="Get one reservation details")
 def get_reservation_vendor(
     reservation_id:int,
     session: Session = Depends(get_session),
@@ -73,20 +89,18 @@ def get_reservation_vendor(
                                    time_created = reservation.time_created,
                                    status = reservation.status)
 
-@router.get("????????", response_model= CustReservationRead, tags=["Reservation"], summary="Get one reservation details")
+@router.get("/{reservation_id}/customer", response_model= CustReservationRead, tags=["Reservation"], summary="Get one reservation details")
 def get_reservation_customer(
     reservation_id:int,
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
     ):
     
-
     statement = select(Reservation).where(Reservation.reservation_id == reservation_id)
     reservation = session.exec(statement).first()
 
     if not reservation:
         raise HTTPException(status_code=404, detail="Reservation not found")
-    
 
     # Ensures only the customer that created the reservation can access it
     if current_user.role == "customer":
@@ -100,12 +114,76 @@ def get_reservation_customer(
                                    code = reservation.code,
                                    status = reservation.status)
 
-@router.post("???", tags=["reservations"], summary="Cancel an already booked reservation")
+@router.get("/customer", response_model= CustReservationList, tags=["Reservation"], summary="Get one reservation details")
+def get_list_of_reservations_customer(
+    session: Session = Depends(get_session),
+    current_user = Depends(get_current_user)
+    ):
+    
+    # Ensures only the customers can call this
+    if current_user.role == "customer":
+        raise HTTPException(status_code=403, detail = "Not customer")
+
+    statement = select(Reservation).where(Reservation.consumer_id == current_user.customer_profile.customer_id)
+    reservations = session.exec(statement).all()
+
+    count = len(reservations)
+
+    customer_reservations = []
+
+    for reservation in reservations:
+        customer_reservations.append(CustReservationRead(reservation_id = reservation.reservation_id, 
+                                   bundle_id = reservation.bundle_id, 
+                                   consumer_id = reservation.consumer_id,
+                                   time_created = reservation.time_created,
+                                   code = reservation.code,
+                                   status = reservation.status))
+    
+    return{
+        "total_count":count,
+        "bundles": customer_reservations
+    }
+
+@router.get("/vendor", response_model= VendReservationList, tags=["Reservation"], summary="Get one reservation details")
+def get_list_of_reservations_vendor(
+    session: Session = Depends(get_session),
+    current_user = Depends(get_current_user)
+    ):
+    
+    # Ensures only the vendors can call this
+    if current_user.role == "vendor":
+        raise HTTPException(status_code=403, detail = "Not vendor")
+
+    statement = select(Reservation).where(Template.vendor == current_user.vendor_profile.vendor_id 
+                                          and reservation.bundle_id == Bundle.bundle_id
+                                          and Bundle.template_id == Template.template_id)
+    reservations = session.exec(statement).all()
+
+    count = len(reservations)
+
+    vendor_reservations = []
+
+    for reservation in reservations:
+        vendor_reservations.append(VendReservationRead(reservation_id = reservation.reservation_id, 
+                                   bundle_id = reservation.bundle_id, 
+                                   consumer_id = reservation.consumer_id,
+                                   time_created = reservation.time_created,
+                                   status = reservation.status))
+    
+    return{
+        "total_count":count,
+        "bundles": vendor_reservations
+    }
+
+@router.post("/{reservation_id}/cancel", tags=["reservations"], summary="Cancel an already booked reservation")
 def cancel_reservation(
     reservation_id: int,
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
     ):
+
+    if reservation.status == "cancelled":
+        raise HTTPException(status_code=404, detail="Reservation already cancelled")
 
     statement = select(Reservation).where(Reservation.reservation_id == reservation_id)
     reservation = session.exec(statement).first()
@@ -130,6 +208,11 @@ def cancel_reservation(
 
     reservation.status = "cancelled"
 
+    statement = select(Customer).where(Customer.customer_id == reservation.consumer_id)
+    customer = session.exec(statement).first()
+    
+    customer.store_credit += cost
+
     # cancel reservation by changing status
     # change bundle that was reserved "PurchasedBy" back to none
     # ensure that it is the vendor or the customer
@@ -138,15 +221,18 @@ def cancel_reservation(
     bundle = session.exec(statement).first()
 
     bundle.purchased_by = None
+    try:
+        session.add(bundle)
+        session.add(reservation)
+        session.commit()
+    except Exception as e:
+        session.rollback() # If anything fails
+        raise HTTPException(status_code=500, detail=str(e))
 
-    session.add(bundle)
-    session.add(reservation)
-    session.commit()
-
-    return {"message": "Bundle created successfully"}
+    return {"message": "Reservation cancelled successfully"}
 
 # need to do accept reservation (when they pick it up)
-@router.post("???", tags=["reservations"], summary="Finalise a reservation")
+@router.post("/{reservation_id}/check", tags=["reservations"], summary="Finalise a reservation")
 def finalise_reservation(
     reservation_id: int,
     pickup_code : int,
@@ -172,13 +258,9 @@ def finalise_reservation(
 
     statement = select(Template.cost).where(Template.template_id == Bundle.template_id 
                                               and Bundle.bundle_id == reservation.bundle_id)
-    cost = session.exec(statement).first()
 
     if pickup_code != reservation.code:
         raise HTTPException(status_code=403, detail="Customer does not the correct accepting code")
-
-    if customer.store_credit < cost:
-        raise HTTPException(status_code=403, detail="Customer does not have enough credit to purchase")
 
     statement = select(Template.carbon_saved).where(Template.template_id == Bundle.template_id 
                                               and Bundle.bundle_id == reservation.bundle_id)
@@ -186,20 +268,22 @@ def finalise_reservation(
     carbon_saved = session.exec(statement).first()
 
     reservation.status = "collected"
-    customer.store_credit -= cost
 
     statement = select(Vendor).where(Vendor.vendor_id == current_user.vendor_profile.vendor_id)
     vendor = session.exec(statement).first()
 
     customer.carbon_saved += carbon_saved
     vendor.carbon_saved += carbon_saved
+    try:
+        session.add(reservation)
+        session.add(customer)
+        session.add(vendor)
+        session.commit()
+    except Exception as e:
+        session.rollback() # If anything fails
+        raise HTTPException(status_code=500, detail=str(e))
 
-    session.add(reservation)
-    session.add(customer)
-    session.add(vendor)
-    session.commit()
-
-
+    return {"message": "Reservation accepted successfully"}
 
 
 # need to do set no-show if they don't turn up 

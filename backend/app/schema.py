@@ -197,3 +197,11 @@ class CustReservationRead(BaseModel):
     time_created : time
     code : int
     status : str
+
+class CustReservationList(BaseModel):
+    total_count:int
+    bundles: List[CustReservationRead]
+
+class VendReservationList(BaseModel):
+    total_count:int
+    bundles: List[VendReservationRead]
