@@ -19,9 +19,6 @@ press enter and give the password
 write 'create database byteworks;' 
 
 
-
-
-
 git clone the repo
 
 add a '.env' file to backend
@@ -72,7 +69,7 @@ in sql shell enter through and give the password
 
 then run:
 
-DROP TABLE IF EXISTS vendor, customer, "user" CASCADE;
+DROP TABLE IF EXISTS vendor, customer, "user", template, bundle CASCADE;
 
 
 
