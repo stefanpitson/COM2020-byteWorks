@@ -1,10 +1,17 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerVendor, loginUser, uploadImage} from "../../api/auth";
-import type { User } from "../../types";
+import { saveAuthSession } from "../../utils/authSession";
+import EyeIcon from "../../assets/icons/eye.svg?react";
+import EyeOffIcon from "../../assets/icons/eye-off.svg?react";
+import { getPasswordStrength, type PasswordStrength, strengthConfig } from "../../utils/password";
 
 export default function VendorSignUp() {
   const navigate = useNavigate();
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>("very-weak");
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Step is used to keep track what part of the sign up page is being displayed
   const [step, setStep] = useState(1);
@@ -30,24 +37,33 @@ export default function VendorSignUp() {
   const steps = ["User Details", "Vendor Details", "Photo"];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === "post_code") setFormData({ ...formData, [name]: value.toUpperCase().replace(/\s+/g, "") });
+    else setFormData({ ...formData, [name]: value})
   };
 
-  const handleNext = () => setStep((s) => s + 1);
-  const handlePrev = () => setStep((s) => s - 1);
+  const handleNext = () => {
+    if (validateStep(step)) {
+      setErrors({});
+      setStep((s) => s + 1);
+    }
+  }
+  const handlePrev = () => {step === 1 ? navigate("/customer/signup") : setStep((s) => s - 1)};
 
   async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
+
+    if (!validateStep(step)) return;
     if (step < steps.length) return;
 
     try {
       // 1. register the vendor
       await registerVendor(
-        { email: formData.email, password: formData.password, role: "vendor" },
+        { email: formData.email.trim().toLowerCase(), password: formData.password.trim(), role: "vendor" },
         {   name: formData.name,
             street: formData.street,
             city: formData.city,
-            post_code: formData.post_code,
+            post_code: formData.post_code.toUpperCase().replace(/\s+/g, ""),
             opening_hours: formData.opening_hours,
             phone_number: formData.phone_number,
         },
@@ -55,25 +71,16 @@ export default function VendorSignUp() {
       
       // 2. Automatically login in the background
       const loginResponse = await loginUser({
-        email: formData.email, 
-        password:formData.password
+        email: formData.email.trim().toLowerCase(), 
+        password: formData.password.trim()
       });
 
-      const token: string = loginResponse.access_token;
-      const token_type: string = loginResponse.token_type;
-      const user: User = loginResponse.user;
-
-      localStorage.setItem("token", token);
-      localStorage.setItem("tokenType", token_type);
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("role", user.role);
-
-
+      saveAuthSession(loginResponse);
       // Upload the image
       if (selectedImage) {
       const imageData = new FormData();
       imageData.append("image", selectedImage);
-      uploadImage(imageData);
+      await uploadImage(imageData);
     }
 
     // Navigate to dashboard
@@ -93,6 +100,52 @@ export default function VendorSignUp() {
     }
   };
 
+  const getInputClass = (error?: string) => { return `
+    mt-1 block w-full rounded shadow-sm p-2
+    border
+    ${error ? "border-red-500" : "border-transparent"}
+    ring-0
+    focus:ring-2
+    ${error ? "focus:ring-red-500 focus:border-transparent" : "focus:ring-primary"}
+    focus:outline-none
+  `};
+  
+
+  const validateStep = (step: number) => {
+   const newErrors: { [key: string]: string } = {};
+
+  if (step === 1) { 
+    if (!formData.name.trim()) newErrors.name = "Name is required";
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (formData.email && !emailRegex.test(formData.email))
+      newErrors.email = "Please enter a valid email";
+    if (!formData.password.trim()) newErrors.password = "Password is required";
+    else {
+      const pwIssues: string[] = [];
+      if (formData.password.length < 8) pwIssues.push("Password must exceed 8 characters");
+      if (formData.password.length > 64) pwIssues.push("Password cannot exceed 64 characters");
+      if (!/[A-Z]/.test(formData.password)) pwIssues.push("Password must contain at least one capital letter");
+      if (!/\d/.test(formData.password)) pwIssues.push("Password must contain at least one number");
+      if (pwIssues.length > 0) newErrors.password = pwIssues.join("\n");
+    }
+  }
+
+  if (step === 2) { 
+    if (!formData.street.trim()) newErrors.street = "Street is required";
+    if (!formData.city.trim()) newErrors.city = "City is required";
+    const postCodeRegex = /^[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2}$/;
+    if (!formData.post_code.trim()) newErrors.post_code = "Post Code is required";
+    else if (!postCodeRegex.test(formData.post_code)) newErrors.post_code = "Invalid Post Code format";
+    const phoneRegex = /^\+\d{1,3}\s\d{3,4}\s\d{6,7}$/;
+    if (!formData.phone_number.trim()) newErrors.phone_number = "Phone number is required";
+    else if (!phoneRegex.test(formData.phone_number)) newErrors.phone_number = "Invalid phone number format. Use +44 xxxx xxxxxx";
+    if (!formData.opening_hours.trim()) newErrors.opening_hours = "Opening hours are required";
+  }
+
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
 
   return (
     <div className="h-screen w-screen flex items-start justify-center bg-background pt-20 md:pt-[20vh]">
@@ -138,77 +191,118 @@ export default function VendorSignUp() {
             <input
               name="name"
               placeholder="Vendor Name"
-              className="w-full border p-2 rounded"
+              className={getInputClass(errors.name)}
               value={formData.name}
               onChange={handleChange}
-              required
             />
+            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+
             <p>Email:</p>
             <input
               name="email"
-              placeholder="Vendor@example.com"
-              className="w-full border p-2 rounded"
+              placeholder="vendor@domain.com"
+              className={getInputClass(errors.email)}
               value={formData.email}
               onChange={handleChange}
-              required
             />
+            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+
             <p>Password:</p>
-            <input
-              name="password"
-              placeholder="Password"
-              type="password"
-              className="w-full border p-2 rounded"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
+            <div className="relative">
+              <input
+                name="password"
+                placeholder="••••••••"
+                type={showPassword ? "text" : "password"}
+                className={getInputClass(errors.password)}
+                value={formData.password}
+                onChange={(e) => {
+                  handleChange(e);
+                  setPasswordStrength(getPasswordStrength(e.target.value));
+                }}
+              />
+
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+              </button>
+            </div>
+            {errors.password && <p className="text-red-500 text-xs mt-1 whitespace-pre-line">{errors.password}</p>}
+            {formData.password && (
+              <>
+                <div className="h-3" />
+
+                <div className="mt-2">
+                  <div className="h-2 w-full rounded bg-gray-200">
+                    <div
+                      className={`h-2 rounded transition-all ${strengthConfig[passwordStrength].color}`}
+                      style={{
+                        width:
+                          passwordStrength === "very-weak" ? "20%" :
+                          passwordStrength === "weak" ? "40%" :
+                          passwordStrength === "medium" ? "60%" :
+                          passwordStrength === "strong" ? "80%" :
+                          "100%",
+                      }}
+                    />
+                  </div>
+                  <p className="text-xs mt-1 text-gray-600">
+                    {strengthConfig[passwordStrength].label}
+                  </p>
+                </div>
+              </>
+            )}
           </div>
+          
         )}
 
         {/* Page 2: Vendor Details */}
         {step === 2 && (
-          <div className="space-y-4 animate-fadeIn">
+          <div className="space-y-1 animate-fadeIn">
             <h2 className="text-xl font-bold">Where are you?</h2>
             <input
               name="street"
               placeholder="Street"
-              className="w-full border p-2 rounded"
+              className={getInputClass(errors.street)}
               value={formData.street}
               onChange={handleChange}
-              required
             />
+            {errors.street && <p className="text-red-500 text-xs mt-1">{errors.street}</p>}
             <input
               name="city"
               placeholder="City"
-              className="w-full border p-2 rounded"
+              className={getInputClass(errors.city)}
               value={formData.city}
               onChange={handleChange}
-              required
             />
+            {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
             <input
               name="post_code"
               placeholder="Post Code"
-              className="w-full border p-2 rounded"
+              className={getInputClass(errors.post_code)}
               value={formData.post_code}
               onChange={handleChange}
-              required
             />
+            {errors.post_code && <p className="text-red-500 text-xs mt-1">{errors.post_code}</p>}
             <input
               name="opening_hours"
               placeholder="Opening Hours"
-              className="w-full border p-2 rounded"
+              className={getInputClass(errors.opening_hours)}
               value={formData.opening_hours}
               onChange={handleChange}
-              required
             />
+            {errors.opening_hours && <p className="text-red-500 text-xs mt-1">{errors.opening_hours}</p>}
             <input
               name="phone_number"
-              placeholder="+44 xxxx xxx xxx"
-              className="w-full border p-2 rounded"
+              placeholder="+44 xxxx xxxxxx"
+              className={getInputClass(errors.phone_number)}
               value={formData.phone_number}
               onChange={handleChange}
-              required
             />
+            {errors.phone_number && <p className="text-red-500 text-xs mt-1">{errors.phone_number}</p>}
           </div>
         )}
 
@@ -250,8 +344,7 @@ export default function VendorSignUp() {
             type="button"
             key="back-button"
             onClick={handlePrev}
-            disabled={step === 1}
-            className={`px-4 py-2 rounded ${step === 1 ? 'bg-gray-300' : 'bg-gray-500 text-white'}`}
+            className={"px-4 py-2 rounded bg-gray-500 text-white"}
           >
             Previous
           </button>
