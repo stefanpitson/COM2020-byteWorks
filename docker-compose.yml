@@ -28,6 +28,8 @@ services:
       SECRET_KEY: ${SECRET_KEY}
       HASH_ALGORITHM: ${HASH_ALGORITHM}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+    volumes:
+      - uploads_data:/app/uploads
 
   gateway:
     build:
@@ -60,3 +62,4 @@ services:
 
 volumes:
   postgres_data:
+  uploads_data:
