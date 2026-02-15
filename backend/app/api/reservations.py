@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select, func
 from app.core.database import get_session
-from app.models import Template, Allergen, Bundle, Reservation, Customer, Vendor
+from app.models import Template, Allergen, Bundle, Reservation, Customer, Vendor, Streak, User
 from app.schema import VendReservationRead, CustReservationRead, CustReservationList, VendReservationList
 from app.api.deps import get_current_user
-from datetime import datetime
+from datetime import datetime, timedelta
 from random import randint
 
 router = APIRouter()
@@ -17,9 +17,9 @@ def create_reservation(
     ):
 
     # Ensures bundles of the correct template, made for that day and that haven't been purchased yet are selected
-    statement = select(Bundle).where(Bundle.template_id == template_id 
-                                     and Bundle.date == datetime.now().date() 
-                                     and Bundle.purchased_by == None)
+    statement = (select(Bundle).where(Bundle.template_id == template_id, 
+                                     Bundle.date == datetime.now().date(), 
+                                     Bundle.purchased_by == None))
     
     # Picks the first of any suitable bundles that meet criteria
     bundle = session.exec(statement).first()
@@ -49,6 +49,7 @@ def create_reservation(
 
     # Update the bought bundle and add the new reservation
     try:
+        increment_streak(session, current_user)
         session.add(bundle)
         session.add(new_reservation)
         session.commit()
@@ -56,7 +57,48 @@ def create_reservation(
         session.rollback() # If anything fails
         raise HTTPException(status_code=500, detail=str(e))
 
-    return {"message": "Reservation created successfully"}
+    return {"message": "Reservation created successfully", "reservation_id":new_reservation.reservation_id}
+
+
+#logic for incrementing or making a new streak 
+def increment_streak(session: Session, current_user:User):
+    # check if they have a streak
+    statement = (select(Streak)
+                 .where(Streak.customer_id == current_user.customer_profile.customer_id)
+                 .where(Streak.ended.is_(False))
+                 )
+    streak = session.exec(statement).first()
+    try:
+        if streak != None:
+            # check date 
+            last = streak.last + timedelta(days=7)
+            if last >= datetime.now().date(): # streak is in date
+                streak.count +=1
+                streak.last = datetime.now().date()
+                session.add(streak)
+                session.commit()
+                return
+            
+            else: # streak is out of date
+                streak.ended = True
+                session.add(streak)
+    
+        # create new streak
+        new_streak = Streak(
+            started= datetime.now().date(),
+            last= datetime.now().date(),
+            count = 1
+        )
+
+        session.add(new_streak)
+        session.commit()
+        return
+    
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=55, detail=str(e))
+
+    
 
 @router.get("/{reservation_id}/vendor", response_model= VendReservationRead, tags=["Reservations"], summary="Get one reservation details")
 def get_reservation_vendor(
@@ -73,8 +115,8 @@ def get_reservation_vendor(
         raise HTTPException(status_code=404, detail="Reservation not found")
     
     # Gets the ID of the vendor that is responsible for the reservation
-    statement = select(Template.vendor).where(Template.template_id == Bundle.template_id 
-                                              and Bundle.bundle_id == reservation.bundle_id)
+    statement = select(Template.vendor).where(Template.template_id == Bundle.template_id, 
+                                               Bundle.bundle_id == reservation.bundle_id)
 
     reserveVendorID = session.exec(statement).first()
 
@@ -121,7 +163,7 @@ def get_list_of_reservations_customer(
     ):
     
     # Ensures only the customers can call this
-    if current_user.role == "customer":
+    if current_user.role != "customer":
         raise HTTPException(status_code=403, detail = "Not customer")
 
     statement = select(Reservation).where(Reservation.customer_id == current_user.customer_profile.customer_id)
@@ -154,9 +196,9 @@ def get_list_of_reservations_vendor(
     if current_user.role == "vendor":
         raise HTTPException(status_code=403, detail = "Not vendor")
 
-    statement = select(Reservation).where(Template.vendor == current_user.vendor_profile.vendor_id 
-                                          and reservation.bundle_id == Bundle.bundle_id
-                                          and Bundle.template_id == Template.template_id)
+    statement = select(Reservation).where(Template.vendor == current_user.vendor_profile.vendor_id, 
+                                          reservation.bundle_id == Bundle.bundle_id,
+                                          Bundle.template_id == Template.template_id)
     reservations = session.exec(statement).all()
 
     count = len(reservations)
@@ -193,8 +235,8 @@ def cancel_reservation(
         raise HTTPException(status_code=404, detail="Reservation already cancelled")
 
     # Gets the ID of the vendor that is responsible for the reservation
-    statement = select(Template.vendor).where(Template.template_id == Bundle.template_id 
-                                              and Bundle.bundle_id == reservation.bundle_id)
+    statement = select(Template.vendor).where(Template.template_id == Bundle.template_id, 
+                                              Bundle.bundle_id == reservation.bundle_id)
 
     reserveVendorID = session.exec(statement).first()
 
@@ -212,13 +254,12 @@ def cancel_reservation(
     statement = select(Customer).where(Customer.customer_id == reservation.customer_id)
     customer = session.exec(statement).first()
     
-    statement = select(Template.cost).where(Bundle.template_id == Template.template_id 
-                                     and Bundle.bundle_id == reservation.bundle_id
-                                     and reservation.reservation_id == reservation_id)
+    statement = select(Template.cost).where(Bundle.template_id == Template.template_id, 
+                                     Bundle.bundle_id == reservation.bundle_id,
+                                     reservation.reservation_id == reservation_id)
     cost = session.exec(statement).first()
 
     customer.store_credit += cost
-
 
     statement = select(Bundle).where(Bundle.template_id == reservation.bundle_id)
     bundle = session.exec(statement).first()
@@ -227,6 +268,7 @@ def cancel_reservation(
     try:
         session.add(bundle)
         session.add(reservation)
+        session.add(customer)
         session.commit()
     except Exception as e:
         session.rollback() # If anything fails
