@@ -5,6 +5,7 @@ import { getCustomerProfile } from "../../api/customers";
 import { getAllVendors } from "../../api/vendors";
 import { clearAuthSession } from "../../utils/authSession";
 import placeholder from "../../assets/placeholder.jpg";
+import { resolveImageUrl } from "../../utils/imageUrl";
 
 type HomeVendor = Vendor & {
   bundle_count: number;
@@ -57,7 +58,7 @@ export default function CustomerHome() {
     >
       <div className="flex-1 flex justify-center items-center rounded-lg overflow-hidden border border-white bg-white mb-4">
         <img
-          src={vendor.photo || placeholder}
+          src={resolveImageUrl(vendor?.photo) || placeholder}
           alt={vendor.name}
           className="rounded-lg max-w-full max-h-full object-contain"
         />

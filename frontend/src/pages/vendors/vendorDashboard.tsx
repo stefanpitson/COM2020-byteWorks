@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import type { Vendor } from "../../types";
 import { getVendorProfile } from "../../api/vendors";
 import placeholder from "../../assets/placeholder.jpg";
+import { resolveImageUrl } from "../../utils/imageUrl";
 
 export default function VendorDashboard() {
   const navigate = useNavigate();
@@ -42,11 +43,11 @@ export default function VendorDashboard() {
           You are signed in. This is the dashboard.
         </p>
         <div className="w-52 h-32 rounded-3xl overflow-hidden border-2 border-gray-300 relative">
-          {profile?.photo ? (
-            <img src={profile.photo} alt="imagePreview" className="w-full h-full object-cover" />
-          ) : (
-            <img src={placeholder} alt="imagePreview" className="w-full h-full object-cover" />
-          )}
+          <img
+            src={resolveImageUrl(profile?.photo) || placeholder}
+            alt="imagePreview"
+            className="w-full h-full object-cover"
+          />
         </div>
         
         <button
