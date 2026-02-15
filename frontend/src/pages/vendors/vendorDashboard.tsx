@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Vendor } from "../../types";
 import { getVendorProfile } from "../../api/vendors";
-import { API_BASE_URL } from "../../api/axiosConfig";
 import placeholder from "../../assets/placeholder.jpg";
 
 export default function VendorDashboard() {
