@@ -86,11 +86,7 @@ export default function NavBar() {
         </span>
       </Link>
 
-      
-
-     
-
-      <div className="flex items-center gap-4">
+      <div ref={menuRef} className="flex items-center gap-4">
 
         {role === "customer" && storeCredit !== null && (
           <div
