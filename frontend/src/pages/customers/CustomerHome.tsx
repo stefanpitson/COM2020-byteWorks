@@ -3,11 +3,9 @@ import { useNavigate } from "react-router-dom";
 import type { Customer, Vendor } from "../../types";
 import { getCustomerProfile } from "../../api/customers";
 import { getAllVendors } from "../../api/vendors";
-import { clearAuthSession } from "../../utils/authSession";
 import placeholder from "../../assets/placeholder.jpg";
 import { resolveImageUrl } from "../../utils/imageUrl";
 
-// --- Icons ---
 const MapPinIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
     <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -18,12 +16,6 @@ const MapPinIcon = () => (
 const SearchIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 text-gray-400">
     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-  </svg>
-);
-
-const LogOutIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
   </svg>
 );
 
@@ -65,12 +57,6 @@ export default function CustomerHome() {
     fetchData();
   }, [navigate]);
 
-  function handleLogout() {
-    clearAuthSession();
-    navigate("/login");
-  }
-
-  // Filter vendors based on search term
   const filteredVendors = useMemo(() => {
     return vendors.filter(v => 
       v.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -92,7 +78,6 @@ export default function CustomerHome() {
   );
 
   const VendorCard = ({ vendor, isSoldOut }: { vendor: HomeVendor; isSoldOut?: boolean }) => {
-    // If < 5 items, show orange "Fire" badge
     const isLowStock = vendor.bundle_count > 0 && vendor.bundle_count < 5;
 
     return (
@@ -119,7 +104,7 @@ export default function CustomerHome() {
             </div>
           )}
          
-          {/* Diet Badges - Cleaner logic: Vegan implies Veggie */}
+          {/* Diet Badges */}
           <div className="absolute top-3 left-3 flex gap-1">
             {vendor.has_vegan && <Badge type="VE" />}
             {vendor.has_vegetarian && !vendor.has_vegan && <Badge type="V" />}
@@ -181,6 +166,11 @@ export default function CustomerHome() {
         
         {/* Search Header */}
         <div className="mb-10 text-center max-w-2xl mx-auto">
+            {profile && (
+              <h2 className="text-3xl md:text-4xl font-extrabold text-[hsl(var(--text-main))] mb-6 leading-tight">
+                Welcome back, {profile.name}!
+              </h2>
+            )}
             <h1 className="text-3xl md:text-4xl font-extrabold text-[hsl(var(--text-main))] mb-6 leading-tight">
                 Save food, <span className="text-[hsl(var(--accent))] underline decoration-4 decoration-[hsl(var(--accent)/0.3)]">save money.</span>
             </h1>

@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getVendorTemplates, getTemplateBundleCount } from "../../api/templates";
 import { getVendorById } from "../../api/vendors";
-import { getCustomerProfile } from "../../api/customers";
-import { clearAuthSession } from "../../utils/authSession";
-import type { Template, Vendor, Customer } from "../../types";
+import type { Template, Vendor } from "../../types";
 import { resolveImageUrl } from "../../utils/imageUrl";
 import placeholder from "../../assets/placeholder.jpg";
 
@@ -22,22 +20,10 @@ const BagIcon = () => (
   </svg>
 );
 
-const ArrowLeftIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-  </svg>
-);
-
 const LeafIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
     <path fillRule="evenodd" d="M12.963 2.286a.75.75 0 00-1.071-.136 9.742 9.742 0 00-3.539 6.177c-.129.58-.94.961-1.272.26a4.246 4.246 0 01-.13-1.077 5.25 5.25 0 00-3.805 5.188c0 2.9 2.355 5.25 5.25 5.25 1.583 0 3.018-.707 4.01-1.815.728-.813 1.956-.566 2.338.444.208.549.262 1.13.262 1.62h2.25c0-4.085-3.047-7.46-7.14-7.859a1.503 1.503 0 01-1.353-1.637c.026-.255.06-.508.102-.756a7.502 7.502 0 013.295-4.66z" clipRule="evenodd" />
   </svg>
-);
-
-const LogOutIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-    </svg>
 );
 
 const PhoneIcon = () => (
@@ -67,7 +53,6 @@ export default function VendorPage() {
   const navigate = useNavigate();
 
   const [vendor, setVendor] = useState<Vendor | null>(null);
-  const [user, setUser] = useState<Customer | null>(null);
   const [templates, setTemplates] = useState<TemplateWithCount[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -75,9 +60,6 @@ export default function VendorPage() {
     const fetchData = async () => {
       try {
         if (!vendorId) return;
-        
-        const userData = await getCustomerProfile();
-        setUser(userData);
 
         const vendorData = await getVendorById(Number(vendorId));
         setVendor(vendorData);
@@ -99,11 +81,6 @@ export default function VendorPage() {
     };
     fetchData();
   }, [vendorId, navigate]);
-
-  const handleLogout = () => {
-    clearAuthSession();
-    navigate("/login");
-  };
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--background))]">
