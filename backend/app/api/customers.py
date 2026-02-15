@@ -23,7 +23,7 @@ def get_customer_profile(
     
     return current_user.customer_profile
 
-@router.patch("/profile")
+@router.patch("/profile", tags = ["Customers"], summary = "Updating the settings of customer's accounts")
 def update_customer_profile(
     data: CustomerUpdate, 
     session: Session = Depends(get_session),
@@ -63,8 +63,11 @@ def update_customer_profile(
         if not validation.is_valid_postcode(parsed_postcode):
                     raise HTTPException(status_code=400, detail="Postcode is not valid")
         current_user.customer_profile.post_code = data.customer.post_code
-
-    session.add(current_user)
-    session.commit()
+    try:
+        session.add(current_user)
+        session.commit()
+    except Exception as e:
+        session.rollback() # If anything fails
+        raise HTTPException(status_code=500, detail=str(e))
     return {"message": "Customer updated successfully"}
     

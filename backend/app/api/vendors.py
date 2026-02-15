@@ -24,7 +24,7 @@ def get_vendor_profile(
     
     return current_user.vendor_profile
 
-@router.patch("/profile")
+@router.patch("/profile", tags = ["Vendors"], summary = "Updating the settings of the vendors accounts")
 def update_vendor_profile(
     data: VendorUpdate, 
     session: Session = Depends(get_session),
@@ -78,7 +78,10 @@ def update_vendor_profile(
     # May have to change when photo implementation is done properly
     if data.vendor.photo != None:
          current_user.vendor_profile.photo = data.vendor.photo
-
-    session.add(current_user)
-    session.commit()
+    try:
+        session.add(current_user)
+        session.commit()
+    except Exception as e:
+        session.rollback() # If anything fails
+        raise HTTPException(status_code=500, detail=str(e))
     return {"message": "Customer updated successfully"}
