@@ -153,11 +153,11 @@ def get_list_of_reservations_vendor(
     ):
     
     # Ensures only the vendors can call this
-    if current_user.role == "vendor":
+    if current_user.role != "vendor":
         raise HTTPException(status_code=403, detail = "Not vendor")
 
     statement = select(Reservation).where(Template.vendor == current_user.vendor_profile.vendor_id, 
-                                          reservation.bundle_id == Bundle.bundle_id,
+                                          Reservation.bundle_id == Bundle.bundle_id,
                                           Bundle.template_id == Template.template_id)
     reservations = session.exec(statement).all()
 
@@ -221,7 +221,7 @@ def cancel_reservation(
 
     customer.store_credit += cost
 
-    statement = select(Bundle).where(Bundle.template_id == reservation.bundle_id)
+    statement = select(Bundle).where(Bundle.bundle_id == reservation.bundle_id)
     bundle = session.exec(statement).first()
 
     bundle.purchased_by = None
