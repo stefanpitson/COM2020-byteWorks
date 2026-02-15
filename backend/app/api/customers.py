@@ -52,8 +52,11 @@ def update_customer_profile(
     
     if data.customer.post_code != None:
         current_user.customer_profile.post_code = data.customer.post_code
-
-    session.add(current_user)
-    session.commit()
+    try:
+        session.add(current_user)
+        session.commit()
+    except Exception as e:
+        session.rollback() # If anything fails
+        raise HTTPException(status_code=500, detail=str(e))
     return {"message": "Customer updated successfully"}
     
