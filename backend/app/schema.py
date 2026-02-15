@@ -217,3 +217,6 @@ class VendorList(BaseModel):
         bundle_count: int
         has_vegan: bool
         has_vegetarian: bool
+
+class PickupCode(BaseModel):
+    pickup_code: int

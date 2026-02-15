@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select, func
 from app.core.database import get_session
 from app.models import Template, Allergen, Bundle, Reservation, Customer
-from app.schema import TemplateCreate, TemplateList, TemplateRead
+from app.schema import TemplateCreate, TemplateList, TemplateRead 
 from app.api.deps import get_current_user
 from datetime import datetime
 from random import randint
@@ -147,3 +147,4 @@ def count_bundles(
     if count == None:
         return 0
     return count 
+    
