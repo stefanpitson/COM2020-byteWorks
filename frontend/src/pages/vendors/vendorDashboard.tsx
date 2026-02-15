@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import type { Vendor } from "../../types";
 import { getVendorProfile } from "../../api/vendors";
 import { API_BASE_URL } from "../../api/axiosConfig";
+import placeholder from "../../assets/placeholder.jpg";
 
 export default function VendorDashboard() {
   const navigate = useNavigate();
@@ -43,9 +44,9 @@ export default function VendorDashboard() {
         </p>
         <div className="w-52 h-32 rounded-3xl overflow-hidden border-2 border-gray-300 relative">
           {profile?.photo ? (
-            <img src={`${API_BASE_URL}/${profile.photo}`} alt="imagePreview" className="w-full h-full object-cover" />
+            <img src={`${API_BASE_URL}${profile.photo}`} alt="imagePreview" className="w-full h-full object-cover" />
           ) : (
-            <img src={`${API_BASE_URL}/static/placeholder.jpg`} alt="imagePreview" className="w-full h-full object-cover" />
+            <img src={placeholder} alt="imagePreview" className="w-full h-full object-cover" />
           )}
         </div>
         
