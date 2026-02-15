@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import type { Customer, Vendor } from "../../types";
 import { getCustomerProfile } from "../../api/customers";
 import { getAllVendors } from "../../api/vendors";
-import { API_BASE_URL } from "../../api/axiosConfig"; 
 import { clearAuthSession } from "../../utils/authSession";
 import placeholder from "../../assets/placeholder.jpg";
 import { resolveImageUrl } from "../../utils/imageUrl";
@@ -81,8 +80,6 @@ export default function CustomerHome() {
   const availableVendors = filteredVendors.filter((v) => v.bundle_count > 0);
   const soldOutVendors = filteredVendors.filter((v) => v.bundle_count === 0);
 
-  // --- Sub-Components ---
-
   const Badge = ({ type }: { type: 'VE' | 'V' }) => (
     <span className={`
       text-[10px] font-bold px-2 py-1 rounded-full border shadow-sm backdrop-blur-md
@@ -112,7 +109,7 @@ export default function CustomerHome() {
         <div className="relative h-40 bg-gray-100 overflow-hidden">
           {vendor.photo ? (
             <img
-              src={`${API_BASE_URL}/${vendor.photo}`}
+              src={resolveImageUrl(vendor.photo) || placeholder}
               alt={vendor.name}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
