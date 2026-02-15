@@ -5,7 +5,6 @@ from sqlmodel import Session
 from app.models import User
 from app.core.database import get_session
 from app.core.security import SECRET_KEY, ALGORITHM
-from datetime import datetime, timedelta, timezone
 
 # this tells FastAPI that the token is in the "Authorization: Bearer <token>" header
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")

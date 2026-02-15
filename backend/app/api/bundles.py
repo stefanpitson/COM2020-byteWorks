@@ -4,7 +4,7 @@ from app.core.database import get_session
 from app.models import Template, Allergen, Bundle, Reservation
 from app.schema import BundleCreate, CustBundleList, BundleRead, VendBundleList
 from app.api.deps import get_current_user
-from datetime import datetime
+from app.core.time import timer
 
 router = APIRouter()
 
@@ -71,7 +71,7 @@ def vendor_list_bundles(
     if current_user.role != "vendor":
         raise HTTPException(status_code=403, detail="Not a vendor account")
     
-    today = datetime.now().date()
+    today = timer.date()
     #vendor = current_user.vendor_profile.vendor_id
 
     statement = (select(Bundle)
