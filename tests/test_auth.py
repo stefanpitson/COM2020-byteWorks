@@ -4,8 +4,9 @@ import pytest
 def test_customer_register_success(test_client, registered_customer):
     '''Register a customer account with valid details'''
     register_response = registered_customer["response"]
+    register_response_data = register_response.json()
 
-    assert register_response.text == "{\"message\":\"Customer account created successfully\"}"
+    assert register_response_data["message"] == "Customer account created successfully"
     assert register_response.status_code == 200
 
 def test_customer_login_success(test_client, registered_customer):
@@ -23,16 +24,17 @@ def test_customer_login_success(test_client, registered_customer):
     assert login_response_data["user"]["role"] == "customer"
     assert login_response.status_code == 200
 
-@pytest.mark.parametrize("input_value, expected", [
-    ("InvalidEmail", True),
-    ("InvalidEmail@",True),
-    ("@InvalidEmail",True),
-    ("a"*255 + "@example.com", True),
+@pytest.mark.parametrize("input_value", [
+    (""),
+    ("InvalidEmail"),
+    ("InvalidEmail@"),
+    ("@InvalidEmail"),
+    ("a"*255 + "@example.com"),
 ])
-def test_invalid_email_register_fail(test_client, input_value, expected):    
+def test_invalid_email_register_fail(test_client, input_value):    
     customer_data = {
         "user": {
-            "email": "InvalidEmail",
+            "email": input_value,
             "password": "password456",
             "role": "customer"
         },
@@ -42,8 +44,9 @@ def test_invalid_email_register_fail(test_client, input_value, expected):
         }
     }
     register_response = test_client.post("/register/customer", json=customer_data)
+    register_response_data = register_response.json()
     
-    assert register_response.text == "{\"message\":\"Invalid email\"}"
+    assert register_response_data["message"] == "Invalid email"
     assert register_response.status_code == 400
 
 def test_customer_login_fail(test_client):
@@ -53,9 +56,10 @@ def test_customer_login_fail(test_client):
         "email": "test@exeter.ac.uk", 
         "password": "password456"
     })
+    login_response_data = login_response.json()
     
+    assert login_response_data["detail"] == "Incorrect email or password"
     assert login_response.status_code == 401
-    assert login_response.text == "{\"detail\":\"Incorrect email or password\"}"
 
 def test_customer_repeat_register_fail(test_client, registered_customer):
     '''Register user with same details twice'''
@@ -77,23 +81,25 @@ def test_customer_repeat_register_fail(test_client, registered_customer):
                 "post_code": "ab1 2cd"
             }
     })
+    register_response_data_1 = register_response_1.json()
+    register_response_data_2 = register_response_2.json()
 
+    assert register_response_data_1["message"] == "Customer account created successfully"
     assert register_response_1.status_code == 200
-    assert register_response_1.text == "{\"message\":\"Customer account created successfully\"}"
 
+    assert register_response_data_2["detail"] == "Email already registered"
     assert register_response_2.status_code == 400
-    assert register_response_2.text == "{\"detail\":\"Email already registered\"}"
 
 
 # VENDOR RELATED TESTS
 
 def test_vendor_register_success(test_client, registered_vendor):
-    register_response = registered_vendor["response"] 
-
+    register_response = registered_vendor["response"]
+    register_response_data = register_response.json()
+    assert register_response_data["message"] == "Vendor account created successfully"
     assert register_response.status_code == 200
-    assert register_response.text == "{\"message\":\"Vendor account created successfully\"}"
 
-def test_vendor_login_success(test_client, registered_vendor): # registered vendor is a fixture in conftest.py
+def test_vendor_login_success(test_client, registered_vendor):
     vendor = registered_vendor["vendor_data"]
     login_response = test_client.post("/login", json={
         "email": vendor["user"]["email"], 
@@ -104,15 +110,17 @@ def test_vendor_login_success(test_client, registered_vendor): # registered vend
 
     assert login_response_data["user"]["email"] == vendor["user"]["email"]
     assert login_response_data["user"]["role"] == "vendor"
+    assert login_response_data["user"]["user_id"] > 0
     assert login_response.status_code == 200
 
 
-def test_vendor_login_success(test_client): # registered vendor is a fixture in conftest.py
+def test_vendor_login_fail(test_client):
     login_response = test_client.post("/login", json={
         "email": "vendor@exeter.ac.uk", 
         "password": "passwrod31"
     })
+    login_response_data = login_response.json()
 
+    assert login_response_data["detail"] == "Incorrect email or password"
     assert login_response.status_code == 401
-    assert login_response.text == "{\"detail\":\"Incorrect email or password\"}"
 

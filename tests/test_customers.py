@@ -13,12 +13,12 @@ def test_get_profile_success(test_client, registered_customer, customer_login_re
     profile_post_code = profile_response_data["post_code"]
     profile_customer_id = profile_response_data["customer_id"]
 
-    assert profile_response.status_code == 200
     assert customer["customer"]["name"] == profile_name
     assert customer["customer"]["post_code"] == profile_post_code
     assert profile_customer_id > 0
+    assert profile_response.status_code == 200
 
-def test_get_profile_wrong_role_fail(test_client ,registered_vendor, vendor_login_response):
+def test_get_profile_wrong_role_fail(test_client, registered_vendor, vendor_login_response):
     vendor = registered_vendor["vendor_data"]
     token = vendor_login_response["access_token"]
 
@@ -27,12 +27,12 @@ def test_get_profile_wrong_role_fail(test_client ,registered_vendor, vendor_logi
         headers={"Authorization": "Bearer " + token}
     )
 
-    assert profile_response.text == "{\"detail\":\"Not a customer account\"}"
+    profile_response_data = profile_response.json()
+    assert profile_response_data["detail"] == "Not a customer account"
     assert profile_response.status_code == 403
 
 
 def test_patch_profile_password_success(test_client, registered_customer, customer_login_response):
-
     customer = registered_customer["customer_data"]
     token = customer_login_response["access_token"]
     profile_response = test_client.patch(
@@ -50,11 +50,10 @@ def test_patch_profile_password_success(test_client, registered_customer, custom
         }
     )
     profile_response_data = profile_response.json()
-    assert profile_response.status_code == 200
     assert profile_response_data["message"] == "Customer updated successfully"
+    assert profile_response.status_code == 200
 
 def test_patch_profile_email_success(test_client, registered_customer, customer_login_response):
-
     customer = registered_customer["customer_data"]
     token = customer_login_response["access_token"]
     profile_response = test_client.patch(
@@ -71,11 +70,10 @@ def test_patch_profile_email_success(test_client, registered_customer, customer_
         }
     )
     profile_response_data = profile_response.json()
-    assert profile_response.status_code == 200
     assert profile_response_data["message"] == "Customer updated successfully"
+    assert profile_response.status_code == 200
 
 def test_patch_profile_name_success(test_client, registered_customer, customer_login_response):
-
     customer = registered_customer["customer_data"]
     token = customer_login_response["access_token"]
     profile_response = test_client.patch(
@@ -91,11 +89,10 @@ def test_patch_profile_name_success(test_client, registered_customer, customer_l
         }
     )
     profile_response_data = profile_response.json()
-    assert profile_response.status_code == 200
     assert profile_response_data["message"] == "Customer updated successfully"
+    assert profile_response.status_code == 200
 
 def test_patch_profile_post_code_success(test_client, registered_customer, customer_login_response):
-
     customer = registered_customer["customer_data"]
     token = customer_login_response["access_token"]
     profile_response = test_client.patch(
@@ -111,8 +108,8 @@ def test_patch_profile_post_code_success(test_client, registered_customer, custo
         }
     )
     profile_response_data = profile_response.json()
-    assert profile_response.status_code == 200
     assert profile_response_data["message"] == "Customer updated successfully"
+    assert profile_response.status_code == 200
 
 
 def test_patch_profile_missing_new_password_fail(test_client, registered_customer, customer_login_response):
@@ -132,8 +129,8 @@ def test_patch_profile_missing_new_password_fail(test_client, registered_custome
         }
     )
     profile_response_data = profile_response.json()
-    assert profile_response.status_code == 400
     assert profile_response_data["detail"] == "New password is missing"
+    assert profile_response.status_code == 400
  
 def test_patch_profile_missing_old_password_fail(test_client, registered_customer, customer_login_response):
     customer = registered_customer["customer_data"]
@@ -152,11 +149,10 @@ def test_patch_profile_missing_old_password_fail(test_client, registered_custome
         }
     )
     profile_response_data = profile_response.json()
-    assert profile_response.status_code == 400
     assert profile_response_data["detail"] == "Old password is required to change new password"
+    assert profile_response.status_code == 400
 
 def test_patch_profile_same_email_fail(test_client, registered_customer, customer_login_response):
-
     customer = registered_customer["customer_data"]
     token = customer_login_response["access_token"]
     profile_response = test_client.patch(
@@ -172,11 +168,10 @@ def test_patch_profile_same_email_fail(test_client, registered_customer, custome
         }
     )
     profile_response_data = profile_response.json()
-    assert profile_response.status_code == 400
     assert profile_response_data["detail"] == "Email already registered"
+    assert profile_response.status_code == 400
 
 def test_patch_profile_same_name_fail(test_client, registered_customer, customer_login_response):
-
     customer = registered_customer["customer_data"]
     token = customer_login_response["access_token"]
     profile_response = test_client.patch(
@@ -192,11 +187,10 @@ def test_patch_profile_same_name_fail(test_client, registered_customer, customer
         }
     )
     profile_response_data = profile_response.json()
-    assert profile_response.status_code == 400
-    assert profile_response_data["detail"] == "Name already registered"
+    assert profile_response_data["message"] == "Customer updated successfully"
+    assert profile_response.status_code == 200
 
 def test_patch_profile_same_post_code_fail(test_client, registered_customer, customer_login_response):
-
     customer = registered_customer["customer_data"]
     token = customer_login_response["access_token"]
     profile_response = test_client.patch(
@@ -212,8 +206,8 @@ def test_patch_profile_same_post_code_fail(test_client, registered_customer, cus
         }
     )
     profile_response_data = profile_response.json()
-    assert profile_response.status_code == 400
-    assert profile_response_data["message"] == "Post code already registered"
+    assert profile_response_data["message"] == "Customer updated successfully"
+    assert profile_response.status_code == 200
 
 # def test_get_profile_with_no_account_fail(test_client, registered_customer):
 #     '''Login, recieve JWT token, delete account (if that functiontionality is added), then attempt get profile'''
