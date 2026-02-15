@@ -4,7 +4,8 @@ from app.core.database import get_session
 from app.models import Template, Allergen, Bundle, Reservation, Customer, Vendor, Streak, User
 from app.schema import VendReservationRead, CustReservationRead, CustReservationList, VendReservationList, PickupCode
 from app.api.deps import get_current_user
-from datetime import datetime, timedelta
+from datetime import timedelta
+from app.core.time import timer
 from random import randint
 
 router = APIRouter()
@@ -18,7 +19,7 @@ def create_reservation(
 
     # Ensures bundles of the correct template, made for that day and that haven't been purchased yet are selected
     statement = (select(Bundle).where(Bundle.template_id == template_id, 
-                                     Bundle.date == datetime.now().date(), 
+                                     Bundle.date == timer.date(), 
                                      Bundle.purchased_by == None))
     
     # Picks the first of any suitable bundles that meet criteria
@@ -305,9 +306,9 @@ def increment_streak(session: Session, customer):
         if streak != None:
             # check date 
             last = streak.last + timedelta(days=7)
-            if last >= datetime.now().date(): # streak is in date
+            if last >= timer.date(): # streak is in date
                 streak.count +=1
-                streak.last = datetime.now().date()
+                streak.last = timer.date()
                 session.add(streak)
                 session.commit()
                 return
@@ -319,8 +320,8 @@ def increment_streak(session: Session, customer):
         # create new streak
         new_streak = Streak(
             customer_id=customer.customer_id,
-            started= datetime.now().date(),
-            last= datetime.now().date(),
+            started= timer.date(),
+            last= timer.date(),
             count = 1
         )
 

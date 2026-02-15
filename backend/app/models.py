@@ -1,6 +1,7 @@
 from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship
-from datetime import date as Date, time as Time, datetime
+from datetime import date as Date, time as Time
+from app.core.time import timer
 from random import random
 
 # models establishes the object types for the database 
@@ -114,8 +115,8 @@ class Bundle(SQLModel, table=True):
     bundle_id: Optional[int] = Field(default=None, primary_key=True)
     template_id: Optional[int] = Field( default=None, foreign_key="template.template_id")
     picked_up: bool = Field(default= False)
-    date: Date = Field(default_factory=lambda: datetime.now().date()) # basically tells the db to use this function to populate it
-    time: Time = Field(default_factory=lambda: datetime.now().time())
+    date: Date = Field(default_factory=lambda: timer.date()) # basically tells the db to use this function to populate it
+    time: Time = Field(default_factory=lambda: timer.time())
 
     purchased_by: Optional[int] = Field(default=None, foreign_key="customer.customer_id")
 
@@ -124,7 +125,7 @@ class Reservation(SQLModel, table=True):
     reservation_id:Optional[int] = Field(default=None, primary_key=True)
     bundle_id: Optional[int] = Field(default=None, foreign_key="bundle.bundle_id")
     customer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id") 
-    time_created: Time = Field(default_factory=lambda:datetime.now().time()) 
+    time_created: Time = Field(default_factory=lambda:timer.time()) 
 
     # status either:
     # 'booked' - reservation made, not collected 
@@ -151,7 +152,7 @@ class Forecast_Input(SQLModel, table=True):
 
     #time the bundles were posted, this should be able to grab from bundles table, but 
     # could have issues if there aren't any
-    date: Date = Field(default_factory=lambda:datetime.now().date()) # basically tells the db to use this function to populate it
+    date: Date = Field(default_factory=lambda:timer.date()) # basically tells the db to use this function to populate it
     precipitation: float = Field(default_factory=lambda:random()) # may want to change this 
     bundles_posted: int 
     bundles_reserved: int 
@@ -161,7 +162,7 @@ class Forecast_Output(SQLModel, table=True):
     output_id: Optional[int] = Field(default=None, primary_key=True)
     vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id")
     template_id: Optional[int] = Field(default=None, foreign_key="template.template_id")
-    date: Date = Field(default_factory=lambda:datetime.now().date())
+    date: Date = Field(default_factory=lambda:timer.date())
     reservation_prediction: int 
     no_show_prediction: int 
     rationale:str 

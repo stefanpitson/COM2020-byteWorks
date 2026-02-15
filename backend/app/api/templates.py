@@ -4,7 +4,7 @@ from app.core.database import get_session
 from app.models import Template, Allergen, Bundle, Reservation, Customer
 from app.schema import TemplateCreate, TemplateList, TemplateRead 
 from app.api.deps import get_current_user
-from datetime import datetime
+from app.core.time import timer
 from random import randint
 
 router = APIRouter()
@@ -128,7 +128,7 @@ def count_bundles(
     current_user = Depends(get_current_user) # conducts basic security checks even though the variable isn't used
     ):
     
-    today = datetime.now().date()
+    today = timer.date()
 
     statement = (
         select(

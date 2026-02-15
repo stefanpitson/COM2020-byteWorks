@@ -11,10 +11,7 @@ from app.schema import VendorRead, CustBundleList, VendorList, VendorUpdate
 from app.api.deps import get_current_user
 import uuid
 import shutil
-from datetime import datetime
-import uuid
-import shutil
-from datetime import datetime
+from app.core.time import timer 
 from app.core.security import verify_password, get_password_hash
 from ukpostcodeutils import validation
 
@@ -110,7 +107,7 @@ def customer_list_bundles(
     if current_user.role == "vendor" and vendor_id != current_user.vendor_profile.vendor_id:
         return HTTPException(status_code=403, detail="Not the correct vendor")
 
-    today = datetime.now().date()
+    today = timer.date()
 
     # get templates
     # this statement may not show as functioning but it does seem to work  
@@ -201,7 +198,7 @@ def get_all_vendors(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
     ):
-    today = datetime.now().date()
+    today = timer.date()
     # get all vendors 
     statement = ( 
         select(
