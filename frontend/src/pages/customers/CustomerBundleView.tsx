@@ -35,12 +35,7 @@ export default function BundleDetailsPage() {
   const [bundle, setBundle] = useState<TemplateWithCount | null>(null);
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const currentUserString = localStorage.getItem("user");
-  const currentUser = currentUserString ? JSON.parse(currentUserString) : null;
-
-  const userStoreCredit = currentUser?.store_credit ?? 0;
-  
+  const [userStoreCredit, setUserStoreCredit] = useState(0);
 
   useEffect(() => {
     const fetchBundle = async () => {
@@ -71,6 +66,26 @@ export default function BundleDetailsPage() {
 
     fetchBundle();
   }, [templateId, navigate]);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("/api/customers/profile", {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        }); 
+        const data = await response.json();
+        setUserStoreCredit(data.store_credit ?? 0);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchUserProfile();
+  }, []);
+
+  console.log(userStoreCredit);
 
   if (loading) {
     return (

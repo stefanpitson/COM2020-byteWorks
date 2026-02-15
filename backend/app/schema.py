@@ -11,7 +11,7 @@ class CustomerRead(BaseModel):
     customer_id: int
     name: str
     post_code: str
-    store_credit: int
+    store_credit: float
 
 class VendorRead(BaseModel):
     vendor_id: int
