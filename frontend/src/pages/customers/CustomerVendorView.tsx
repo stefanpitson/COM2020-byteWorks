@@ -3,9 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getVendorTemplates, getTemplateBundleCount } from "../../api/templates";
 import { getVendorById } from "../../api/vendors";
 import { getCustomerProfile } from "../../api/customers";
-import { API_BASE_URL } from "../../api/axiosConfig";
 import { clearAuthSession } from "../../utils/authSession";
 import type { Template, Vendor, Customer } from "../../types";
+import { resolveImageUrl } from "../../utils/imageUrl";
+import placeholder from "../../assets/placeholder.jpg";
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(amount);
@@ -135,21 +136,22 @@ export default function VendorPage() {
         <div className={`
             group flex flex-col bg-white rounded-3xl overflow-hidden transition-all duration-300 border border-gray-100
             ${isSoldOut 
-                ? "opacity-60 grayscale cursor-not-allowed" 
+                ? "opacity-60 grayscale" 
                 : "hover:shadow-xl hover:-translate-y-1 cursor-pointer shadow-sm"}
         `}>
         <div className="relative h-44 bg-gray-100 overflow-hidden">
-            {template.photo ? (
+            {/* {template.photo ? (
                 <img
-                src={`${API_BASE_URL}/${template.photo}`}
-                alt={template.title}
-                className="w-full h-full object-cover"
+                    src={resolveImageUrl(template.photo)}
+                    alt={template.title}
+                    className="w-full h-full object-cover"
                 />
-            ) : (
+            ) : ( */}
+            {
                 <div className="absolute inset-0 bg-[hsl(var(--primary)/0.05)] flex items-center justify-center text-[hsl(var(--primary))]">
                     <BagIcon />
                 </div>
-            )}
+            }
             
             {!isSoldOut && (
             <div className="absolute top-3 right-3 bg-white/95 px-2.5 py-1 rounded-full shadow-sm">
@@ -223,8 +225,8 @@ export default function VendorPage() {
 
             <div className="md:w-1/3 flex flex-col items-center md:items-start">
                 <div className="w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border-4 border-white mb-4">
-                     <img
-                        src={vendor.photo ? `${API_BASE_URL}/${vendor.photo}` : `${API_BASE_URL}/static/placeholder.jpg`}
+                    <img
+                        src={resolveImageUrl(vendor.photo) || placeholder}
                         alt={vendor.name}
                         className="w-full h-full object-cover"
                     />
