@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select, func
 from app.core.database import get_session
-from app.models import Template, Allergen, Bundle, Reservation
-from app.schema import TemplateCreate, TemplateList, TemplateRead 
+from app.models import Template, Allergen, Bundle, Reservation, Customer
+from app.schema import TemplateCreate, TemplateList, TemplateRead, ReservationRead
 from app.api.deps import get_current_user
 from datetime import datetime
+from random import randint
 
 router = APIRouter()
 

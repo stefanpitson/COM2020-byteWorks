@@ -115,13 +115,14 @@ class Bundle(SQLModel, table=True):
 class Reservation(SQLModel, table=True):
     reservation_id:Optional[int] = Field(default=None, primary_key=True)
     bundle_id: Optional[int] = Field(default=None, foreign_key="bundle.bundle_id")
-    consumer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id") 
+    customer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id") 
     time_created: Time = Field(default_factory=lambda:datetime.now().time()) 
 
     # status either:
     # 'booked' - reservation made, not collected 
     # 'collected' - the customer collects 
-    # 'no_show' - the customer is a no show 
+    # 'no_show' - the customer is a no show (when booked and not cancelled and they didn't turn up)
+    # 'cancelled' - the customer/vendor cancelled the booking (when booked and purposefully cancelled - different to no show)
     status: str = Field(default="booked") 
 
     code: Optional[int] = Field(default=None) #shouldn't have a default? 

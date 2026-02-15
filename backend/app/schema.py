@@ -183,6 +183,28 @@ class VendBundleList(BaseModel):
         time: time
         purchased_by: int | None
 
+class VendReservationRead(BaseModel):
+    reservation_id : int
+    bundle_id : int
+    customer_id : int
+    time_created : time
+    status : str
+
+class CustReservationRead(BaseModel):
+    reservation_id : int
+    bundle_id : int
+    customer_id : int
+    time_created : time
+    code : int
+    status : str
+
+class CustReservationList(BaseModel):
+    total_count:int
+    bundles: List[CustReservationRead]
+
+class VendReservationList(BaseModel):
+    total_count:int
+    bundles: List[VendReservationRead]
 # get all stores
 class VendorList(BaseModel):
     total_count:int
