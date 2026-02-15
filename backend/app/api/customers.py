@@ -6,6 +6,7 @@ from app.models import User
 from app.schema import CustomerRead, CustomerUpdate
 from app.api.deps import get_current_user
 from app.core.security import verify_password, get_password_hash
+from ukpostcodeutils import validation
 
 router = APIRouter()
 
@@ -22,12 +23,19 @@ def get_customer_profile(
     
     return current_user.customer_profile
 
-@router.patch("/profile")
+@router.patch("/profile", tags = ["Customers"], summary = "Updating the settings of customer's accounts")
 def update_customer_profile(
     data: CustomerUpdate, 
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
     ):
+
+    if current_user.role != "customer":
+        raise HTTPException(status_code=403, detail="Not a customer account")
+        
+    if not current_user.customer_profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
 
     # User is already a customer 
 
@@ -51,9 +59,15 @@ def update_customer_profile(
         raise HTTPException(status_code=400, detail="New password is missing")
     
     if data.customer.post_code != None:
+        parsed_postcode = (data.customer.post_code).upper().replace(" ","")
+        if not validation.is_valid_postcode(parsed_postcode):
+                    raise HTTPException(status_code=400, detail="Postcode is not valid")
         current_user.customer_profile.post_code = data.customer.post_code
-
-    session.add(current_user)
-    session.commit()
+    try:
+        session.add(current_user)
+        session.commit()
+    except Exception as e:
+        session.rollback() # If anything fails
+        raise HTTPException(status_code=500, detail=str(e))
     return {"message": "Customer updated successfully"}
     
