@@ -110,7 +110,13 @@ export default function VendorPage() {
     const showVeggie = !template.is_vegan && template.is_vegetarian;
 
     return (
-        <div className={`
+        <div 
+            onClick={() => {
+                if (!isSoldOut) {
+                navigate(`/bundle/${template.template_id}`);
+                }
+            }}
+            className={`
             group flex flex-col bg-white rounded-3xl overflow-hidden transition-all duration-300 border border-gray-100
             ${isSoldOut 
                 ? "opacity-60 grayscale" 

@@ -137,6 +137,7 @@ class TemplateRead(BaseModel):
     carbon_saved: float
     is_vegan: bool
     is_vegetarian: bool
+    vendor: int
     allergens: List["AllergenRead"] = []
     class AllergenRead(BaseModel):
         allergen_id: int
