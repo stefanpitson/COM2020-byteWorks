@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from app.core.database import get_session
-from app.models import User
+from app.models import User, Streak
 from app.schema import CustomerRead, CustomerUpdate
 from app.api.deps import get_current_user
 from app.core.security import verify_password, get_password_hash
@@ -71,3 +71,29 @@ def update_customer_profile(
         raise HTTPException(status_code=500, detail=str(e))
     return {"message": "Customer updated successfully"}
     
+# get customer streak 
+@router.get("/streak", tags=["Customer","Streaks"], summary="Get the current streak")
+def get_streak(
+    session: Session = Depends(get_session),
+    current_user = Depends(get_current_user)
+    ):
+
+    if current_user.role != "customer":
+        raise HTTPException(status_code=403, detail="Not a customer account")
+        
+    if not current_user.customer_profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
+    # get the current streak: 
+    statement = (
+        select(
+            Streak.count
+        )
+        .where(Streak.customer_id == current_user.customer_profile.customer_id)
+        .where(Streak.ended.is_(False))
+    )
+
+    count = session.exec(statement).first()
+    if count == None:
+        return 0
+    return count 
