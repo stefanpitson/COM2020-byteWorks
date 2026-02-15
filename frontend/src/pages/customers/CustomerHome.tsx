@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import type { Customer, Vendor } from "../../types";
 import { getCustomerProfile } from "../../api/customers";
 import { getAllVendors } from "../../api/vendors";
-import { API_BASE_URL } from "../../api/axiosConfig"; 
 import { clearAuthSession } from "../../utils/authSession";
 import placeholder from "../../assets/placeholder.jpg";
 
