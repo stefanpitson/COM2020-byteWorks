@@ -254,3 +254,14 @@ def get_all_vendors(
         "vendors":vendors
     }
 
+@router.get("/{vendor_id}", response_model=VendorRead, tags=["Vendors"], summary="Get a specific vendor's public profile")
+def get_vendor_public_profile(
+    vendor_id: int,
+    session: Session = Depends(get_session),
+    current_user = Depends(get_current_user)
+):
+    vendor = session.get(Vendor, vendor_id)
+    if not vendor:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+    return vendor
+
