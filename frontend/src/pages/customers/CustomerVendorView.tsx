@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getVendorTemplates, getTemplateBundleCount } from "../../api/templates";
 import { getVendorById } from "../../api/vendors";
-import { API_BASE_URL } from "../../api/axiosConfig";
+import { resolveImageUrl } from "../../utils/imageUrl";
+import placeholder from "../../assets/placeholder.jpg";
+
 import type { Template, Vendor } from "../../types";
 
 type TemplateWithCount = Template & {
@@ -62,13 +64,9 @@ export default function VendorPage() {
       <div className="flex-1 flex justify-center items-center rounded-lg overflow-hidden border bg-white mb-4">
         <span className="text-gray-400 text-sm">Image Placeholder</span>
         {/* <img
-          src={
-            template.photo
-              ? `${API_BASE_URL}/${template.photo}`
-              : `${API_BASE_URL}/static/placeholder.jpg`
-          }
-          alt={template.title}
-          className="rounded-lg max-w-full max-h-full object-contain"
+            src={resolveImageUrl(template.photo) || placeholder}
+            alt={template.title}
+            className="rounded-lg max-w-full max-h-full object-contain"
         /> */}
       </div>
 
@@ -99,24 +97,12 @@ export default function VendorPage() {
         <div className="flex flex-col items-center justify-center gap-4 mb-8 bg-white p-6 rounded-xl shadow">
             <div className="w-24 h-24 rounded-full overflow-hidden border flex items-center justify-center">
             <img
-                src={vendor.photo ? `${API_BASE_URL}/${vendor.photo}` : `${API_BASE_URL}/static/placeholder.jpg`}
+                src={resolveImageUrl(vendor.photo) || placeholder}
                 alt={vendor.name}
                 className="w-full h-full object-cover"
             />
             </div>
             <h1 className="text-3xl font-bold text-center">{vendor.name}</h1>
-            <div className="flex gap-2">
-            {vendor.has_vegan && (
-                <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded border border-green-200">
-                VE
-                </span>
-            )}
-            {vendor.has_vegetarian && (
-                <span className="bg-emerald-50 text-emerald-600 text-xs font-bold px-2 py-0.5 rounded border border-emerald-200">
-                V
-                </span>
-            )}
-            </div>
         </div>
         )}
 

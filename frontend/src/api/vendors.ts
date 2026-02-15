@@ -1,5 +1,4 @@
 import api from "./axiosConfig";
-import { API_BASE_URL } from "./axiosConfig";
 import type { Vendor } from "../types";
 
 export const getVendorProfile = async () => {
@@ -25,8 +24,10 @@ export const getAllVendors = async (): Promise<VendorResponse> => {
 };
 
 export async function getVendorById(vendorId: number): Promise<Vendor> {
-  const res = await api.get(`${API_BASE_URL}/vendors`);
-  const vendor = res.data.vendors.find((v: Vendor) => v.vendor_id === vendorId);
+  const res = await api.get<VendorResponse>("/vendors");
+  const vendor = res.data.vendors.find(
+    (v) => v.vendor_id === vendorId
+  );
   if (!vendor) throw new Error("Vendor not found");
   return vendor;
 }
