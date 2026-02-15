@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select, func
 from app.core.database import get_session
 from app.models import Template, Allergen, Bundle, Reservation, Customer, Vendor, Streak, User
-from app.schema import VendReservationRead, CustReservationRead, CustReservationList, VendReservationList
+from app.schema import VendReservationRead, CustReservationRead, CustReservationList, VendReservationList, PickupCode
 from app.api.deps import get_current_user
 from datetime import datetime, timedelta
 from random import randint
@@ -49,7 +49,6 @@ def create_reservation(
 
     # Update the bought bundle and add the new reservation
     try:
-        increment_streak(session, current_user)
         session.add(bundle)
         session.add(new_reservation)
         session.commit()
@@ -58,46 +57,6 @@ def create_reservation(
         raise HTTPException(status_code=500, detail=str(e))
 
     return {"message": "Reservation created successfully", "reservation_id":new_reservation.reservation_id}
-
-
-#logic for incrementing or making a new streak 
-def increment_streak(session: Session, current_user:User):
-    # check if they have a streak
-    statement = (select(Streak)
-                 .where(Streak.customer_id == current_user.customer_profile.customer_id)
-                 .where(Streak.ended.is_(False))
-                 )
-    streak = session.exec(statement).first()
-    try:
-        if streak != None:
-            # check date 
-            last = streak.last + timedelta(days=7)
-            if last >= datetime.now().date(): # streak is in date
-                streak.count +=1
-                streak.last = datetime.now().date()
-                session.add(streak)
-                session.commit()
-                return
-            
-            else: # streak is out of date
-                streak.ended = True
-                session.add(streak)
-    
-        # create new streak
-        new_streak = Streak(
-            customer_id=current_user.customer_profile.customer_id,
-            started= datetime.now().date(),
-            last= datetime.now().date(),
-            count = 1
-        )
-
-        session.add(new_streak)
-        session.commit()
-        return
-    
-    except Exception as e:
-        session.rollback()
-        raise HTTPException(status_code=55, detail=str(e))
 
     
 
@@ -281,10 +240,12 @@ def cancel_reservation(
 @router.post("/{reservation_id}/check", tags=["Reservations"], summary="Finalise a reservation")
 def finalise_reservation(
     reservation_id: int,
-    pickup_code : int,
+    pickup_code_obj : PickupCode,
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
     ):
+
+    pickup_code = pickup_code_obj.pickup_code
 
     statement = select(Reservation).where(Reservation.reservation_id == reservation_id)
     reservation = session.exec(statement).first()
@@ -321,6 +282,7 @@ def finalise_reservation(
     customer.carbon_saved += carbon_saved
     vendor.carbon_saved += carbon_saved
     try:
+        increment_streak(session,customer)
         session.add(reservation)
         session.add(customer)
         session.add(vendor)
@@ -331,5 +293,43 @@ def finalise_reservation(
 
     return {"message": "Reservation accepted successfully"}
 
+#logic for incrementing or making a new streak 
+def increment_streak(session: Session, customer):
+    # check if they have a streak
+    statement = (select(Streak)
+                 .where(Streak.customer_id == customer.customer_id)
+                 .where(Streak.ended.is_(False))
+                 )
+    streak = session.exec(statement).first()
+    try:
+        if streak != None:
+            # check date 
+            last = streak.last + timedelta(days=7)
+            if last >= datetime.now().date(): # streak is in date
+                streak.count +=1
+                streak.last = datetime.now().date()
+                session.add(streak)
+                session.commit()
+                return
+            
+            else: # streak is out of date
+                streak.ended = True
+                session.add(streak)
+    
+        # create new streak
+        new_streak = Streak(
+            customer_id=customer.customer_id,
+            started= datetime.now().date(),
+            last= datetime.now().date(),
+            count = 1
+        )
+
+        session.add(new_streak)
+        session.commit()
+        return
+    
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 # need to do set no-show if they don't turn up 
