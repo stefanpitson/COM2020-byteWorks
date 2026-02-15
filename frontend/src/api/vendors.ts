@@ -22,3 +22,12 @@ export const getAllVendors = async (): Promise<VendorResponse> => {
   const response = await api.get<VendorResponse>("/vendors");
   return response.data;
 };
+
+export async function getVendorById(vendorId: number): Promise<Vendor> {
+  const res = await api.get<VendorResponse>("/vendors");
+  const vendor = res.data.vendors.find(
+    (v) => v.vendor_id === vendorId
+  );
+  if (!vendor) throw new Error("Vendor not found");
+  return vendor;
+}

@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import type { Customer, Vendor } from "../../types";
 import { getCustomerProfile } from "../../api/customers";
 import { getAllVendors } from "../../api/vendors";
-import { API_BASE_URL } from "../../api/axiosConfig"; 
 import { clearAuthSession } from "../../utils/authSession";
+import placeholder from "../../assets/placeholder.jpg";
+import { resolveImageUrl } from "../../utils/imageUrl";
 
 type HomeVendor = Vendor & {
   bundle_count: number;
@@ -50,18 +51,14 @@ export default function CustomerHome() {
 
   const VendorCard = ({ vendor, isSoldOut }: { vendor: HomeVendor; isSoldOut?: boolean }) => (
     <div
-      key={vendor.vendor_id}
+      onClick={() => !isSoldOut && navigate(`/vendor/${vendor.vendor_id}`)}
       className={`bg-white rounded-xl shadow-lg transition p-4 text-left flex flex-col aspect-[7/6]
         ${isSoldOut ? "saturate-50 opacity-75 pointer-events-none" : "hover:shadow-xl"}
       `}
     >
       <div className="flex-1 flex justify-center items-center rounded-lg overflow-hidden border border-white bg-white mb-4">
         <img
-          src={
-            vendor.photo
-              ? `${API_BASE_URL}/${vendor.photo}`
-              : `${API_BASE_URL}/static/placeholder.jpg`
-          }
+          src={resolveImageUrl(vendor?.photo) || placeholder}
           alt={vendor.name}
           className="rounded-lg max-w-full max-h-full object-contain"
         />
