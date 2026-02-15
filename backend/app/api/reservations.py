@@ -85,6 +85,7 @@ def increment_streak(session: Session, current_user:User):
     
         # create new streak
         new_streak = Streak(
+            customer_id=current_user.customer_profile.customer_id,
             started= datetime.now().date(),
             last= datetime.now().date(),
             count = 1
