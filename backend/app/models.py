@@ -48,7 +48,7 @@ class Vendor(SQLModel, table=True):
     post_code: str
     phone_number: str
     opening_hours: str
-    photo: Optional[str]
+    photo: Optional[str] = Field(default=None)
     carbon_saved: int = Field(default=0)
     user: Optional[User] = Relationship(back_populates="vendor_profile")
     validated: bool = Field(default=False)
@@ -76,13 +76,13 @@ class Template(SQLModel, table=True):
     estimated_value: float 
     cost: float 
     
-    meatPercent: float
-    carbPercent: float
-    vegPercent: float
+    meat_percent: float
+    carb_percent: float
+    veg_percent: float
     carbon_saved: Optional[float]
     weight: float
-    isVegan: bool = Field(default=False)
-    isVegetarian: bool = Field(default=False)
+    is_vegan: bool = Field(default=False)
+    is_vegetarian: bool = Field(default=False)
 
     vendor: Optional[int] = Field(default=None,foreign_key="vendor.vendor_id")
 
@@ -102,7 +102,6 @@ class Allergen(SQLModel, table=True):
     )
 
 
-
 class Bundle(SQLModel, table=True):
     bundle_id: Optional[int] = Field(default=None, primary_key=True)
     template_id: Optional[int] = Field( default=None, foreign_key="template.template_id")
@@ -117,14 +116,20 @@ class Reservation(SQLModel, table=True):
     reservation_id:Optional[int] = Field(default=None, primary_key=True)
     bundle_id: Optional[int] = Field(default=None, foreign_key="bundle.bundle_id")
     consumer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id") 
-    time_created: Time = Field(default_factory=lambda:datetime.now().time())
+    time_created: Time = Field(default_factory=lambda:datetime.now().time()) 
+
+    # status either:
+    # 'booked' - reservation made, not collected 
+    # 'collected' - the customer collects 
+    # 'no_show' - the customer is a no show 
+    status: str = Field(default="booked") 
 
     code: Optional[int] = Field(default=None) #shouldn't have a default? 
 
 class Report(SQLModel, table=True):
     report_id: Optional[int] = Field(default=None, primary_key=True)
     customer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id")
-    seller_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id")
+    vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id")
     title: str
     complaint: str
     responded: bool = Field(default=False)
