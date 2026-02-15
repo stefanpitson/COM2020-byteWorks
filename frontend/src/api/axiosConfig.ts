@@ -1,7 +1,5 @@
 import axios from "axios";
 
-export const API_BASE_URL = "http://localhost:8000";
-
 const api = axios.create({
   baseURL: "/api",
   timeout: 5000,
@@ -25,10 +23,7 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error)
 );
 
 export default api;
-
