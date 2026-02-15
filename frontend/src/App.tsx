@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import CustomerSignUp from "./pages/customers/CustomerSignUp";
 import VendorSignUp from "./pages/vendors/vendorSignUp";
 import VendorSettings from "./pages/vendors/vendorSettings";
+import TemplateDetails from "./pages/vendors/templateDetails";
 
 export default function App() {
   return (
@@ -18,6 +19,8 @@ export default function App() {
 
         <Route path="/vendor/signup" element={<VendorSignUp />} />
         <Route path="/customer/signup" element={<CustomerSignUp />} />
+
+        <Route path="/vendor/template" element={<TemplateDetails />} />
 
         {/* Applies the navbar */}
         <Route element={<MainLayout />}>
