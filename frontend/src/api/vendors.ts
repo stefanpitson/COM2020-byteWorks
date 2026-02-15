@@ -22,3 +22,9 @@ export const getAllVendors = async (): Promise<VendorResponse> => {
   const response = await api.get<VendorResponse>("/vendors");
   return response.data;
 };
+
+export async function getVendorById(vendorId: number): Promise<Vendor> {
+  const res = await api.get<Vendor>(`/vendors/${vendorId}`);
+  return res.data;
+}
+

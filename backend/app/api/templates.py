@@ -143,4 +143,6 @@ def count_bundles(
     )
 
     count = session.exec(statement).one_or_none()
+    if count is None:
+        return 0
     return count 
