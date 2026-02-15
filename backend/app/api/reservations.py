@@ -182,15 +182,16 @@ def cancel_reservation(
     current_user = Depends(get_current_user)
     ):
 
-    if reservation.status == "cancelled":
-        raise HTTPException(status_code=404, detail="Reservation already cancelled")
-
     statement = select(Reservation).where(Reservation.reservation_id == reservation_id)
     reservation = session.exec(statement).first()
 
     if not reservation:
         raise HTTPException(status_code=404, detail="Reservation not found")
     
+    
+    if reservation.status == "cancelled":
+        raise HTTPException(status_code=404, detail="Reservation already cancelled")
+
     # Gets the ID of the vendor that is responsible for the reservation
     statement = select(Template.vendor).where(Template.template_id == Bundle.template_id 
                                               and Bundle.bundle_id == reservation.bundle_id)
