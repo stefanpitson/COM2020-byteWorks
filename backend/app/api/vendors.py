@@ -187,8 +187,12 @@ async def upload_image(
     # Set the vendor photo to the saved filepath
     current_user.vendor_profile.photo = f"/static/{unique_filename}"
 
-    session.add(current_user.vendor_profile)
-    session.commit()
+    try:
+        session.add(current_user.vendor_profile)
+        session.commit()
+    except Exception as e:
+        session.rollback() # If anything fails
+        raise HTTPException(status_code=500, detail=str(e))
     
     return {"status": "success", "image_url": current_user.vendor_profile.photo}
     
