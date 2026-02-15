@@ -9,7 +9,7 @@ from random import randint
 
 router = APIRouter()
 
-@router.post("/{template_id}/reserve", tags=["reservations"], summary="Create a reservation of a template if a bundle is available")
+@router.post("/{template_id}/reserve", tags=["Reservations"], summary="Create a reservation of a template if a bundle is available")
 def create_reservation(
     template_id: int,
     session: Session = Depends(get_session),
@@ -58,7 +58,7 @@ def create_reservation(
 
     return {"message": "Reservation created successfully"}
 
-@router.get("/{reservation_id}/vendor", response_model= VendReservationRead, tags=["Reservation"], summary="Get one reservation details")
+@router.get("/{reservation_id}/vendor", response_model= VendReservationRead, tags=["Reservations"], summary="Get one reservation details")
 def get_reservation_vendor(
     reservation_id:int,
     session: Session = Depends(get_session),
@@ -89,7 +89,7 @@ def get_reservation_vendor(
                                    time_created = reservation.time_created,
                                    status = reservation.status)
 
-@router.get("/{reservation_id}/customer", response_model= CustReservationRead, tags=["Reservation"], summary="Get one reservation details")
+@router.get("/{reservation_id}/customer", response_model= CustReservationRead, tags=["Reservations"], summary="Get one reservation details")
 def get_reservation_customer(
     reservation_id:int,
     session: Session = Depends(get_session),
@@ -114,7 +114,7 @@ def get_reservation_customer(
                                    code = reservation.code,
                                    status = reservation.status)
 
-@router.get("/customer", response_model= CustReservationList, tags=["Reservation"], summary="Get one reservation details")
+@router.get("/customer", response_model= CustReservationList, tags=["Reservations"], summary="Get one reservation details")
 def get_list_of_reservations_customer(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
@@ -144,7 +144,7 @@ def get_list_of_reservations_customer(
         "bundles": customer_reservations
     }
 
-@router.get("/vendor", response_model= VendReservationList, tags=["Reservation"], summary="Get one reservation details")
+@router.get("/vendor", response_model= VendReservationList, tags=["Reservations"], summary="Get one reservation details")
 def get_list_of_reservations_vendor(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
@@ -175,7 +175,7 @@ def get_list_of_reservations_vendor(
         "bundles": vendor_reservations
     }
 
-@router.post("/{reservation_id}/cancel", tags=["reservations"], summary="Cancel an already booked reservation")
+@router.post("/{reservation_id}/cancel", tags=["Reservations"], summary="Cancel an already booked reservation")
 def cancel_reservation(
     reservation_id: int,
     session: Session = Depends(get_session),
@@ -235,7 +235,7 @@ def cancel_reservation(
     return {"message": "Reservation cancelled successfully"}
 
 # need to do accept reservation (when they pick it up)
-@router.post("/{reservation_id}/check", tags=["reservations"], summary="Finalise a reservation")
+@router.post("/{reservation_id}/check", tags=["Reservations"], summary="Finalise a reservation")
 def finalise_reservation(
     reservation_id: int,
     pickup_code : int,
