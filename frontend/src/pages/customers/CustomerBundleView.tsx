@@ -30,10 +30,17 @@ type TemplateWithCount = Template & {
 export default function BundleDetailsPage() {
   const { templateId } = useParams();
   const navigate = useNavigate();
+  
 
   const [bundle, setBundle] = useState<TemplateWithCount | null>(null);
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const currentUserString = localStorage.getItem("user");
+  const currentUser = currentUserString ? JSON.parse(currentUserString) : null;
+
+  const userStoreCredit = currentUser?.store_credit ?? 0;
+  
 
   useEffect(() => {
     const fetchBundle = async () => {
@@ -42,6 +49,7 @@ export default function BundleDetailsPage() {
 
         const template = await getTemplateById(Number(templateId));
         const count = await getTemplateBundleCount(Number(templateId));
+      
 
         let vendorData = null;
         if (template.vendor) {
@@ -75,6 +83,7 @@ export default function BundleDetailsPage() {
   if (!bundle) return null;
 
   const isSoldOut = bundle.available_count === 0;
+  const isInsufficientFunds = userStoreCredit < bundle.cost;
 
   const Badge = ({ type }: { type: "VE" | "V" }) => (
     <span
@@ -211,15 +220,17 @@ export default function BundleDetailsPage() {
               </div>
 
               <button
-                disabled={isSoldOut}
+                disabled={isSoldOut || isInsufficientFunds}
                 className={`w-full py-5 rounded-2xl font-bold text-lg transition-all
                   ${
                     isSoldOut
                       ? "bg-gray-200 text-gray-400"
+                      : isInsufficientFunds
+                      ? "bg-red-400 text-white"
                       : "bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary-dark))] shadow-lg shadow-green-100 active:scale-95"
                   }`}
               >
-                {isSoldOut ? "Sold Out" : "Reserve Bundle"}
+                {isSoldOut ? "Sold Out" : isInsufficientFunds ? "Insufficient Funds" : "Reserve Bundle"}
               </button>
             </div>
 
