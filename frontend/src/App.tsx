@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import CustomerSignUp from "./pages/customers/CustomerSignUp";
 import VendorSignUp from "./pages/vendors/vendorSignUp";
 import VendorSettings from "./pages/vendors/vendorSettings";
+import VendorAnalytics from "./pages/vendors/vendorAnalytics";
 import CustomerVendorView from "./pages/customers/CustomerVendorView";
 import CustomerBundleView from "./pages/customers/CustomerBundleView"
 import TemplateDetails from "./pages/vendors/templateDetails";
@@ -39,6 +40,7 @@ export default function App() {
           <Route element={<ProtectedRoute allowedRole="vendor" />}>
             <Route path="/vendor/dashboard" element={<VendorDashboard />} />
             <Route path="/vendor/settings" element={<VendorSettings />} />
+            <Route path="/vendor/analytics" element={<VendorAnalytics />} />
             <Route path="/vendor/template" element={<TemplateDetails />} />
           </Route>
         </Route>

@@ -48,3 +48,7 @@ export interface Template {
     title: string;
   }[];
 }
+
+export interface Analytics {
+  id: number;
+}

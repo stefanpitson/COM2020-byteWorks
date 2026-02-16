@@ -1,5 +1,5 @@
 import api from "./axiosConfig";
-import type { User, Customer, Vendor } from "../types";
+import type { User} from "../types";
 
 // LOGIN
 

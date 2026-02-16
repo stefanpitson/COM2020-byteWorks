@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
-from sqlmodel import SQLModel, create_engine, Session
+from sqlmodel import SQLModel, create_engine, Session, select
+from app.models import Allergen
 
 # Main functions relating to database functionality
 
@@ -19,9 +20,31 @@ if not DATABASE_URL:
 
 engine = create_engine(DATABASE_URL, echo=True)
 
+DEFAULT_ALLERGENS = [
+    "Celery", "Gluten", "Crustaceans", "Eggs", "Fish", "Lupin", 
+    "Milk", "Molluscs", "Mustard", "Treenuts", "Peanuts", 
+    "Sesame", "Soybean", "Sulphur Dioxide"
+]
+
+def seed_allergens():
+    with Session(engine) as session:
+        # Check if we already have allergens in the DB
+        statement = select(Allergen)
+        existing_allergens = session.exec(statement).first()
+
+        if not existing_allergens:
+            print("Seeding default allergens...")
+            for name in DEFAULT_ALLERGENS:
+                allergen = Allergen(title=name)
+                session.add(allergen)
+            session.commit()
+            print("Allergens successfully seeded.")
+
 # connects to the db using the parts declared 
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
+    # seeds the allergens on table creation
+    seed_allergens()
 
 # used on all api calls using the db 
 def get_session():
