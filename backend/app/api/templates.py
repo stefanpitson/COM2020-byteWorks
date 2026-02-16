@@ -100,7 +100,7 @@ async def upload_image(
     if not current_user.vendor_profile:
         raise HTTPException(status_code=400, detail="User is not a vendor")
     
-    template = session.exec(select(Template).where(Template.template_id == template_id))
+    template = session.exec(select(Template).where(Template.template_id == template_id)).first()
 
     # Set the vendor photo to the saved filepath
     template.photo = f"static/{unique_filename}"
