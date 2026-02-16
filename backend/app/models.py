@@ -59,11 +59,19 @@ class Customer(SQLModel, table=True):
     user_id: Optional[int] = Field(foreign_key="user.user_id")
     name:str
     post_code:str
-    store_credit: int = Field(default=0)
+    store_credit: float = Field(default=100.0)
     carbon_saved: int = Field(default=0)
     rating: Optional[int] = Field(default=None)
 
     user: Optional[User] = Relationship(back_populates="customer_profile")
+
+class Streak(SQLModel, table=True):
+    streak_id: Optional[int] =Field(default=None, primary_key=True)
+    customer_id: Optional[int] =Field(foreign_key="customer.customer_id")
+    count: int = Field(default=0)
+    started: Date
+    last: Date
+    ended: bool = Field(default=False)
 
 class Allergen_Template(SQLModel,table=True): # linking table, has to come before the other entities 
     allergen_id: Optional[int] = Field(default=None, primary_key=True, foreign_key="allergen.allergen_id")
@@ -117,13 +125,14 @@ class Bundle(SQLModel, table=True):
 class Reservation(SQLModel, table=True):
     reservation_id:Optional[int] = Field(default=None, primary_key=True)
     bundle_id: Optional[int] = Field(default=None, foreign_key="bundle.bundle_id")
-    consumer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id") 
+    customer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id") 
     time_created: Time = Field(default_factory=lambda:datetime.now().time()) 
 
     # status either:
     # 'booked' - reservation made, not collected 
     # 'collected' - the customer collects 
-    # 'no_show' - the customer is a no show 
+    # 'no_show' - the customer is a no show (when booked and not cancelled and they didn't turn up)
+    # 'cancelled' - the customer/vendor cancelled the booking (when booked and purposefully cancelled - different to no show)
     status: str = Field(default="booked") 
 
     code: Optional[int] = Field(default=None) #shouldn't have a default 
@@ -145,7 +154,6 @@ class Forecast_Input(SQLModel, table=True):
     #time the bundles were posted, this should be able to grab from bundles table, but 
     # could have issues if there aren't any
     date: Date = Field(default_factory=lambda:datetime.now().date()) # basically tells the db to use this function to populate it
-    time: Time = Field(default_factory=lambda:datetime.now().time())
     precipitation: float = Field(default_factory=lambda:random()) # may want to change this 
     bundles_posted: int 
     bundles_reserved: int 

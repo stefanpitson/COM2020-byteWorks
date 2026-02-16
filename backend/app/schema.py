@@ -11,6 +11,7 @@ class CustomerRead(BaseModel):
     customer_id: int
     name: str
     post_code: str
+    store_credit: float
 
 class VendorRead(BaseModel):
     vendor_id: int
@@ -131,6 +132,7 @@ class TemplateRead(BaseModel):
     carbon_saved: float
     is_vegan: bool
     is_vegetarian: bool
+    vendor: int
     allergens: List["AllergenRead"] = []
     class AllergenRead(BaseModel):
         allergen_id: int
@@ -178,6 +180,28 @@ class VendBundleList(BaseModel):
         time: time
         purchased_by: int | None
 
+class VendReservationRead(BaseModel):
+    reservation_id : int
+    bundle_id : int
+    customer_id : int
+    time_created : time
+    status : str
+
+class CustReservationRead(BaseModel):
+    reservation_id : int
+    bundle_id : int
+    customer_id : int
+    time_created : time
+    code : int
+    status : str
+
+class CustReservationList(BaseModel):
+    total_count:int
+    bundles: List[CustReservationRead]
+
+class VendReservationList(BaseModel):
+    total_count:int
+    bundles: List[VendReservationRead]
 # get all stores
 class VendorList(BaseModel):
     total_count:int
@@ -190,3 +214,6 @@ class VendorList(BaseModel):
         bundle_count: int
         has_vegan: bool
         has_vegetarian: bool
+
+class PickupCode(BaseModel):
+    pickup_code: int

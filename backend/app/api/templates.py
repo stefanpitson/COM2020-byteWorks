@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlmodel import Session, select, func
 from app.core.database import get_session
-from app.models import Template, Allergen, Bundle, Reservation
-from app.schema import TemplateCreate, TemplateList, TemplateRead 
+from app.models import Template, Allergen, Bundle, Reservation, Customer
+from app.schema import TemplateCreate, TemplateList, TemplateRead
 from app.api.deps import get_current_user
 from datetime import datetime
+from random import randint
 import uuid
 import shutil
 
@@ -182,4 +183,20 @@ def count_bundles(
     )
 
     count = session.exec(statement).one_or_none()
+    if count == None:
+        return 0
     return count 
+
+# get a specific template
+@router.get("/{template_id}", response_model = TemplateRead, tags=["Templates"], summary="Get one templates details")
+def get_template(
+    template_id:int,
+    session: Session = Depends(get_session),
+    current_user = Depends(get_current_user) # conducts basic security checks even though the variable isn't used
+):
+    statement = select(Template).where(Template.template_id == template_id)
+    template = session.exec(statement).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    
+    return template

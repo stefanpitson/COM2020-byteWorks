@@ -8,6 +8,8 @@ import Login from "./pages/Login";
 import CustomerSignUp from "./pages/customers/CustomerSignUp";
 import VendorSignUp from "./pages/vendors/vendorSignUp";
 import VendorSettings from "./pages/vendors/vendorSettings";
+import CustomerVendorView from "./pages/customers/CustomerVendorView";
+import CustomerBundleView from "./pages/customers/CustomerBundleView"
 
 export default function App() {
   return (
@@ -26,11 +28,13 @@ export default function App() {
             <Route path="/customer/home" element={<CustomerHome />} />
 
             <Route path="/customer/settings" element={<CustomerSignUp />} />
+            <Route path="/vendor/:vendorId" element={<CustomerVendorView />} />
+            <Route path="/bundle/:templateId" element={<CustomerBundleView />} />
           </Route>
 
           {/* Only Vendors allowed */}
           <Route element={<ProtectedRoute allowedRole="vendor" />}>
-            <Route path="/vendor/dashboard" element={<VendorDashboard />} />#
+            <Route path="/vendor/dashboard" element={<VendorDashboard />} />
             <Route path="/vendor/settings" element={<VendorSettings />} />
           </Route>
         </Route>
