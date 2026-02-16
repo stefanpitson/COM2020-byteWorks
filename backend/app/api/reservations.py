@@ -38,10 +38,14 @@ def create_reservation(
             
     statement = select(Customer).where(Customer.customer_id == new_reservation.customer_id)
     customer = session.exec(statement).first()
+    if not customer:
+        raise HTTPException(status_code=403, detail = "Customer not found")
 
     statement = select(Template).where(Template.template_id == template_id)
     template = session.exec(statement).first()
-    
+    if not template:
+        raise HTTPException(status_code=403, detail = "Template behind reservation not found")
+
     if customer.store_credit < template.cost:
         raise HTTPException(status_code=403, detail="Customer does not have enough credit to purchase")
     customer.store_credit -= template.cost
@@ -67,18 +71,17 @@ def get_reservation_vendor(
     current_user = Depends(get_current_user)
     ):
     
-
     statement = select(Reservation).where(Reservation.reservation_id == reservation_id)
     reservation = session.exec(statement).first()
-
     if not reservation:
         raise HTTPException(status_code=404, detail="Reservation not found")
     
     # Gets the ID of the vendor that is responsible for the reservation
     statement = select(Template.vendor).where(Template.template_id == Bundle.template_id, 
                                                Bundle.bundle_id == reservation.bundle_id)
-
     reserveVendorID = session.exec(statement).first()
+    if not reserveVendorID:
+        raise HTTPException(status_code=403, detail = "Vendor behind reservation not found")
 
     # Checks if the vendor that made the bundle that has the reservation is trying to get the reservation
     if current_user.role == "vendor":  
@@ -100,7 +103,6 @@ def get_reservation_customer(
     
     statement = select(Reservation).where(Reservation.reservation_id == reservation_id)
     reservation = session.exec(statement).first()
-
     if not reservation:
         raise HTTPException(status_code=404, detail="Reservation not found")
 
@@ -186,10 +188,8 @@ def cancel_reservation(
 
     statement = select(Reservation).where(Reservation.reservation_id == reservation_id)
     reservation = session.exec(statement).first()
-
     if not reservation:
         raise HTTPException(status_code=404, detail="Reservation not found")
-    
     
     if reservation.status == "cancelled":
         raise HTTPException(status_code=404, detail="Reservation already cancelled")
@@ -197,8 +197,9 @@ def cancel_reservation(
     # Gets the ID of the vendor that is responsible for the reservation
     statement = select(Template.vendor).where(Template.template_id == Bundle.template_id, 
                                               Bundle.bundle_id == reservation.bundle_id)
-
     reserveVendorID = session.exec(statement).first()
+    if not reserveVendorID:
+        raise HTTPException(status_code=403, detail = "Vendor behind reservation not found")
 
     # Checks if either the vendor that made the bundle that has the reservation or
     # the customer that created the reservation is trying to get the reservation
@@ -213,16 +214,23 @@ def cancel_reservation(
 
     statement = select(Customer).where(Customer.customer_id == reservation.customer_id)
     customer = session.exec(statement).first()
+    if not customer:
+        raise HTTPException(status_code=403, detail = "Customer not found")
     
     statement = select(Template.cost).where(Bundle.template_id == Template.template_id, 
                                      Bundle.bundle_id == reservation.bundle_id,
                                      reservation.reservation_id == reservation_id)
     cost = session.exec(statement).first()
+    if not cost:
+        raise HTTPException(status_code=403, detail = "Cost of template of the reservation not found")
+
 
     customer.store_credit += cost
 
     statement = select(Bundle).where(Bundle.bundle_id == reservation.bundle_id)
     bundle = session.exec(statement).first()
+    if not bundle:
+        raise HTTPException(status_code=403, detail = "Bundle not found")
 
     bundle.purchased_by = None
     try:
@@ -249,35 +257,44 @@ def finalise_reservation(
 
     statement = select(Reservation).where(Reservation.reservation_id == reservation_id)
     reservation = session.exec(statement).first()
+    if not reservation:
+        raise HTTPException(status_code=403, detail = "Reservation not found")
+        
 
     # Gets the ID of the vendor that is responsible for the reservation
-    statement = select(Template.vendor).where(Template.template_id == Bundle.template_id 
-                                              and Bundle.bundle_id == reservation.bundle_id)
-
+    statement = select(Template.vendor).where(Template.template_id == Bundle.template_id,
+                                              Bundle.bundle_id == reservation.bundle_id)
     reserveVendorID = session.exec(statement).first()
+    if not reserveVendorID:
+        raise HTTPException(status_code=403, detail = "Vendor behind reservation not found")
 
+    # Ensures the user is of role vendor and that the vendor is the correct vendor that made the bundle behind the reservation
     if current_user.role == "vendor":  
         if current_user.vendor_profile.vendor_id != reserveVendorID:
             raise HTTPException(status_code=403, detail="Not the correct vendor")
-        
+    
+    # Gets the customer object
     statement = select(Customer).where(Customer.customer_id == reservation.customer_id)
     customer = session.exec(statement).first()
-
-    statement = select(Template.cost).where(Template.template_id == Bundle.template_id 
-                                              and Bundle.bundle_id == reservation.bundle_id)
+    if not customer:
+                raise HTTPException(status_code=403, detail = "Customer not found")
 
     if pickup_code != reservation.code:
         raise HTTPException(status_code=403, detail="Customer does not the correct accepting code")
 
-    statement = select(Template.carbon_saved).where(Template.template_id == Bundle.template_id 
-                                              and Bundle.bundle_id == reservation.bundle_id)
-
+    statement = select(Template.carbon_saved).where(Template.template_id == Bundle.template_id,
+                                                    Bundle.bundle_id == reservation.bundle_id)
     carbon_saved = session.exec(statement).first()
+    if not carbon_saved:
+        raise HTTPException(status_code=403, detail = "Carbon saved value not found")
 
     reservation.status = "collected"
 
+    # Gets the vendor object to update their value
     statement = select(Vendor).where(Vendor.vendor_id == current_user.vendor_profile.vendor_id)
     vendor = session.exec(statement).first()
+    if not vendor:
+        raise HTTPException(status_code=403, detail = "Vendor not found")
 
     customer.carbon_saved += carbon_saved
     vendor.carbon_saved += carbon_saved
@@ -292,6 +309,40 @@ def finalise_reservation(
         raise HTTPException(status_code=500, detail=str(e))
 
     return {"message": "Reservation accepted successfully"}
+
+@router.post("/vendor/noshows", tags=["Reservations"], summary="Set all reservat")
+def set_reservation_no_shows(
+    days_back : int = 1,
+    session: Session = Depends(get_session),
+    current_user = Depends(get_current_user)
+    ):
+     # Ensures only the vendors can call this
+    if current_user.role != "vendor":
+        raise HTTPException(status_code=403, detail = "Not vendor")
+
+    if days_back < 1:
+        raise HTTPException(status_code=403, detail = "Gone back too few days")
+
+    go_back_date = datetime.now().date() - timedelta(days = days_back)
+
+    statement = select(Reservation).where(Template.vendor == current_user.vendor_profile.vendor_id, 
+                                          Reservation.bundle_id == Bundle.bundle_id,
+                                          Bundle.template_id == Template.template_id,
+                                          Bundle.date > go_back_date,
+                                          Reservation.status == "booked")
+    reservations = session.exec(statement).all()
+
+    try:
+        for reservation in reservations:
+            reservation.status = "no_show"
+            session.add(reservation)
+        session.commit()
+    except Exception as e:
+        session.rollback() # If anything fails
+        raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    
 
 #logic for incrementing or making a new streak 
 def increment_streak(session: Session, customer):
