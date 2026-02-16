@@ -6,6 +6,7 @@ from app.schema import CustomerRead, CustomerUpdate, StreakRead
 from app.api.deps import get_current_user
 from app.core.security import verify_password, get_password_hash
 from ukpostcodeutils import validation
+from typing import Optional
 
 router = APIRouter()
 
@@ -71,7 +72,7 @@ def update_customer_profile(
     return {"message": "Customer updated successfully"}
     
 # get customer streak 
-@router.get("/streak", response_model=StreakRead, tags=["Customer","Streaks"], summary="Get the current streak")
+@router.get("/streak", response_model=Optional[StreakRead], tags=["Customer","Streaks"], summary="Get the current streak")
 def get_streak(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)

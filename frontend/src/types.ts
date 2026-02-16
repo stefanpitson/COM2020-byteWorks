@@ -48,3 +48,11 @@ export interface Template {
     title: string;
   }[];
 }
+
+export interface Streak {
+  count: number;
+  last: string; 
+}
+export interface Analytics {
+  id: number;
+}
