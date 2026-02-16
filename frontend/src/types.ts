@@ -25,3 +25,20 @@ export interface Vendor {
   validated: boolean;
   photo: string;
 }
+
+export interface Template {
+  template_id: number;
+  title: string;
+  description: string;
+  cost: number;
+  meat_percent: number;
+  carb_percent: number;
+  veg_percent: number;
+  carbon_saved: number;
+  is_vegan: boolean;
+  is_vegetarian: boolean;
+  allergens: {
+    allergen_id: number;
+    title: string;
+  }[];
+}
