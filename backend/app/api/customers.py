@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from app.core.database import get_session
 from app.models import User, Streak
-from app.schema import CustomerRead, CustomerUpdate
+from app.schema import CustomerRead, CustomerUpdate, StreakRead
 from app.api.deps import get_current_user
 from app.core.security import verify_password, get_password_hash
 from ukpostcodeutils import validation
@@ -71,7 +71,7 @@ def update_customer_profile(
     return {"message": "Customer updated successfully"}
     
 # get customer streak 
-@router.get("/streak", tags=["Customer","Streaks"], summary="Get the current streak")
+@router.get("/streak", response_model=StreakRead, tags=["Customer","Streaks"], summary="Get the current streak")
 def get_streak(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)

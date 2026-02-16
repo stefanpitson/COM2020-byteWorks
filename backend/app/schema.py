@@ -218,3 +218,12 @@ class VendorList(BaseModel):
 
 class PickupCode(BaseModel):
     pickup_code: int
+
+class StreakRead(BaseModel):
+    streak_id: int
+    customer_id: int
+    count: int
+    started: date
+    last: date
+    ended:bool
+
