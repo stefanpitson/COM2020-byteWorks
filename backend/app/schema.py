@@ -11,6 +11,7 @@ class CustomerRead(BaseModel):
     customer_id: int
     name: str
     post_code: str
+    store_credit: float
 
 class VendorRead(BaseModel):
     vendor_id: int
@@ -136,6 +137,7 @@ class TemplateRead(BaseModel):
     carbon_saved: float
     is_vegan: bool
     is_vegetarian: bool
+    vendor: int
     allergens: List["AllergenRead"] = []
     class AllergenRead(BaseModel):
         allergen_id: int

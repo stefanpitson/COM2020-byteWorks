@@ -9,6 +9,7 @@ import CustomerSignUp from "./pages/customers/CustomerSignUp";
 import VendorSignUp from "./pages/vendors/vendorSignUp";
 import VendorSettings from "./pages/vendors/vendorSettings";
 import CustomerVendorView from "./pages/customers/CustomerVendorView";
+import CustomerBundleView from "./pages/customers/CustomerBundleView"
 import TemplateDetails from "./pages/vendors/templateDetails";
 
 export default function App() {
@@ -31,6 +32,7 @@ export default function App() {
 
             <Route path="/customer/settings" element={<CustomerSignUp />} />
             <Route path="/vendor/:vendorId" element={<CustomerVendorView />} />
+            <Route path="/bundle/:templateId" element={<CustomerBundleView />} />
           </Route>
 
           {/* Only Vendors allowed */}

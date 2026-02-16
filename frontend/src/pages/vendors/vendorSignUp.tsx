@@ -48,7 +48,12 @@ export default function VendorSignUp() {
       setStep((s) => s + 1);
     }
   }
-  const handlePrev = () => {step === 1 ? navigate("/customer/signup") : setStep((s) => s - 1)};
+  const handlePrev = () => {
+    if (step === 1) {
+      navigate("/customer/signup")
+    } else {
+       setStep((s) => s - 1)
+    }};
 
   async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
