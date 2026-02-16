@@ -115,40 +115,54 @@ export default function BundleDetailsPage() {
     </span>
   );
 
-  const handleReserve = async () => {
-    if (!bundle) return;
-    setReserving(true);
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`/api/reservations/${bundle.template_id}/reserve`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
-      });
+const handleReserve = async () => {
+  if (!bundle) return;
+  setReserving(true);
 
-      if (!res.ok) {
-        const data = await res.json();
-        alert(data.detail || "Failed to reserve");
-        return;
-      }
+  try {
+    const token = localStorage.getItem("token");
 
+    const res = await fetch(`/api/reservations/${bundle.template_id}/reserve`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
       const data = await res.json();
-      const codeRes = await fetch(`/api/reservations/${data.reservation_id}/customer`, {
-        headers: { "Authorization": `Bearer ${token}` }
-      });
-      const codeData = await codeRes.json();
-      setReservationCode(codeData.code);
-
-      setUserStoreCredit((prev) => prev - bundle.cost);
-
-    } catch (err) {
-      console.error(err);
-      alert("Error reserving bundle");
-    } finally {
-      setReserving(false);
+      alert(data.detail || "Failed to reserve");
+      return;
     }
-  };
+
+    const data = await res.json();
+
+    const updatedTemplate = await getTemplateById(bundle.template_id);
+    const updatedCount = await getTemplateBundleCount(bundle.template_id);
+    setBundle({
+      ...updatedTemplate,
+      available_count: updatedCount ?? 0,
+    });
+
+    const profileRes = await fetch("/api/customers/profile", {
+      headers: { "Authorization": `Bearer ${token}` },
+    });
+    const profileData = await profileRes.json();
+    setUserStoreCredit(profileData.store_credit ?? 0);
+
+    const codeRes = await fetch(`/api/reservations/${data.reservation_id}/customer`, {
+      headers: { "Authorization": `Bearer ${token}` },
+    });
+    const codeData = await codeRes.json();
+    setReservationCode(codeData.code);
+
+  } catch (err) {
+    console.error(err);
+    alert("Error reserving bundle");
+  } finally {
+    setReserving(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-pattern pb-32">
