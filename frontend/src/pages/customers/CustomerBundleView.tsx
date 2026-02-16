@@ -36,6 +36,8 @@ export default function BundleDetailsPage() {
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [loading, setLoading] = useState(true);
   const [userStoreCredit, setUserStoreCredit] = useState(0);
+  const [reservationCode, setReservationCode] = useState<string | null>(null);
+  const [reserving, setReserving] = useState(false);
 
   useEffect(() => {
     const fetchBundle = async () => {
@@ -113,6 +115,41 @@ export default function BundleDetailsPage() {
     </span>
   );
 
+  const handleReserve = async () => {
+    if (!bundle) return;
+    setReserving(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`/api/reservations/${bundle.template_id}/reserve`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.detail || "Failed to reserve");
+        return;
+      }
+
+      const data = await res.json();
+      const codeRes = await fetch(`/api/reservations/${data.reservation_id}/customer`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const codeData = await codeRes.json();
+      setReservationCode(codeData.code);
+
+      setUserStoreCredit((prev) => prev - bundle.cost);
+
+    } catch (err) {
+      console.error(err);
+      alert("Error reserving bundle");
+    } finally {
+      setReserving(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-pattern pb-32">
       <div className="max-w-6xl mx-auto px-6 pt-12">
@@ -150,7 +187,7 @@ export default function BundleDetailsPage() {
                 <p className="text-gray-600 text-sm">
                   Reserving this bundle prevents approximately{" "}
                   <span className="font-semibold text-gray-800">
-                    {bundle.carbon_saved}kg of CO₂e
+                    {(Math.round(bundle.carbon_saved * 100) / 100).toLocaleString()}kg of CO₂e
                   </span>{" "}
                   from being wasted.
                 </p>
@@ -235,6 +272,7 @@ export default function BundleDetailsPage() {
               </div>
 
               <button
+                onClick={handleReserve}
                 disabled={isSoldOut || isInsufficientFunds}
                 className={`w-full py-5 rounded-2xl font-bold text-lg transition-all
                   ${
@@ -247,6 +285,15 @@ export default function BundleDetailsPage() {
               >
                 {isSoldOut ? "Sold Out" : isInsufficientFunds ? "Insufficient Funds" : "Reserve Bundle"}
               </button>
+              
+              {reservationCode && (
+                <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg text-center">
+                  <p className="font-semibold">Reservation Confirmed!</p>
+                  <p>Your pickup code is:</p>
+                  <div className="text-2xl font-bold text-[hsl(var(--primary))]">{reservationCode}</div>
+                  <p>Show this code to the vendor to collect your bundle.</p>
+                </div>
+              )}
             </div>
 
           </div>
