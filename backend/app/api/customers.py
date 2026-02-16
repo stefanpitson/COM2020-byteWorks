@@ -86,13 +86,11 @@ def get_streak(
     # get the current streak: 
     statement = (
         select(
-            Streak.count
+            Streak
         )
         .where(Streak.customer_id == current_user.customer_profile.customer_id)
         .where(Streak.ended.is_(False))
     )
 
-    count = session.exec(statement).first()
-    if count == None:
-        return 0
-    return count 
+    streak = session.exec(statement).first()
+    return streak
