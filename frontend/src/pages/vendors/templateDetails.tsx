@@ -1,6 +1,20 @@
 import React, {useState} from "react";
 import { useNavigate } from "react-router-dom";
 import { createTemplate } from "../../api/templates";
+import CeleryImg from "../../assets/allergens/Celery.png";
+import CrustaceansImg from "../../assets/allergens/Crustaceans.png";
+import EggImg from "../../assets/allergens/Egg.png";
+import FishImg from "../../assets/allergens/Fish.png";
+import GlutenImg from "../../assets/allergens/Gluten.png";
+import LupinImg from "../../assets/allergens/Lupin.png";
+import MilkImg from "../../assets/allergens/Milk.png";
+import MolluscsImg from "../../assets/allergens/Molluscs.png";
+import MustardImg from "../../assets/allergens/Mustard.png";
+import PeanutsImg from "../../assets/allergens/Peanuts.png";
+import SesameImg from "../../assets/allergens/Sesame.png";
+import So2Img from "../../assets/allergens/So2.png";
+import SoyabeansImg from "../../assets/allergens/Soyabeans.png";
+import TreenutsImg from "../../assets/allergens/Treenuts.png";
 
 export default function TemplateDetails() {
     const navigate = useNavigate();
@@ -17,6 +31,23 @@ export default function TemplateDetails() {
     const [inclusions, setInclusions] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+    const ALLERGEN_LIST = [
+        { name: "Celery", image: CeleryImg },
+        { name: "Gluten", image: GlutenImg },
+        { name: "Crustaceans", image: CrustaceansImg },
+        { name: "Eggs", image: EggImg }, 
+        { name: "Fish", image: FishImg },
+        { name: "Lupin", image: LupinImg },
+        { name: "Milk", image: MilkImg },
+        { name: "Molluscs", image: MolluscsImg },
+        { name: "Mustard", image: MustardImg },
+        { name: "Treenuts", image: TreenutsImg },
+        { name: "Peanuts", image: PeanutsImg },
+        { name: "Sesame", image: SesameImg },
+        { name: "Soybean", image: SoyabeansImg }, 
+        { name: "Sulphur Dioxide", image: So2Img } 
+    ];
 
     const validateForm = () => {
         const newErrors: { [key: string]: string } = {};
@@ -160,15 +191,22 @@ export default function TemplateDetails() {
                     <div className={cardStyle}>
                     <h3 className="text-sm font-medium text-gray-900 mb-3">Allergens</h3>
                     <div className="space-y-3 text-sm text-gray-600">
-                        {["Celery", "Gluten", "Crustaceans", "Eggs", "Fish", "Lupin", "Milk", "Molluscs", "Mustard", "Treenuts", "Peanuts", "Sesame", "Soybean", "Sulphur Dioxide"].map((allergen) => (
-                        <label key={allergen} className="flex items-center cursor-pointer hover:text-gray-900">
+                        {ALLERGEN_LIST.map((allergen) => (
+                        <label key={allergen.name} className="flex items-center cursor-pointer hover:text-gray-900">
                         <input 
                             type="checkbox" 
-                            checked={allergens.includes(allergen)}
-                            onChange={() => handleAllergenChange(allergen)}
+                            checked={allergens.includes(allergen.name)}
+                            onChange={() => handleAllergenChange(allergen.name)}
                             className="mr-3 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
                         />
-                            {allergen}
+
+                        <img 
+                            src={allergen.image}
+                            alt={allergen.name}
+                            className="w-6 h-6 mr-2 object-contain"
+                        />
+
+                        {allergen.name}
                         </label>
                     ))}
                     </div>
