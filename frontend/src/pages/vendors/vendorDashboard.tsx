@@ -22,11 +22,6 @@ const PlusIcon = () => (
   </svg>
 );
 
-const LeafIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
-    <path fillRule="evenodd" d="M12.963 2.286a.75.75 0 00-1.071-.136 9.742 9.742 0 00-3.539 6.177c-.129.58-.94.961-1.272.26a4.246 4.246 0 01-.13-1.077 5.25 5.25 0 00-3.805 5.188c0 2.9 2.355 5.25 5.25 5.25 1.583 0 3.018-.707 4.01-1.815.728-.813 1.956-.566 2.338.444.208.549.262 1.13.262 1.62h2.25c0-4.085-3.047-7.46-7.14-7.859a1.503 1.503 0 01-1.353-1.637c.026-.255.06-.508.102-.756a7.502 7.502 0 013.295-4.66z" clipRule="evenodd" />
-  </svg>
-);
 
 const BagIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
@@ -57,8 +52,9 @@ export default function VendorTemplateManager() {
       try {
        
         const vendorData = await getVendorProfile();
+        vendorData.carbon_saved = vendorData.carbon_saved ?? 0;
         setVendor(vendorData);
-
+        
         if (!vendorData || vendorData.vendor_id === undefined) {
           console.error("Vendor profile or ID is missing");
           return;
@@ -231,29 +227,29 @@ export default function VendorTemplateManager() {
             </div>
 
             <div className="md:w-2/3 flex flex-col justify-center">
-                 <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-2">My Shop</h1>
-                 <p className="text-gray-500 mb-6">Manage your templates and daily bundle stock here.</p>
+              <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-2">My Shop</h1>
+              <p className="text-gray-500 mb-6">Manage your templates and daily bundle stock here.</p>
 
-                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="md:col-span-2 flex items-start gap-3">
-                        <div className="p-2.5 bg-orange-50 text-[hsl(var(--accent))] rounded-xl shrink-0">
-                            <MapPinIcon />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wide mb-1">Location</h3>
-                            <p className="text-gray-600 font-medium">
-                                {vendor.street}, {vendor.city}, {vendor.post_code}
-                            </p>
-                        </div>
+              <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="md:col-span-2 flex items-start gap-3">
+                    <div className="p-2.5 bg-orange-50 text-[hsl(var(--accent))] rounded-xl shrink-0">
+                        <MapPinIcon />
                     </div>
-                 </div>
-
-                 {vendor.carbon_saved > 0 && (
-                     <div className="mt-6 inline-flex items-center gap-2 bg-green-50 text-green-700 px-5 py-3 rounded-2xl font-bold self-start border border-green-200">
-                         <LeafIcon />
-                         <span>Your store has saved {vendor.carbon_saved}kg of CO2e!</span>
-                     </div>
-                 )}
+                    <div>
+                        <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wide mb-1">Location</h3>
+                        <p className="text-gray-600 font-medium">
+                            {vendor.street}, {vendor.city}, {vendor.post_code}
+                        </p>
+                    </div>
+                </div>
+              </div>
+              <button 
+                onClick={() => navigate('/vendor/analytics')}
+                className="ml-4 shrink-0 flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-xl hover:bg-black transition-colors"
+              >
+                <PlusIcon />
+                <span className="font-bold text-sm">Analytics</span>
+            </button>
             </div>
           </div>
         )}
