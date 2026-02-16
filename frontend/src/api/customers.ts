@@ -6,3 +6,9 @@ export const getCustomerProfile = async () => {
 
   return response.data;
 };
+
+export const getCustomerStreak = async () => {
+  const response = await api.get<number>("/customers/streak");
+
+  return response.data;
+}
