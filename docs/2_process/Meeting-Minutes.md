@@ -287,3 +287,14 @@ We also discussed what documentation is left to do:
 - testing report
 
 planning to work hard over the weekend to have the project ready for the demo
+
+# Meeting 12 - 16/02
+## Attendance
+All present 
+
+## Overview
+We discussed what needs to be implemented before the demo:
+
+#### Endpoints:
+- calculate earnings
+- 

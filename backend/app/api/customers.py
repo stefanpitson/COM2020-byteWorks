@@ -1,9 +1,8 @@
-from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from app.core.database import get_session
 from app.models import User, Streak
-from app.schema import CustomerRead, CustomerUpdate
+from app.schema import CustomerRead, CustomerUpdate, StreakRead
 from app.api.deps import get_current_user
 from app.core.security import verify_password, get_password_hash
 from ukpostcodeutils import validation
@@ -72,7 +71,7 @@ def update_customer_profile(
     return {"message": "Customer updated successfully"}
     
 # get customer streak 
-@router.get("/streak", tags=["Customer","Streaks"], summary="Get the current streak")
+@router.get("/streak", response_model=StreakRead, tags=["Customer","Streaks"], summary="Get the current streak")
 def get_streak(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
@@ -87,13 +86,11 @@ def get_streak(
     # get the current streak: 
     statement = (
         select(
-            Streak.count
+            Streak
         )
         .where(Streak.customer_id == current_user.customer_profile.customer_id)
         .where(Streak.ended.is_(False))
     )
 
-    count = session.exec(statement).first()
-    if count == None:
-        return 0
-    return count 
+    streak = session.exec(statement).first()
+    return streak

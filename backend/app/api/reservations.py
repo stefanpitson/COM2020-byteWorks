@@ -304,6 +304,9 @@ def increment_streak(session: Session, customer):
     try:
         if streak != None:
             # check date 
+            if streak.last == datetime.now().date():
+                return # streak is not adjusted if last was same day
+
             last = streak.last + timedelta(days=7)
             if last >= datetime.now().date(): # streak is in date
                 streak.count +=1
