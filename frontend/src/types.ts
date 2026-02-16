@@ -43,3 +43,12 @@ export interface Template {
     title: string;
   }[];
 }
+
+export interface Reservation {
+  reservation_id: number;
+  bundle_id: number;
+  customer_id: number;
+  time_created: string;
+  code: number;
+  status: string;
+};
