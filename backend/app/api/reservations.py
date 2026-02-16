@@ -310,6 +310,7 @@ def finalise_reservation(
 
     return {"message": "Reservation accepted successfully"}
 
+@router.post("/vendor/noshows", tags=["Reservations"], summary="Set all reservat")
 def set_reservation_no_shows(
     days_back : int = 1,
     session: Session = Depends(get_session),
@@ -327,7 +328,8 @@ def set_reservation_no_shows(
     statement = select(Reservation).where(Template.vendor == current_user.vendor_profile.vendor_id, 
                                           Reservation.bundle_id == Bundle.bundle_id,
                                           Bundle.template_id == Template.template_id,
-                                          Bundle.date > go_back_date)
+                                          Bundle.date > go_back_date,
+                                          Reservation.status == "booked")
     reservations = session.exec(statement).all()
 
     try:
