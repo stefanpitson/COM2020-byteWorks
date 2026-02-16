@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.jpg"; 
 import { getCustomerProfile, getCustomerStreak } from "../api/customers"
+import type { Streak } from "../types"
 
 const SettingsIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
@@ -33,7 +34,7 @@ export default function NavBar() {
   const [isSettingsOpen, setSettingsOpen] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const [storeCredit, setStoreCredit] = useState<number | null>(null);
-  const [streak, setStreak] = useState<number | null>(null);
+  const [streak, setStreak] = useState<Streak | null>(null);
 
   const role = localStorage.getItem('role');
   const homeLink = role === 'vendor' ? '/vendor/dashboard' : '/customer/home';
@@ -61,8 +62,8 @@ export default function NavBar() {
         const profile = await getCustomerProfile();
         setStoreCredit(profile.store_credit);
 
-        const streakCount = await getCustomerStreak();
-        setStreak(streakCount);
+        const streakResponse = await getCustomerStreak();
+        setStreak(streakResponse);
       } catch (err) {
         console.error("Failed to load navbar data", err);
       }
@@ -74,7 +75,12 @@ export default function NavBar() {
     localStorage.clear();
     navigate("/login");
   }
-  
+
+  const today = new Date().toISOString().slice(0, 10);
+  const hasStreak = streak && streak.count > 0;
+  const isExtendedToday = streak ? streak.last === today : false;
+  const isGrey = !hasStreak || !isExtendedToday;
+  const displayCount = streak ? streak.count : 0;
 
   return (
     <nav className="fixed top-0 left-0 right-0 h-16 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm z-50 px-4 md:px-8 flex justify-between items-center transition-all">
@@ -98,16 +104,16 @@ export default function NavBar() {
 
       <div ref={menuRef} className="flex items-center gap-4">
 
-        {role === "customer" && streak !== null && (
+        {role === "customer" && (
           <div
             className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold ${
-              streak === 0
+              isGrey
                 ? "bg-gray-100 text-gray-400"
                 : "bg-[hsl(34,92%,64%)]/10 text-[hsl(14,90%,60%)]"
             }`}
           >
             <FireIcon />
-            <span>{streak} day streak</span>
+            <span>{displayCount} day streak</span>
           </div>
         )}
 
