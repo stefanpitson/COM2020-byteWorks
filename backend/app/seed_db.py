@@ -5,28 +5,27 @@ from app.models import User, Vendor, Customer, Template, Bundle, Reservation
 from datetime import datetime, timedelta
 
 def seed_database():
-    # SQLModel.metadata.drop_all(engine)
+    SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
 
     with Session(engine) as session:
-        # === USERS ===
         vendor1_user = User(
-            email="shop@demo.com",
-            password_hash=get_password_hash("shop123"),
+            email="admin@tesco.com",
+            password_hash=get_password_hash("tesco123"),
             role="vendor",
         )
         vendor2_user = User(
-            email="bakery@demo.com",
-            password_hash=get_password_hash("bakery123"),
+            email="admin@greggs.com",
+            password_hash=get_password_hash("greggs123"),
             role="vendor",
         )
         customer1_user = User(
-            email="bob@demo.com",
+            email="bob@gmail.com",
             password_hash=get_password_hash("bob123"),
             role="customer",
         )
         customer2_user = User(
-            email="alice@demo.com",
+            email="alice@gmail.com",
             password_hash=get_password_hash("alice123"),
             role="customer",
         )
@@ -52,12 +51,13 @@ def seed_database():
         )
         vendor2 = Vendor(
             user_id=vendor2_user.user_id,
-            name="Cosy Coffee & Bakery",
+            name="Greggs",
             street="12 High Street",
             city="Exeter",
             post_code="EX4 3AT",
             phone_number="01392 333444",
             opening_hours="07:00-18:00",
+            photo="/static/greggs.png",
             validated=True,
             carbon_saved=220,
         )
@@ -100,6 +100,7 @@ def seed_database():
             is_vegan=False,
             is_vegetarian=True,
             vendor=vendor1.vendor_id,
+            photo="/static/cinnabuns.jpg",
         )
         template2 = Template(
             title="Mixed Sandwich Pack",
@@ -114,6 +115,7 @@ def seed_database():
             is_vegan=False,
             is_vegetarian=False,
             vendor=vendor1.vendor_id,
+            photo="/static/sandwiches.jpg",
         )
         template3 = Template(
             title="Fresh Salad Bowl",
@@ -128,6 +130,7 @@ def seed_database():
             is_vegan=True,
             is_vegetarian=True,
             vendor=vendor1.vendor_id,
+            photo="/static/saladbowl.jpg",
         )
         template4 = Template(
             title="Coffee & Muffin Bundle",
@@ -142,6 +145,7 @@ def seed_database():
             is_vegan=False,
             is_vegetarian=True,
             vendor=vendor2.vendor_id,
+            photo="/static/coffeemuffin.jpg",
         )
         template5 = Template(
             title="Artisan Bread Loaf",
@@ -156,6 +160,7 @@ def seed_database():
             is_vegan=True,
             is_vegetarian=True,
             vendor=vendor2.vendor_id,
+            photo="/static/bread.jpg",
         )
 
         session.add_all([template1, template2, template3, template4, template5])
