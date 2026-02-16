@@ -19,3 +19,10 @@ export async function getTemplateBundleCount(templateId: number): Promise<number
   );
   return response.data ?? 0;
 }
+
+export async function getTemplateById(templateId: number): Promise<Template> {
+  const response = await axios.get<Template>(
+    `/templates/${templateId}`
+  );
+  return response.data;
+}

@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlmodel import Session, select, func
 from app.core.database import get_session
 from app.models import Template, Allergen, Bundle, Reservation, Customer
-from app.schema import TemplateCreate, TemplateList, TemplateRead 
+from app.schema import TemplateCreate, TemplateList, TemplateRead
 from app.api.deps import get_current_user
 from datetime import datetime
 from random import randint
+import uuid
+import shutil
 
 router = APIRouter()
 
@@ -36,6 +38,7 @@ def create_template(
 
     calc_carbon_saved = meat_carbon +carb_carbon +veg_carbon
     
+    # make new template 
     new_template = Template(
         title = data.title,
         description = data.description,
@@ -75,19 +78,40 @@ def create_template(
         session.rollback() # If anything fails, undo the Vendor creation
         raise HTTPException(status_code=500, detail=str(e))
     
-# get a specific template
-@router.get("/{template_id}", response_model = TemplateRead, tags=["Templates"], summary="Get one templates details")
-def get_template(
+@router.post("/upload-image/{template_id}", tags=["Templates"], summary="Post an image to be stored on the server and set it to be the Template photo")
+async def upload_image(
     template_id:int,
-    session: Session = Depends(get_session),
-    current_user = Depends(get_current_user) # conducts basic security checks even though the variable isn't used
-):
-    statement = select(Template).where(Template.template_id == template_id)
-    template = session.exec(statement).first()
-    if not template:
-        raise HTTPException(status_code=404, detail="Template not found")
+    image: UploadFile = File(...),
+    current_user = Depends(get_current_user),
+    session: Session = Depends(get_session)
+    ):
+    # If the image is malformed, throw a 400 error
+    if not image.filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
     
-    return template
+    file_extension = image.filename.split(".")[-1]
+    unique_filename = f"{uuid.uuid4()}.{file_extension}"
+    file_location = f"uploads/{unique_filename}"
+
+    # Copy the file information to the /uploads folder
+    with open(file_location, "wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
+
+    if not current_user.vendor_profile:
+        raise HTTPException(status_code=400, detail="User is not a vendor")
+    
+    template = session.exec(select(Template).where(Template.template_id == template_id)).first()
+
+    # Set the vendor photo to the saved filepath
+    template.photo = f"static/{unique_filename}"
+
+    try:
+        session.add(template)
+        session.commit()
+        return {"status": "success", "image_url":template.photo}
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
     
 # get a list of templates 
@@ -96,7 +120,7 @@ def get_list_of_templates(
     # doesn't need verification? as anyone can see the templates?
     vendor_id: int,
     session: Session = Depends(get_session),
-    current_user = Depends(get_current_user) # conducts basic security checks even though the variable isn't used
+    current_user = Depends(get_current_user)
     ):
     
     if current_user.role == "vendor" and vendor_id != current_user.vendor_profile.vendor_id:
@@ -121,7 +145,7 @@ def get_list_of_templates(
     
 # gets the count of how many bundles there are for a template
 # expected use when getting a displaying full bundle/template information 
-@router.get("/count/{template_id}", response_model = int, tags=["Template"], summary="Get the count of available bundles for a specified template.")
+@router.get("/count/{template_id}", response_model = int, tags=["Templates"], summary="Get the count of available bundles for a specified template.")
 def count_bundles(
     template_id: int,
     session: Session = Depends(get_session),
@@ -147,4 +171,17 @@ def count_bundles(
     if count == None:
         return 0
     return count 
+
+# get a specific template
+@router.get("/{template_id}", response_model = TemplateRead, tags=["Templates"], summary="Get one templates details")
+def get_template(
+    template_id:int,
+    session: Session = Depends(get_session),
+    current_user = Depends(get_current_user) # conducts basic security checks even though the variable isn't used
+):
+    statement = select(Template).where(Template.template_id == template_id)
+    template = session.exec(statement).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
     
+    return template
