@@ -21,7 +21,9 @@ export interface Vendor {
   post_code: string;
   opening_hours: string;
   phone_number: string;
+  total_revenue: number;
   carbon_saved: number;
+  food_saved: number;
   validated: boolean;
   photo: string;
 }
@@ -30,13 +32,17 @@ export interface Template {
   template_id: number;
   title: string;
   description: string;
+  estimated_value:number;
   cost: number;
   meat_percent: number;
   carb_percent: number;
   veg_percent: number;
   carbon_saved: number;
+  weight: number;
   is_vegan: boolean;
   is_vegetarian: boolean;
+  vendor?: number;
+  photo: string;
   allergens: {
     allergen_id: number;
     title: string;

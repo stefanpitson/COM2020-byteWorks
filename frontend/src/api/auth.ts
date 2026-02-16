@@ -28,10 +28,9 @@ export interface UserSignupData extends Omit<User, "user_id"> {
 
 // Customer
 
-export type CustomerSignupData = {
+export type CustomerSignupData ={
   name: string;
   post_code: string;
-
 }
 
 export interface RegisterCustomerPayload {
@@ -61,7 +60,7 @@ export type VendorSignupData = {
   post_code: string;
   opening_hours: string;
   phone_number: string;
-}
+} 
 
 export interface RegisterVendorPayload {
   user: UserSignupData;
