@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.jpg"; 
-import { getCustomerProfile, getCustomerStreak } from "../api/customers"
+import { getCustomerProfile } from "../api/customers"
 
 const SettingsIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
@@ -22,18 +22,11 @@ const UserIcon = () => (
   </svg>
 );
 
-const FireIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-fire" viewBox="0 0 16 16">
-    <path d="M8 16c3.314 0 6-2 6-5.5 0-1.5-.5-4-2.5-6 .25 1.5-1.25 2-1.25 2C11 4 9 .5 6 0c.357 2 .5 4-2 6-1.25 1-2 2.729-2 4.5C2 14 4.686 16 8 16m0-1c-1.657 0-3-1-3-2.75 0-.75.25-2 1.25-3C6.125 10 7 10.5 7 10.5c-.375-1.25.5-3.25 2-3.5-.179 1-.25 2 1 3 .625.5 1 1.364 1 2.25C11 14 9.657 15 8 15"/>
-  </svg>
-);
-
 export default function NavBar() {
   const navigate = useNavigate();
   const [isSettingsOpen, setSettingsOpen] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const [storeCredit, setStoreCredit] = useState<number | null>(null);
-  const [streak, setStreak] = useState<number | null>(null);
 
   const role = localStorage.getItem('role');
   const homeLink = role === 'vendor' ? '/vendor/dashboard' : '/customer/home';
@@ -54,27 +47,24 @@ export default function NavBar() {
   }, [isSettingsOpen]);
 
   useEffect(() => {
-    async function fetchData() {
+    async function fetchStoreCredit() {
       if (role !== "customer") return;
 
       try {
         const profile = await getCustomerProfile();
         setStoreCredit(profile.store_credit);
-
-        const streakCount = await getCustomerStreak();
-        setStreak(streakCount);
       } catch (err) {
-        console.error("Failed to load navbar data", err);
+        console.error("Failed to load store credit", err);
       }
     }
-    fetchData();
+
+    fetchStoreCredit();
   }, [role]);
 
   function handleLogout() {
     localStorage.clear();
     navigate("/login");
   }
-  
 
   return (
     <nav className="fixed top-0 left-0 right-0 h-16 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm z-50 px-4 md:px-8 flex justify-between items-center transition-all">
@@ -97,19 +87,6 @@ export default function NavBar() {
       </Link>
 
       <div ref={menuRef} className="flex items-center gap-4">
-
-        {role === "customer" && streak !== null && (
-          <div
-            className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold ${
-              streak === 0
-                ? "bg-gray-100 text-gray-400"
-                : "bg-[hsl(34,92%,64%)]/10 text-[hsl(14,90%,60%)]"
-            }`}
-          >
-            <FireIcon />
-            <span>{streak} day streak</span>
-          </div>
-        )}
 
         {role === "customer" && storeCredit !== null && (
           <div
