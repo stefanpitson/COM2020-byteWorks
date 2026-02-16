@@ -106,7 +106,6 @@ class Template(SQLModel, table=True):
 class Allergen(SQLModel, table=True):
     allergen_id: Optional[int] = Field(default=None, primary_key=True)
     title: str 
-    description: str
 
     templates: List["Template"] = Relationship( # for the linking table
         back_populates="allergens",             # having this means we dont have to write join statements
