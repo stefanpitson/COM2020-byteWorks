@@ -22,7 +22,7 @@ export default function App() {
         <Route path="/vendor/signup" element={<VendorSignUp />} />
         <Route path="/customer/signup" element={<CustomerSignUp />} />
 
-        <Route path="/vendor/template" element={<TemplateDetails />} />
+        
 
         {/* Applies the navbar */}
         <Route element={<MainLayout />}>
@@ -39,6 +39,7 @@ export default function App() {
           <Route element={<ProtectedRoute allowedRole="vendor" />}>
             <Route path="/vendor/dashboard" element={<VendorDashboard />} />
             <Route path="/vendor/settings" element={<VendorSettings />} />
+            <Route path="/vendor/template" element={<TemplateDetails />} />
           </Route>
         </Route>
       </Routes>
