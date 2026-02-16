@@ -27,7 +27,6 @@ DEFAULT_ALLERGENS = [
 ]
 
 def seed_allergens():
-    """Checks if allergens table is empty and populates it if necessary."""
     with Session(engine) as session:
         # Check if we already have allergens in the DB
         statement = select(Allergen)
@@ -36,7 +35,7 @@ def seed_allergens():
         if not existing_allergens:
             print("Seeding default allergens...")
             for name in DEFAULT_ALLERGENS:
-                allergen = Allergen(name=name)
+                allergen = Allergen(title=name)
                 session.add(allergen)
             session.commit()
             print("Allergens successfully seeded.")
