@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 
+from app.schema import VendorList
+
 def test_create_bundle_success(test_client, vendor_login_response, template_factory):
     template_factory()
     token = vendor_login_response["access_token"]
@@ -81,6 +83,52 @@ def test_create_bundle_with_template_of_an_other_vendor_role_fail(test_client, v
     bundle_response_data = bundle_response.json()
     assert bundle_response_data["detail"] == "You are not the vendor of the template"
     assert bundle_response.status_code == 403
+
+def test_get_mystore_view_of_bundles_success(test_client, vendor_login_response, registered_bundle):
+    token = vendor_login_response["access_token"]
+    d = datetime.now()
+    if d.month <= 9:
+        month = f'0{d.month}'
+    else:
+        month = d.month
+    if d.day <= 9:
+        day = f'0{d.day}'
+    else:
+        day = d.day
+    mystore_response = test_client.get("/bundles/mystore",
+        headers={"Authorization": "Bearer " + token},               
+    )
+    mystore_response_data = mystore_response.json()
+    assert mystore_response_data["total_count"] == 5
+    i = 1
+    for bundle in mystore_response_data["bundles"]:
+        assert bundle["bundle_id"] == i
+        i+=1
+        assert bundle["template_id"] == 1
+        assert bundle["picked_up"] == False
+        assert bundle["date"] == f"{d.year}-{month}-{day}"
+        # assert time
+        assert bundle["purchased_by"] == None
+    assert mystore_response.status_code == 200
+
+def test_get_mystore_view_with_no_bundles_success(test_client, vendor_login_response):
+    token = vendor_login_response["access_token"]
+    mystore_response = test_client.get("/bundles/mystore",
+        headers={"Authorization": "Bearer " + token},               
+    )
+    mystore_response_data = mystore_response.json()
+    assert mystore_response_data["total_count"] == 0
+    assert mystore_response_data["bundles"] == []
+    assert mystore_response.status_code == 200
+
+def test_get_mystore_view_of_bundles_with_invalid_role_fail(test_client, customer_login_response):
+    token = customer_login_response["access_token"]
+    mystore_response = test_client.get("/bundles/mystore",
+        headers={"Authorization": "Bearer " + token},               
+    )
+    mystore_response_data = mystore_response.json()
+    assert mystore_response_data["detail"] == "Not a vendor account"
+    assert mystore_response.status_code == 403
 
 def test_get_bundle_success(test_client, vendor_login_response, registered_bundle):
     token = vendor_login_response["access_token"]

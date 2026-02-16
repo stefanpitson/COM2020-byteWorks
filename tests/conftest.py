@@ -202,6 +202,7 @@ def template_factory(test_client, vendor_login_response):
 @pytest.fixture
 def registered_bundle(test_client, vendor_login_response, template_factory):
     template_factory()
+    template_factory()
     token = vendor_login_response["access_token"]
     bundle_response = test_client.post("/bundles/create",
         headers={"Authorization": "Bearer " + token},
