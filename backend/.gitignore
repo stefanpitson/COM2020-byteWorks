@@ -3,5 +3,5 @@
 *.py[cod]
 .vscode/
 /uploads/*
-# Exception: do not ignore keeper.txt
-!/uploads/placeholder.jpg
+# Exception: do not ignore .gitkeep
+!/uploads/.gitkeep

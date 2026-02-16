@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select, func
 from app.core.database import get_session
-from app.models import Template, Allergen, Bundle, Reservation
+from app.models import Template, Allergen, Bundle, Reservation, Customer
 from app.schema import TemplateCreate, TemplateList, TemplateRead 
 from app.api.deps import get_current_user
 from datetime import datetime
+from random import randint
 
 router = APIRouter()
 
@@ -19,19 +20,19 @@ def create_template(
     if current_user.role != "vendor":
         raise HTTPException(status_code=403, detail="Not a vendor account")
 
-    if session.exec(select(Template).where(Template.title == data.title and Template.vendor == current_user.vendor_profile.vendor_id)).first():
+    if session.exec(select(Template).where(Template.title == data.title, Template.vendor == current_user.vendor_profile.vendor_id)).first():
         raise HTTPException(status_code=400, detail="Template already registered")
     
     percents = data.meat_percent + data.carb_percent + data.veg_percent\
     
     if percents > 1.05 or percents < 0.90:
-        raise HTTPException(status_code=400, detail="Percentages do not add up to 100")
+        raise HTTPException(status_code=400, detail="Percentages do not add up to 1")
 
 
     # calculating the bundle carbon 
     meat_carbon = data.weight * (data.meat_percent) *12.4 # see backend chat
     carb_carbon = data.weight * (data.carb_percent) *1 
-    veg_carbon = data.weight * ( data.meat_percent) *0.2 
+    veg_carbon = data.weight * ( data.veg_percent) *0.2 
 
     calc_carbon_saved = meat_carbon +carb_carbon +veg_carbon
     
@@ -75,7 +76,7 @@ def create_template(
         raise HTTPException(status_code=500, detail=str(e))
     
 # get a specific template
-@router.get("/{template_id}", response_model= TemplateRead, tags=["Templates"], summary="Get one templates details")
+@router.get("/{template_id}", response_model = TemplateRead, tags=["Templates"], summary="Get one templates details")
 def get_template(
     template_id:int,
     session: Session = Depends(get_session),
@@ -99,7 +100,7 @@ def get_list_of_templates(
     ):
     
     if current_user.role == "vendor" and vendor_id != current_user.vendor_profile.vendor_id:
-        return HTTPException(status_code=403, detail="Not the correct vendor")
+        raise HTTPException(status_code=403, detail="Not the correct vendor")
 
     statement = select(Template).where(Template.vendor == vendor_id)
     templates = session.exec(statement).all()
@@ -143,4 +144,7 @@ def count_bundles(
     )
 
     count = session.exec(statement).one_or_none()
+    if count == None:
+        return 0
     return count 
+    

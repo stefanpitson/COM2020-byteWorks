@@ -6,3 +6,24 @@ export const getVendorProfile = async () => {
 
   return response.data;
 };
+
+type HomeVendor = Vendor & {
+  bundle_count: number;
+  has_vegan: boolean;
+  has_vegetarian: boolean;
+};
+
+interface VendorResponse {
+  total_count: number;
+  vendors: HomeVendor[];
+}
+
+export const getAllVendors = async (): Promise<VendorResponse> => {
+  const response = await api.get<VendorResponse>("/vendors");
+  return response.data;
+};
+
+export async function getVendorById(vendorId: number): Promise<Vendor> {
+  const res = await api.get<Vendor>(`/vendors/${vendorId}`);
+  return res.data;
+}

@@ -141,7 +141,7 @@ To summarise:
 Andrew, Arden, Alex, Stefan, Joe ,Jack
 
 ## Overview 
-We started work on an ER diagram to work from on for the design of the back and front end. 
+We started work on an Page layout for the design of the front end. 
 This can be accessed at:
 https://www.figma.com/design/HXzXN460ZO1xMGQeSDfb3Y/group-project?node-id=0-1&p=f
 
@@ -152,6 +152,9 @@ Andrew, Alfie, Alex, Jack, Joe
 ## Overview 
 We worked on the ER diagram, iterating on the design. Coming to consensus on the basic entities and their attributes, this is still to be hashed out with other team members that were not able to attend.
 We also viewed the website designs made by Alfie that will come to guide how each page should look. 
+
+The ER Diagram can be accessed at:
+https://lucid.app/lucidchart/9be3478b-b033-4e02-a547-7e9217e29243/edit?invitationId=inv_0d92ce72-aacd-479e-9018-7f7f074c59fe&page=0_0# 
 
 Security and logging-in was discussed, JWT were decided as a way to authenticate users.
 ## Details
@@ -175,6 +178,7 @@ Mention Hashing algorithm decision
 Demonstrate schema changes
 Discuss user authentication 
 Allocation of new tickets
+
 We discussed how to implement what comes next and planned to individually learn what was there, looking more into the side we were going to be working with. So for frontend the typescript with tailscale, for the backend learning the FastAPI and sqlmodel libraries. 
 
 ## assignments 
@@ -193,10 +197,28 @@ Arden
 
 # Meeting 8 - 03/02
 ### Attendance 
-All but Alfie and Arden
+All but Alfie
 
 ## Overview
-We discussed specific work we have started and what we are getting on with (1), their progress(2), if we need help with anything(3) and what they are planning to do next (4). 
+In this meeting Andrew demonstrated the new framework that we will be using for the project, on the back end code is separated into different files to improve organisation, eg. models.py. on the front end demonstrating how to use back end calls and use information from them. 
+Andrew also went over the new authentication which will support all of the other end points.
+
+We also began assigning work for individuals to do: 
+Andrew - creating vendor sign up 
+Alex - verifying user input
+Joe - implementing templates and bundles 
+Stefan - error messages and refinements
+Magnus - testing back end 
+Jack - adding customer update endpoint 
+Arden - beginning documentation
+Alfie - further design work 
+
+# Meeting 9 - 06
+### Attendance
+All but Alfie and Arden 
+
+## Overview
+Due to scheduling issues we had an asynchronous meeting where we discussed specific work we have started and what we are getting on with (1), their progress(2), if we need help with anything(3) and what they are planning to do next (4). 
 ## Info
 Andrew:
 1-Ive been working on creasing Vendor accounts and uploading their vendor Images
@@ -226,7 +248,7 @@ Magnus:
 1-working on Tests for all the endpoints, including Auth, Customer, Vendor..
 2-I've made a local test database that copies the existing model and lives for the duration of the test program, so as of now I am simply creating extensive tests.
 3-No help needed, but its on test-main repo, people can simply go into tests directory and make tests easily following the format in the program if needed.
-4-Waiting on functional logic to test that is seperate from endpoints. Happy to help others if needed!!
+4-Waiting on functional logic to test that is separate from endpoints. Happy to help others if needed!!
 
 Jack:
 1-On updating customer settings so that customers can change their email, name etc
@@ -234,7 +256,7 @@ Jack:
 3-None
 4-Work on vendors maybe, or add postcode validation to this function
 
-# Meeting 9 - 06/02
+# Meeting 10 - 10/02
 ### Attendance 
 All but Alfie 
 
@@ -246,3 +268,22 @@ Highlighting the need to beguin creating the documentation, namely -(assignment)
 -ethical and legal considerations 
 -deployment guide
 -testing evidence 
+
+# Meeting 11 - 13/02
+### Attendance
+All but Alfie 
+
+## Overview 
+We discussed what is left to be implemented for the demo:
+- reservation end points need completing
+- pages for customer view of vendors
+- pages for vendor home page
+- pages for booking bundles 
+- pages for collecting bundles
+
+We also discussed what documentation is left to do:
+- prototype report
+- slides for presentation 
+- testing report
+
+planning to work hard over the weekend to have the project ready for the demo

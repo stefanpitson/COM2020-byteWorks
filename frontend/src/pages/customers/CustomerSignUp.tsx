@@ -4,6 +4,7 @@ import { registerCustomer } from "../../api/auth";
 import EyeIcon from "../../assets/icons/eye.svg?react";
 import EyeOffIcon from "../../assets/icons/eye-off.svg?react";
 import BackButton from "../../assets/icons/back-button.svg?react";
+import { getPasswordStrength, type PasswordStrength, strengthConfig } from "../../utils/password";
 
 export default function CustomerSignUp() {
   const navigate = useNavigate();
@@ -20,8 +21,6 @@ export default function CustomerSignUp() {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>("very-weak");
-
-  type PasswordStrength = "very-weak" | "weak" | "medium" | "strong" | "very-strong";
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -45,25 +44,14 @@ export default function CustomerSignUp() {
       newErrors.password = "Password is required";
     } else {
       const passwordIssues: string[] = [];
-
-      if (password.length < 8) {
-        passwordIssues.push("Password must exceed 8 characters");
-      }  
-      if (password.length > 64) {
-        passwordIssues.push("Password cannot exceed 64 characters");
-      }  
-      if (!/[A-Z]/.test(password)) {
-        passwordIssues.push("Password must contain at least one capital letter");
-      } 
-      if (!/\d/.test(password)) {
-        passwordIssues.push("Password must contain at least one number");
-      }
-      if (passwordIssues.length > 0) {
-        newErrors.password = passwordIssues.join("\n");
-      }
+      if (password.length < 8) passwordIssues.push("Password must exceed 8 characters");
+      if (password.length > 64) passwordIssues.push("Password cannot exceed 64 characters");
+      if (!/[A-Z]/.test(password))  passwordIssues.push("Password must contain at least one capital letter");
+      if (!/\d/.test(password)) passwordIssues.push("Password must contain at least one number");
+      if (passwordIssues.length > 0) newErrors.password = passwordIssues.join("\n");
     }
       
-    const postCodeRegex = /^[a-zA-Z]{1,2}\d[a-zA-Z\d]?\s\d[a-zA-Z]{2}$/;
+    const postCodeRegex = /^[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2}$/;
     if (!postCode.trim()) {
       newErrors.postCode = "Post Code is required";
     } else if (!postCodeRegex.test(postCode)) {
@@ -84,7 +72,7 @@ export default function CustomerSignUp() {
     try {
       await registerCustomer(
         { email: email.toLowerCase(), password: password, role: "customer" },
-        { name: name, post_code: postCode },
+        { name: name, post_code: postCode.toUpperCase().replace(/\s+/g, "")},
       );
       navigate("/login");
     } catch (error) {
@@ -93,35 +81,6 @@ export default function CustomerSignUp() {
       setIsLoading(false);
     }
   }
-
-  function getPasswordStrength(password: string): PasswordStrength {
-    const length = password.length;
-    const hasUpper = /[A-Z]/.test(password);
-    const hasNumber = /\d/.test(password);
-    const hasSymbol = /[^A-Za-z0-9]/.test(password);
-
-    if (length < 8 || !hasUpper || !hasNumber ) {
-      if (length < 4) {
-        return "very-weak";
-      } else {
-        return "weak";
-      }
-    } else if (length < 12 && !hasSymbol) {
-      return "medium";
-    } else if (length > 11 && hasSymbol) {
-      return "very-strong";
-    } else {
-      return "strong";
-    }
-  }
-
-  const strengthConfig: Record<PasswordStrength, { label: string; color: string }> = {
-    "very-weak": { label: "Very weak", color: "bg-red-500" },
-    "weak": { label: "Weak", color: "bg-red-400" },
-    "medium": { label: "Medium", color: "bg-yellow-400" },
-    "strong": { label: "Strong", color: "bg-green-500" },
-    "very-strong": { label: "Very strong", color: "bg-green-700" },
-  };
 
   const getInputClass = (error?: string) => { return `
     mt-1 block w-full rounded shadow-sm p-2
@@ -142,7 +101,7 @@ export default function CustomerSignUp() {
           onClick={() => navigate("/login")}
           className="rounded-full hover:bg-gray-100 transition-colors"
         >
-          <BackButton/>
+          <BackButton className="size-6"/>
         </button>
         
         <div className="p-4 space-y-4">
@@ -150,14 +109,14 @@ export default function CustomerSignUp() {
           <h2 className="text-2xl font-semibold mb-6">Create Customer</h2>
           
           <label className="block mb-4">
-            <span className="text-sm text-gray-700">Name</span>
+            <span className="text-sm text-gray-700">Username</span>
             <input
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
               }}
               className={getInputClass(errors.name)}
-              placeholder="Name"
+              placeholder="Username"
             />
             {errors.name && (
                 <p className="text-red-500 text-xs mt-1">{errors.name}</p>
@@ -201,7 +160,7 @@ export default function CustomerSignUp() {
                 onClick={() => setShowPassword(prev => !prev)}
                 className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
               >
-                {showPassword ? <EyeOffIcon/> : <EyeIcon/>}
+                {showPassword ? <EyeOffIcon className="size-6"/> : <EyeIcon className="size-6"/>}
               </button>
             </div>
 
@@ -236,10 +195,11 @@ export default function CustomerSignUp() {
             <input
               value={postCode}
               onChange={(e) => {
-                setPostCode(e.target.value);
+                const normalized = e.target.value.toUpperCase().replace(/\s+/g, "");
+                setPostCode(normalized);
               }}
               className={getInputClass(errors.postCode)}
-              placeholder="EX0 0EX"
+              placeholder="EX01EX"
             />
             {errors.postCode && (
                 <p className="text-red-500 text-xs mt-1">{errors.postCode}</p>
