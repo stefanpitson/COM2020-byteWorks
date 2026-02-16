@@ -160,7 +160,7 @@ export default function TemplateDetails() {
                     <div className={cardStyle}>
                     <h3 className="text-sm font-medium text-gray-900 mb-3">Allergens</h3>
                     <div className="space-y-3 text-sm text-gray-600">
-                        {["Gluten", "Dairy", "Eggs", "Shellfish", "Soy", "Nuts", "Sesame"].map((allergen) => (
+                        {["Celery", "Gluten", "Crustaceans", "Eggs", "Fish", "Lupin", "Milk", "Molluscs", "Mustard", "Treenuts", "Peanuts", "Sesame", "Soybean", "Sulphur Dioxide"].map((allergen) => (
                         <label key={allergen} className="flex items-center cursor-pointer hover:text-gray-900">
                         <input 
                             type="checkbox" 
