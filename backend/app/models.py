@@ -49,7 +49,9 @@ class Vendor(SQLModel, table=True):
     phone_number: str
     opening_hours: str
     photo: Optional[str] = Field(default=None)
-    carbon_saved: int = Field(default=0)
+    total_revenue: float = Field(default=0.0) 
+    carbon_saved: float = Field(default=0.0)
+    food_saved: float = Field(default=0.0)
     user: Optional[User] = Relationship(back_populates="vendor_profile")
     validated: bool = Field(default=False)
 
