@@ -3,8 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getTemplateById, getTemplateBundleCount } from "../../api/templates";
 import { getVendorById } from "../../api/vendors";
 import type { Template, Vendor } from "../../types";
-import { resolveImageUrl } from "../../utils/imageUrl";
-import placeholder from "../../assets/placeholder.jpg";
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("en-GB", {
@@ -287,17 +285,17 @@ const handleReserve = async () => {
 
               <button
                 onClick={handleReserve}
-                disabled={isSoldOut || isInsufficientFunds}
+                disabled={isSoldOut || isInsufficientFunds || reserving}
                 className={`w-full py-5 rounded-2xl font-bold text-lg transition-all
                   ${
-                    isSoldOut
+                    isSoldOut || reserving
                       ? "bg-gray-200 text-gray-400"
                       : isInsufficientFunds
                       ? "bg-red-400 text-white"
                       : "bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary-dark))] shadow-lg shadow-green-100 active:scale-95"
                   }`}
               >
-                {isSoldOut ? "Sold Out" : isInsufficientFunds ? "Insufficient Funds" : "Reserve Bundle"}
+                {isSoldOut ? "Sold Out" : isInsufficientFunds ? "Insufficient Funds" : reserving ? "Reserving Bundle..." : "Reserve Bundle"}
               </button>
               
               {reservationCode && (
