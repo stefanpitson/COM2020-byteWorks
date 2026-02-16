@@ -75,21 +75,7 @@ def create_template(
         session.rollback() # If anything fails, undo the Vendor creation
         raise HTTPException(status_code=500, detail=str(e))
     
-# get a specific template
-@router.get("/{template_id}", response_model = TemplateRead, tags=["Templates"], summary="Get one templates details")
-def get_template(
-    template_id:int,
-    session: Session = Depends(get_session),
-    current_user = Depends(get_current_user) # conducts basic security checks even though the variable isn't used
-):
-    statement = select(Template).where(Template.template_id == template_id)
-    template = session.exec(statement).first()
-    if not template:
-        raise HTTPException(status_code=404, detail="Template not found")
-    
-    return template
 
-    
 # get a list of templates 
 @router.get("/vendor/{vendor_id}", response_model = TemplateList, tags=["Templates"], summary="Get a list of template details for a specific vendor")
 def get_list_of_templates(
@@ -147,4 +133,17 @@ def count_bundles(
     if count == None:
         return 0
     return count 
+
+# get a specific template
+@router.get("/{template_id}", response_model = TemplateRead, tags=["Templates"], summary="Get one templates details")
+def get_template(
+    template_id:int,
+    session: Session = Depends(get_session),
+    current_user = Depends(get_current_user) # conducts basic security checks even though the variable isn't used
+):
+    statement = select(Template).where(Template.template_id == template_id)
+    template = session.exec(statement).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
     
+    return template
