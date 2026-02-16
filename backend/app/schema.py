@@ -142,7 +142,7 @@ class TemplateRead(BaseModel):
 # list of templates returned for a specific vendor
 class TemplateList(BaseModel):
     total_count: int
-    templates: List[TemplateRead]
+    templates: List[TemplateRead] 
 
 # bundle create is small as all the detail is auto generated on back end or in template
 class BundleCreate(BaseModel):
@@ -157,6 +157,7 @@ class BundleRead(BaseModel):
     date: date
     time: time
     purchased_by: int | None
+    template: List [TemplateRead] | None 
 
 # for the customer view of a vendor page
 class CustBundleList(BaseModel):
@@ -187,6 +188,7 @@ class VendReservationRead(BaseModel):
     customer_id : int
     time_created : time
     status : str
+    template : List[BundleRead] | None
 
 class CustReservationRead(BaseModel):
     reservation_id : int
@@ -195,6 +197,7 @@ class CustReservationRead(BaseModel):
     time_created : time
     code : int
     status : str
+    template : List[BundleRead] | None
 
 class CustReservationList(BaseModel):
     total_count:int
@@ -223,7 +226,6 @@ class StreakRead(BaseModel):
     streak_id: int
     customer_id: int
     count: int
-    started: date
     last: date
     ended:bool
 

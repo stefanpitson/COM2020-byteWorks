@@ -103,6 +103,8 @@ class Template(SQLModel, table=True):
         link_model=Allergen_Template
     )
 
+    bundles: List["Bundle"] = Relationship( back_populates="template")
+
 class Allergen(SQLModel, table=True):
     allergen_id: Optional[int] = Field(default=None, primary_key=True)
     title: str 
@@ -123,6 +125,9 @@ class Bundle(SQLModel, table=True):
 
     purchased_by: Optional[int] = Field(default=None, foreign_key="customer.customer_id")
 
+    template: Optional["Template"] = Relationship(back_populates="bundles")
+    reservations: List["Reservation"] = Relationship(back_populates="bundle")
+
 
 class Reservation(SQLModel, table=True):
     reservation_id:Optional[int] = Field(default=None, primary_key=True)
@@ -138,6 +143,7 @@ class Reservation(SQLModel, table=True):
     status: str = Field(default="booked") 
 
     code: Optional[int] = Field(default=None) #shouldn't have a default 
+    bundle:Optional["Bundle"] = Relationship(back_populates="reservations") 
 
 class Report(SQLModel, table=True):
     report_id: Optional[int] = Field(default=None, primary_key=True)

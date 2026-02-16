@@ -33,7 +33,9 @@ def create_reservation(
 
     new_reservation = Reservation(bundle_id = bundle.bundle_id, 
                                   customer_id = current_user.customer_profile.customer_id,
-                                  code = randint(0,9999))
+                                  code = randint(0,9999),
+                                  bundle = bundle
+                                  )
     
             
     statement = select(Customer).where(Customer.customer_id == new_reservation.customer_id)
