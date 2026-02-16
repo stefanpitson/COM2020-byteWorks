@@ -133,6 +133,7 @@ class TemplateRead(BaseModel):
     is_vegan: bool
     is_vegetarian: bool
     vendor: int
+    photo: Optional[str]
     allergens: List["AllergenRead"] = []
     class AllergenRead(BaseModel):
         allergen_id: int
