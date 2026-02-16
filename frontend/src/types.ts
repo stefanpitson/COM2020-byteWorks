@@ -37,6 +37,7 @@ export interface Template {
   carbon_saved: number;
   is_vegan: boolean;
   is_vegetarian: boolean;
+  vendor?: number;
   allergens: {
     allergen_id: number;
     title: string;
