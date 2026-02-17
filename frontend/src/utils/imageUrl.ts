@@ -3,7 +3,7 @@ const IMAGE_BASE = import.meta.env.DEV
   : "";
 
 export function resolveImageUrl(path?: string | null) {
-  if (!path) return null;
+  if (!path) return undefined;
   const safePath = path.startsWith("/") ? path : `/${path}`;
   
   return `${IMAGE_BASE}${safePath}`;

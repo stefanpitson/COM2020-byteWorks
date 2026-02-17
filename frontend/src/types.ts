@@ -42,12 +42,27 @@ export interface Template {
   is_vegan: boolean;
   is_vegetarian: boolean;
   vendor?: number;
-  photo: string;
+  photo?: string;
   allergens: {
     allergen_id: number;
     title: string;
   }[];
 }
+
+export interface AnalyticDataPoint {
+  bundle_name: string;
+  no_show: number;
+  posted: number;
+  predicted: number;
+  recommendation: string;
+}
+
+
+export interface WeekData {
+  week_date: string; 
+  datapoints: AnalyticDataPoint[];
+}
+
 
 export interface Reservation {
   reservation_id: number;
@@ -71,6 +86,21 @@ export interface Streak {
   count: number;
   last: string; 
 }
-export interface Analytics {
-  id: number;
+
+export interface AnalyticDataPoint {
+  bundle_name: string;
+  no_show: number;
+  posted: number;
+  predicted: number;
+  recommendation: string;
 }
+
+export interface WeekData {
+  week_date: string; 
+  datapoints: AnalyticDataPoint[];
+}
+
+export interface Analytics {
+  week_data: WeekData[];
+}
+
