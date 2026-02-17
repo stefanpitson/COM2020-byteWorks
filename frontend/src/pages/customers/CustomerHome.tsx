@@ -25,6 +25,12 @@ const FireIcon = () => (
   </svg>
 );
 
+const LeafIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-leaf-fill" viewBox="0 0 16 16">
+    <path d="M1.4 1.7c.217.289.65.84 1.725 1.274 1.093.44 2.885.774 5.834.528 2.02-.168 3.431.51 4.326 1.556C14.161 6.082 14.5 7.41 14.5 8.5q0 .344-.027.734C13.387 8.252 11.877 7.76 10.39 7.5c-2.016-.288-4.188-.445-5.59-2.045-.142-.162-.402-.102-.379.112.108.985 1.104 1.82 1.844 2.308 2.37 1.566 5.772-.118 7.6 3.071.505.8 1.374 2.7 1.75 4.292.07.298-.066.611-.354.715a.7.7 0 0 1-.161.042 1 1 0 0 1-1.08-.794c-.13-.97-.396-1.913-.868-2.77C12.173 13.386 10.565 14 8 14c-1.854 0-3.32-.544-4.45-1.435-1.124-.887-1.889-2.095-2.39-3.383-1-2.562-1-5.536-.65-7.28L.73.806z"/>
+  </svg>
+);
+
 type HomeVendor = Vendor & {
   bundle_count: number;
   has_vegan: boolean;
@@ -166,11 +172,29 @@ export default function CustomerHome() {
         
         {/* Search Header */}
         <div className="mb-10 text-center max-w-2xl mx-auto">
-            {profile && (
+          {profile && (
+            <>
               <h2 className="text-3xl md:text-4xl font-extrabold text-[hsl(var(--text-main))] mb-6 leading-tight">
                 Welcome back, {profile.name}!
               </h2>
-            )}
+
+              <div className="mb-8 flex justify-center">
+                <div className="bg-white rounded-2xl shadow-md border border-green-100 px-6 py-4 flex items-center gap-4 max-w-md w-full">
+                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                    <LeafIcon />
+                  </div>
+
+                  <div className="text-left">
+                    <p className="text-sm text-gray-500">Your impact so far</p>
+                    <p className="text-lg font-bold text-green-700">
+                      {profile.carbon_saved?.toFixed(1) ?? "0.0"} kg CO₂e saved
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+    
             <h1 className="text-3xl md:text-4xl font-extrabold text-[hsl(var(--text-main))] mb-6 leading-tight">
                 Save food, <span className="text-[hsl(var(--accent))] underline decoration-4 decoration-[hsl(var(--accent)/0.3)]">save money.</span>
             </h1>

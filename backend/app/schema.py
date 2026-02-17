@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime
 from typing import List, Optional
 from datetime import date, time
 
@@ -12,6 +13,7 @@ class CustomerRead(BaseModel):
     name: str
     post_code: str
     store_credit: float
+    carbon_saved: float
 
 class VendorRead(BaseModel):
     vendor_id: int
@@ -185,14 +187,14 @@ class VendReservationRead(BaseModel):
     reservation_id : int
     bundle_id : int
     customer_id : int
-    time_created : time
+    time_created : datetime
     status : str
 
 class CustReservationRead(BaseModel):
     reservation_id : int
     bundle_id : int
     customer_id : int
-    time_created : time
+    time_created : datetime
     code : int
     status : str
 

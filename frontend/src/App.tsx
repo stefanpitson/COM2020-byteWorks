@@ -11,6 +11,8 @@ import VendorSettings from "./pages/vendors/vendorSettings";
 import VendorAnalytics from "./pages/vendors/vendorAnalytics";
 import CustomerVendorView from "./pages/customers/CustomerVendorView";
 import CustomerBundleView from "./pages/customers/CustomerBundleView"
+import CustomerReservations from "./pages/customers/CustomerReservations";
+import VendorReservations from "./pages/vendors/VendorReservations";
 import TemplateDetails from "./pages/vendors/templateDetails";
 
 export default function App() {
@@ -34,6 +36,7 @@ export default function App() {
             <Route path="/customer/settings" element={<CustomerSignUp />} />
             <Route path="/vendor/:vendorId" element={<CustomerVendorView />} />
             <Route path="/bundle/:templateId" element={<CustomerBundleView />} />
+            <Route path="/customer/reservations" element={<CustomerReservations />} />
           </Route>
 
           {/* Only Vendors allowed */}
@@ -41,6 +44,7 @@ export default function App() {
             <Route path="/vendor/dashboard" element={<VendorDashboard />} />
             <Route path="/vendor/settings" element={<VendorSettings />} />
             <Route path="/vendor/analytics" element={<VendorAnalytics />} />
+            <Route path="/vendor/reservations" element={<VendorReservations />} />
             <Route path="/vendor/template" element={<TemplateDetails />} />
           </Route>
         </Route>
