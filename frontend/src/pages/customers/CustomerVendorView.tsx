@@ -123,18 +123,17 @@ export default function VendorPage() {
                 : "hover:shadow-xl hover:-translate-y-1 cursor-pointer shadow-sm"}
         `}>
         <div className="relative h-44 bg-gray-100 overflow-hidden">
-            {/* {template.photo ? (
+            {template.photo ? (
                 <img
-                    src={resolveImageUrl(template.photo)}
+                    src={resolveImageUrl(template.photo) || undefined}
                     alt={template.title}
                     className="w-full h-full object-cover"
                 />
-            ) : ( */}
-            {
+            ) : (
                 <div className="absolute inset-0 bg-[hsl(var(--primary)/0.05)] flex items-center justify-center text-[hsl(var(--primary))]">
                     <BagIcon />
                 </div>
-            }
+            )}
             
             {!isSoldOut && (
             <div className="absolute top-3 right-3 bg-white/95 px-2.5 py-1 rounded-full shadow-sm">

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getTemplateById, getTemplateBundleCount } from "../../api/templates";
 import { getVendorById } from "../../api/vendors";
+import { resolveImageUrl } from "../../utils/imageUrl";
 import type { Template, Vendor } from "../../types";
 
 const formatCurrency = (amount: number) => {
@@ -179,9 +180,17 @@ const handleReserve = async () => {
           <div className="space-y-6">
 
             <div className="relative h-[420px] rounded-3xl overflow-hidden shadow-xl border border-gray-100 bg-gray-100">
-              <div className="w-full h-full bg-[hsl(var(--primary)/0.05)] flex items-center justify-center text-[hsl(var(--primary))] text-5xl font-bold">
-                {bundle.title.charAt(0)}
-              </div>
+              {bundle.photo ? (
+                <img
+                  src={resolveImageUrl(bundle.photo) || undefined}
+                  alt={bundle.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-[hsl(var(--primary)/0.05)] flex items-center justify-center text-[hsl(var(--primary))] text-5xl font-bold">
+                  {bundle.title.charAt(0)}
+                </div>
+              )}
 
               {!isSoldOut && (
                 <div className="absolute top-6 right-6 bg-white px-5 py-2 rounded-full shadow-md text-sm font-bold text-[hsl(var(--accent))]">
