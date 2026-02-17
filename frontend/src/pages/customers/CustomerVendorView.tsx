@@ -134,6 +134,7 @@ export default function VendorPage() {
                     <BagIcon />
                 </div>
             )}
+        
             
             {!isSoldOut && (
             <div className="absolute top-3 right-3 bg-white/95 px-2.5 py-1 rounded-full shadow-sm">
