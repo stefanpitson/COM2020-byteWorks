@@ -222,3 +222,17 @@ class VendorList(BaseModel):
 
 class PickupCode(BaseModel):
     pickup_code: int
+
+class ForecastDatapoint(BaseModel):
+    bundle_name: str        
+    predicted: int # predicted reservations
+    no_show: int  # predicted no-shows
+    posted: int = 0             
+    recommendation: str = ""        
+
+class ForecastWeekData(BaseModel):
+    week_date: str
+    datapoints: List[ForecastDatapoint]
+
+class ForecastChartResponse(BaseModel):
+    data: dict

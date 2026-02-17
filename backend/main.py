@@ -2,11 +2,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.core.database import create_db_and_tables
 from app.api import customers, auth, vendors, bundles, templates, reservations
 from app.core.database import engine, create_db_and_tables 
 from sqlmodel import SQLModel
 import os
+from app.api.forecasting import router as forecast_router
 
 # this function will handle the start up, and shut down of the app
 @asynccontextmanager
@@ -41,4 +41,5 @@ app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 app.include_router(templates.router, prefix="/templates", tags=["Templates"])
 app.include_router(bundles.router, prefix="/bundles", tags=["Bundles"])
 app.include_router(reservations.router, prefix="/reservations", tags=["Reservations"])
+app.include_router(forecast_router, prefix="/forecast", tags=["Forecasting"])
 # ADD NEW API ROUTES HERE eg. bundles 
