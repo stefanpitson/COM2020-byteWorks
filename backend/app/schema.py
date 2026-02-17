@@ -186,7 +186,7 @@ class VendReservationRead(BaseModel):
     reservation_id : int
     bundle_id : int
     customer_id : int
-    time_created : time
+    time_created : datetime
     status : str
 
 class CustReservationRead(BaseModel):

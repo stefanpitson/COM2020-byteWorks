@@ -164,7 +164,11 @@ export default function NavBar() {
               </li>
               <li>
                 <Link
-                  to="/customer/reservations"
+                  to={
+                    localStorage.getItem("role") === "vendor"
+                      ? "/vendor/reservations"
+                      : "/customer/reservations"
+                  }
                   className="w-full text-left px-4 py-2.5 hover:bg-gray-50 hover:text-[hsl(158,48%,46%)] flex items-center transition-colors"
                 >
                   <BagIcon />
