@@ -5,7 +5,7 @@ from app.models import User, Vendor, Customer, Template, Bundle, Reservation
 from datetime import datetime, timedelta
 
 def seed_database():
-    SQLModel.metadata.drop_all(engine)
+    # SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
 
     with Session(engine) as session:
