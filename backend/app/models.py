@@ -49,7 +49,9 @@ class Vendor(SQLModel, table=True):
     phone_number: str
     opening_hours: str
     photo: Optional[str] = Field(default=None)
-    carbon_saved: int = Field(default=0)
+    total_revenue: float = Field(default=0.0) 
+    carbon_saved: float = Field(default=0.0)
+    food_saved: float = Field(default=0.0)
     user: Optional[User] = Relationship(back_populates="vendor_profile")
     validated: bool = Field(default=False)
 
@@ -94,6 +96,8 @@ class Template(SQLModel, table=True):
 
     vendor: Optional[int] = Field(default=None,foreign_key="vendor.vendor_id")
 
+    photo: Optional[str] = Field(default=None)
+
     allergens: List["Allergen"] = Relationship( # for the linking table
         back_populates="templates",             # having this means we dont have to write join statements
         link_model=Allergen_Template
@@ -102,7 +106,6 @@ class Template(SQLModel, table=True):
 class Allergen(SQLModel, table=True):
     allergen_id: Optional[int] = Field(default=None, primary_key=True)
     title: str 
-    description: str
 
     templates: List["Template"] = Relationship( # for the linking table
         back_populates="allergens",             # having this means we dont have to write join statements
@@ -133,7 +136,7 @@ class Reservation(SQLModel, table=True):
     # 'cancelled' - the customer/vendor cancelled the booking (when booked and purposefully cancelled - different to no show)
     status: str = Field(default="booked") 
 
-    code: Optional[int] = Field(default=None) #shouldn't have a default? 
+    code: Optional[int] = Field(default=None) #shouldn't have a default 
 
 class Report(SQLModel, table=True):
     report_id: Optional[int] = Field(default=None, primary_key=True)
