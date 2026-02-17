@@ -251,8 +251,8 @@ def finalise_reservation(
     reservation = session.exec(statement).first()
 
     # Gets the ID of the vendor that is responsible for the reservation
-    statement = select(Template.vendor).where(Template.template_id == Bundle.template_id 
-                                              and Bundle.bundle_id == reservation.bundle_id)
+    statement = select(Template.vendor).where(Template.template_id == Bundle.template_id,
+                                              Bundle.bundle_id == reservation.bundle_id)
 
     reserveVendorID = session.exec(statement).first()
 
@@ -263,14 +263,14 @@ def finalise_reservation(
     statement = select(Customer).where(Customer.customer_id == reservation.customer_id)
     customer = session.exec(statement).first()
 
-    statement = select(Template.cost).where(Template.template_id == Bundle.template_id 
-                                              and Bundle.bundle_id == reservation.bundle_id)
+    statement = select(Template.cost).where(Template.template_id == Bundle.template_id,
+                                            Bundle.bundle_id == reservation.bundle_id)
 
     if pickup_code != reservation.code:
         raise HTTPException(status_code=403, detail="Customer does not the correct accepting code")
 
-    statement = select(Template.carbon_saved).where(Template.template_id == Bundle.template_id 
-                                              and Bundle.bundle_id == reservation.bundle_id)
+    statement = select(Template.carbon_saved).where(Template.template_id == Bundle.template_id,
+                                                    Bundle.bundle_id == reservation.bundle_id)
 
     carbon_saved = session.exec(statement).first()
 
