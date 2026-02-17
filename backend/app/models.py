@@ -62,7 +62,7 @@ class Customer(SQLModel, table=True):
     name:str
     post_code:str
     store_credit: float = Field(default=100.0)
-    carbon_saved: int = Field(default=0)
+    carbon_saved: float = Field(default=0.0)
     rating: Optional[int] = Field(default=None)
 
     user: Optional[User] = Relationship(back_populates="customer_profile")
@@ -127,7 +127,7 @@ class Reservation(SQLModel, table=True):
     reservation_id:Optional[int] = Field(default=None, primary_key=True)
     bundle_id: Optional[int] = Field(default=None, foreign_key="bundle.bundle_id")
     customer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id") 
-    time_created: Time = Field(default_factory=lambda:datetime.now().time()) 
+    time_created: datetime = Field(default_factory=datetime.now)
 
     # status either:
     # 'booked' - reservation made, not collected 
