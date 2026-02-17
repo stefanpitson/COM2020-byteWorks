@@ -253,9 +253,8 @@ export default function VendorTemplateManager() {
               </div>
               <button 
                 onClick={() => navigate('/vendor/analytics')}
-                className="ml-4 shrink-0 flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-xl hover:bg-black transition-colors"
+                className="mt-4 self-start flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-xl hover:bg-black transition-colors"
               >
-                <PlusIcon />
                 <span className="font-bold text-sm">Analytics</span>
             </button>
             </div>
