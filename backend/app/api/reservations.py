@@ -88,7 +88,7 @@ def get_reservation_vendor(
     return VendReservationRead(reservation_id = reservation_id, 
                                    bundle_id = reservation.bundle_id, 
                                    customer_id = reservation.customer_id,
-                                   time_created = reservation.time_created,
+                                   time_created = datetime.combine(date.today(), reservation.time_created),
                                    status = reservation.status)
 
 @router.get("/{reservation_id}/customer", response_model= CustReservationRead, tags=["Reservations"], summary="Get one reservation details")
@@ -112,7 +112,7 @@ def get_reservation_customer(
     return CustReservationRead(reservation_id = reservation_id, 
                                    bundle_id = reservation.bundle_id, 
                                    customer_id = reservation.customer_id,
-                                   time_created = reservation.time_created,
+                                   time_created = datetime.combine(date.today(), reservation.time_created),
                                    code = reservation.code,
                                    status = reservation.status)
 
@@ -169,7 +169,7 @@ def get_list_of_reservations_vendor(
         vendor_reservations.append(VendReservationRead(reservation_id = reservation.reservation_id, 
                                    bundle_id = reservation.bundle_id, 
                                    customer_id = reservation.customer_id,
-                                   time_created = reservation.time_created,
+                                   time_created = datetime.combine(date.today(), reservation.time_created),
                                    status = reservation.status))
     
     return{
