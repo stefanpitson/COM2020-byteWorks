@@ -13,6 +13,7 @@ class CustomerRead(BaseModel):
     name: str
     post_code: str
     store_credit: float
+    carbon_saved: float
 
 class VendorRead(BaseModel):
     vendor_id: int

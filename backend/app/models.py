@@ -62,7 +62,7 @@ class Customer(SQLModel, table=True):
     name:str
     post_code:str
     store_credit: float = Field(default=100.0)
-    carbon_saved: int = Field(default=0)
+    carbon_saved: float = Field(default=0.0)
     rating: Optional[int] = Field(default=None)
 
     user: Optional[User] = Relationship(back_populates="customer_profile")
