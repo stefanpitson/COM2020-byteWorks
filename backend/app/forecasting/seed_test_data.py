@@ -1,26 +1,19 @@
 import random
 from datetime import datetime, timedelta, date, time
-from sqlmodel import Session, create_engine, select
-import os
-from dotenv import load_dotenv
-from sqlmodel import create_engine, Session
+from sqlmodel import Session, select
 from app.core.database import engine
-
-
-# Import your actual models (adjust the path to your models module)
 from app.models import (
-    User, Vendor, Customer, Template, Bundle, Reservation,
-    # Allergen, Allergen_Template  # if needed, uncomment
+    User, Vendor, Customer, Template, Bundle, Reservation
 )
 
-# -------------------- CONFIGURATION --------------------
+
 
 VENDOR_NAME = "Good Food Market"
 TEMPLATES = [
     {"title": "Vegan Bowl", "description": "Hearty plant-based bowl",
      "estimated_value": 8.50, "cost": 3.20, "meat_percent": 0, "carb_percent": 40,
      "veg_percent": 60, "carbon_saved": 1.2, "weight": 0.5,
-     "is_vegan": True, "is_vegetarian": True, "popularity": 0.8},  # popularity factor for reservation rate
+     "is_vegan": True, "is_vegetarian": True, "popularity": 0.8},
     {"title": "Sandwich Combo", "description": "Sandwich, crisps, drink",
      "estimated_value": 6.00, "cost": 2.50, "meat_percent": 30, "carb_percent": 50,
      "veg_percent": 20, "carbon_saved": 0.8, "weight": 0.4,
@@ -48,20 +41,19 @@ CUSTOMERS = [
 ]
 
 # Time slots per week: (day_of_week, hour, minute, demand_factor)
-# demand_factor multiplies the base reservation probability
 TIME_SLOTS = [
-    (0, 17, 0, 0.7),   # Monday 5pm (lower demand)
-    (2, 12, 0, 1.0),   # Wednesday 12pm (medium)
-    (4, 18, 0, 1.5),   # Friday 6pm (higher demand)
+    (0, 17, 0, 0.7),   # Monday 5pm
+    (2, 12, 0, 1.0),   # Wednesday 12pm
+    (4, 18, 0, 1.5),   # Friday 6pm
 ]
 
 WEEKS_OF_HISTORY = 6
 START_DATE = date.today() - timedelta(weeks=WEEKS_OF_HISTORY)
 
 # Base ranges
-POSTED_RANGE = (15, 35)           # bundles posted per batch (per template)
-BASE_RESERVATION_RATE = (0.5, 0.9) # proportion reserved, adjusted by template popularity and day factor
-NO_SHOW_RATE = (0.05, 0.2)        # proportion of reserved that become no-shows
+POSTED_RANGE = (15, 35)
+BASE_RESERVATION_RATE = (0.5, 0.9)
+NO_SHOW_RATE = (0.05, 0.2)
 
 # -------------------------------------------------------
 
@@ -112,11 +104,10 @@ def seed():
             customer_ids.append(customer.customer_id)
         print(f"Created {len(customer_ids)} customers")
 
-        # 3. Create templates (store popularity factor for later use)
+        # 3. Create templates (store popularity for later use)
         template_records = []
         for t in TEMPLATES:
             popularity = t['popularity']
-            # Remove the extra key before creating Template object
             template_data = {k: v for k, v in t.items() if k != "popularity"}
             template = Template(
                 **template_data,
@@ -139,7 +130,7 @@ def seed():
             for dow, hour, minute, demand_factor in TIME_SLOTS:
                 slot_date = week_start + timedelta(days=dow)
                 if slot_date > date.today():
-                    continue  # skip future dates (shouldn't happen given START_DATE)
+                    continue
                 slot_time = time(hour, minute)
 
                 for template in template_records:
@@ -149,9 +140,8 @@ def seed():
                     # Number of bundles posted in this batch
                     posted = random.randint(*POSTED_RANGE)
 
-                    # Base reservation probability, then adjusted
+                    # Reservation probability
                     base_rate = random.uniform(*BASE_RESERVATION_RATE)
-                    # Cap at 0.95 to avoid overshoot
                     reservation_rate = min(base_rate * popularity * demand_factor, 0.95)
                     reserved = int(posted * reservation_rate)
 
@@ -175,10 +165,9 @@ def seed():
 
                     total_bundles += posted
 
-                    # Decide which bundles are reserved
+                    # Decide which bundles are reserved and handle no‑shows
                     if reserved > 0:
                         reserved_bundle_ids = random.sample(bundle_ids, reserved)
-                        # Choose which of those become no-shows
                         no_show_bundle_ids = random.sample(reserved_bundle_ids, no_shows) if no_shows > 0 else []
 
                         for b_id in reserved_bundle_ids:
@@ -188,14 +177,12 @@ def seed():
                             bundle = session.exec(stmt).one()
                             bundle.purchased_by = cust_id
 
-                            # Determine status
                             status = 'no_show' if b_id in no_show_bundle_ids else 'collected'
 
-                            # Create reservation
                             reservation = Reservation(
                                 bundle_id=b_id,
                                 customer_id=cust_id,
-                                time_created=datetime.now().time(),  # placeholder
+                                time_created=datetime.now().time(),
                                 status=status,
                                 code=random.randint(100000, 999999)
                             )
@@ -204,9 +191,6 @@ def seed():
 
                             if status == 'collected':
                                 bundle.picked_up = True
-                            # else no_show remains picked_up=False
-
-                    # Bundles not reserved remain as is (expired)
 
         session.commit()
         print(f"Seeding complete. Created {total_bundles} bundles and {total_reservations} reservations.")
