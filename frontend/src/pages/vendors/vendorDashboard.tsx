@@ -127,12 +127,12 @@ export default function VendorTemplateManager() {
     return (
         <div className="flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-200 transition-all hover:shadow-md">
         <div className="relative h-44 bg-gray-100 overflow-hidden">
-            {/* Template Image */}
+            {/* Template Image Placeholder */}
             {template.photo ? (
-                <img
-                    src={resolveImageUrl(template.photo) || undefined}
-                    alt={template.title}
-                    className="w-full h-full object-cover"
+                <img 
+                    src={resolveImageUrl(template.photo) || placeholder} 
+                    alt={template.title} 
+                    className="w-full h-full object-cover" 
                 />
             ) : (
                 <div className="absolute inset-0 bg-[hsl(var(--primary)/0.05)] flex items-center justify-center text-[hsl(var(--primary))]">
@@ -271,7 +271,7 @@ export default function VendorTemplateManager() {
             </div>
             
             <button 
-              onClick={() => navigate('/templates/new')}
+              onClick={() => navigate('/vendor/template')}
               className="ml-4 shrink-0 flex items-center gap-2 bg-gray-800 text-white px-4 py-2 rounded-xl hover:bg-black transition-colors"
             >
               <PlusIcon />
@@ -283,7 +283,7 @@ export default function VendorTemplateManager() {
             <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300">
               <p className="text-gray-500 mb-4">You haven't created any bundle templates yet.</p>
               <button 
-                onClick={() => navigate('/templates/new')}
+                onClick={() => navigate('/vendor/template')}
                 className="text-blue-600 font-bold hover:underline"
               >
                 Create your first template
