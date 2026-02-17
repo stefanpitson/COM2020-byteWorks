@@ -4,7 +4,7 @@ from app.core.database import get_session
 from app.models import Template, Allergen, Bundle, Reservation, Customer, Vendor, Streak, User
 from app.schema import VendReservationRead, CustReservationRead, CustReservationList, VendReservationList, PickupCode
 from app.api.deps import get_current_user
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from random import randint
 
 router = APIRouter()
@@ -137,7 +137,7 @@ def get_list_of_reservations_customer(
         customer_reservations.append(CustReservationRead(reservation_id = reservation.reservation_id, 
                                    bundle_id = reservation.bundle_id, 
                                    customer_id = reservation.customer_id,
-                                   time_created = reservation.time_created,
+                                   time_created = datetime.combine(date.today(), reservation.time_created),
                                    code = reservation.code,
                                    status = reservation.status))
     
