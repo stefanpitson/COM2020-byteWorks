@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getTemplateById, getTemplateBundleCount } from "../../api/templates";
 import { getVendorById } from "../../api/vendors";
 import type { Template, Vendor } from "../../types";
+import { resolveImageUrl } from "../../utils/imageUrl";
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("en-GB", {
@@ -18,6 +19,12 @@ const formatPercent = (decimal: number) => {
 const LeafIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-leaf-fill" viewBox="0 0 16 16">
     <path d="M1.4 1.7c.217.289.65.84 1.725 1.274 1.093.44 2.885.774 5.834.528 2.02-.168 3.431.51 4.326 1.556C14.161 6.082 14.5 7.41 14.5 8.5q0 .344-.027.734C13.387 8.252 11.877 7.76 10.39 7.5c-2.016-.288-4.188-.445-5.59-2.045-.142-.162-.402-.102-.379.112.108.985 1.104 1.82 1.844 2.308 2.37 1.566 5.772-.118 7.6 3.071.505.8 1.374 2.7 1.75 4.292.07.298-.066.611-.354.715a.7.7 0 0 1-.161.042 1 1 0 0 1-1.08-.794c-.13-.97-.396-1.913-.868-2.77C12.173 13.386 10.565 14 8 14c-1.854 0-3.32-.544-4.45-1.435-1.124-.887-1.889-2.095-2.39-3.383-1-2.562-1-5.536-.65-7.28L.73.806z"/>
+  </svg>
+);
+
+const BagIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-10 h-10">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
   </svg>
 );
 
@@ -175,36 +182,41 @@ const handleReserve = async () => {
 
         <div className="grid lg:grid-cols-2 gap-12">
 
-          {/* Image Placeholder + Environmental Impact */}
-          <div className="space-y-6">
-
-            <div className="relative h-[420px] rounded-3xl overflow-hidden shadow-xl border border-gray-100 bg-gray-100">
-              <div className="w-full h-full bg-[hsl(var(--primary)/0.05)] flex items-center justify-center text-[hsl(var(--primary))] text-5xl font-bold">
-                {bundle.title.charAt(0)}
-              </div>
-
-              {!isSoldOut && (
-                <div className="absolute top-6 right-6 bg-white px-5 py-2 rounded-full shadow-md text-sm font-bold text-[hsl(var(--accent))]">
-                  {bundle.available_count} left today
-                </div>
-              )}
-            </div>
-
-            {bundle.carbon_saved > 0 && (
-              <div className="bg-[hsl(var(--primary)/0.08)] border border-[hsl(var(--primary)/0.15)] rounded-2xl p-6">
-                <div className="flex items-center gap-3 text-[hsl(var(--primary-dark))] font-semibold mb-2">
-                  <LeafIcon />
-                  Environmental Impact
-                </div>
-                <p className="text-gray-600 text-sm">
-                  Reserving this bundle prevents approximately{" "}
-                  <span className="font-semibold text-gray-800">
-                    {(Math.round(bundle.carbon_saved * 100) / 100).toLocaleString()}kg of CO₂e
-                  </span>{" "}
-                  from being wasted.
-                </p>
+          {/* Image + Environmental Impact */}
+          <div className="relative h-[420px] rounded-3xl overflow-hidden shadow-xl border border-gray-100 bg-gray-100">
+            {bundle.photo ? (
+              <img
+                src={resolveImageUrl(bundle.photo) || undefined}
+                alt={bundle.title}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-[hsl(var(--primary))]">
+                <BagIcon />
               </div>
             )}
+
+            {!isSoldOut && (
+              <div className="absolute top-6 right-6 bg-white px-5 py-2 rounded-full shadow-md text-sm font-bold text-[hsl(var(--accent))]">
+                {bundle.available_count} left today
+              </div>
+            )}
+
+          {bundle.carbon_saved > 0 && (
+            <div className="bg-[hsl(var(--primary)/0.08)] border border-[hsl(var(--primary)/0.15)] rounded-2xl p-6">
+              <div className="flex items-center gap-3 text-[hsl(var(--primary-dark))] font-semibold mb-2">
+                <LeafIcon />
+                Environmental Impact
+              </div>
+              <p className="text-gray-600 text-sm">
+                Reserving this bundle prevents approximately{" "}
+                <span className="font-semibold text-gray-800">
+                  {(Math.round(bundle.carbon_saved * 100) / 100).toLocaleString()}kg of CO₂e
+                </span>{" "}
+                from being wasted.
+              </p>
+            </div>
+          )}
           </div>
 
           {/* Bundle Info */}
