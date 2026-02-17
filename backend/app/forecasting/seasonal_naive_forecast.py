@@ -25,7 +25,7 @@ def generate_naive_forecast(vendor_id: int, target_date: date) -> str:
             return f"No historical data found for vendor {vendor_id} on {historical_date}. No forecasts generated."
 
         for record in historical_data:
-            # generate the output forecast based on our naive calculations
+            
             new_forecast = Forecast_Output(
                 vendor_id=vendor_id,
                 template_id=record.template_id,
@@ -72,11 +72,11 @@ def get_naive_forecast_chart(
     for record, title in results:
         predicted_date = record.date + timedelta(days=7)
         day_abbr = predicted_date.strftime("%a")
-        slot_str = record.slot_start.strftime("%H:%M")
-        bundle_name = f"{day_abbr} {slot_str}: {title}"
-        historical_day_abbr = record.date.strftime("%a")   # for the recommendation
+        # Clean bundle name: only day abbreviation and title (no time)
+        bundle_name = f"{day_abbr}: {title}"
+        historical_day_abbr = record.date.strftime("%a")
 
-        # prevent duplicates
+        # Upsert to avoid duplicates
         existing = session.exec(
             select(Forecast_Output).where(
                 Forecast_Output.vendor_id == vendor_id,
@@ -109,20 +109,18 @@ def get_naive_forecast_chart(
             )
             session.add(forecast)
 
-        # Simple recommendation 
-        recommendation = f"Post {record.bundles_reserved} bundles based on last {historical_day_abbr}."
-
+        # Build the datapoint for the chart
         datapoints.append({
             "bundle_name": bundle_name,
             "predicted": record.bundles_reserved,
             "no_show": record.no_shows,
             "posted": record.bundles_posted,
-            "recommendation": recommendation
+            "recommendation": f"Post {record.bundles_reserved} bundles based on last {historical_day_abbr}."
         })
 
     session.commit()
 
-
+    
     return {
         "data": {
             "week_data": [
@@ -134,17 +132,13 @@ def get_naive_forecast_chart(
         }
     }
 
-
 if __name__ == "__main__":
-
     vendor_id = 1
-    
     today = date.today()
-    target = today + timedelta(days=1)  
+    target = today + timedelta(days=1)
 
     print(f"Generating forecasts for week starting {target}")
     with Session(engine) as session:
         result = get_naive_forecast_chart(session, vendor_id, target)
-
         import json
         print(json.dumps(result, indent=2, default=str))
