@@ -81,7 +81,7 @@ export default function TemplateDetails() {
                 description: description,
                 cost: parseFloat(cost),
                 estimated_value: parseFloat(estimatedValue),
-                weight: parseFloat(weight),
+                weight: parseFloat(weight) / 1000,
                 meat_percent: (parseFloat(meatPercent) || 0) / 100,
                 carb_percent: (parseFloat(carbPercent) || 0) / 100,
                 veg_percent: (parseFloat(vegPercent) || 0) / 100,
