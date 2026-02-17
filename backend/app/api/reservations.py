@@ -4,7 +4,7 @@ from app.core.database import get_session
 from app.models import Template, Allergen, Bundle, Reservation, Customer, Vendor, Streak, User
 from app.schema import VendReservationRead, CustReservationRead, CustReservationList, VendReservationList, PickupCode
 from app.api.deps import get_current_user
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from random import randint
 
 router = APIRouter()
@@ -88,7 +88,7 @@ def get_reservation_vendor(
     return VendReservationRead(reservation_id = reservation_id, 
                                    bundle_id = reservation.bundle_id, 
                                    customer_id = reservation.customer_id,
-                                   time_created = reservation.time_created,
+                                   time_created = datetime.combine(date.today(), reservation.time_created),
                                    status = reservation.status)
 
 @router.get("/{reservation_id}/customer", response_model= CustReservationRead, tags=["Reservations"], summary="Get one reservation details")
@@ -112,7 +112,7 @@ def get_reservation_customer(
     return CustReservationRead(reservation_id = reservation_id, 
                                    bundle_id = reservation.bundle_id, 
                                    customer_id = reservation.customer_id,
-                                   time_created = reservation.time_created,
+                                   time_created = datetime.combine(date.today(), reservation.time_created),
                                    code = reservation.code,
                                    status = reservation.status)
 
@@ -137,7 +137,7 @@ def get_list_of_reservations_customer(
         customer_reservations.append(CustReservationRead(reservation_id = reservation.reservation_id, 
                                    bundle_id = reservation.bundle_id, 
                                    customer_id = reservation.customer_id,
-                                   time_created = reservation.time_created,
+                                   time_created = datetime.combine(date.today(), reservation.time_created),
                                    code = reservation.code,
                                    status = reservation.status))
     
@@ -169,7 +169,7 @@ def get_list_of_reservations_vendor(
         vendor_reservations.append(VendReservationRead(reservation_id = reservation.reservation_id, 
                                    bundle_id = reservation.bundle_id, 
                                    customer_id = reservation.customer_id,
-                                   time_created = reservation.time_created,
+                                   time_created = datetime.combine(date.today(), reservation.time_created),
                                    status = reservation.status))
     
     return{
@@ -251,8 +251,8 @@ def finalise_reservation(
     reservation = session.exec(statement).first()
 
     # Gets the ID of the vendor that is responsible for the reservation
-    statement = select(Template.vendor).where(Template.template_id == Bundle.template_id 
-                                              and Bundle.bundle_id == reservation.bundle_id)
+    statement = select(Template.vendor).where(Template.template_id == Bundle.template_id,
+                                              Bundle.bundle_id == reservation.bundle_id)
 
     reserveVendorID = session.exec(statement).first()
 
@@ -263,14 +263,14 @@ def finalise_reservation(
     statement = select(Customer).where(Customer.customer_id == reservation.customer_id)
     customer = session.exec(statement).first()
 
-    statement = select(Template.cost).where(Template.template_id == Bundle.template_id 
-                                              and Bundle.bundle_id == reservation.bundle_id)
+    statement = select(Template.cost).where(Template.template_id == Bundle.template_id,
+                                            Bundle.bundle_id == reservation.bundle_id)
 
     if pickup_code != reservation.code:
         raise HTTPException(status_code=403, detail="Customer does not the correct accepting code")
 
-    statement = select(Template.carbon_saved).where(Template.template_id == Bundle.template_id 
-                                              and Bundle.bundle_id == reservation.bundle_id)
+    statement = select(Template.carbon_saved).where(Template.template_id == Bundle.template_id,
+                                                    Bundle.bundle_id == reservation.bundle_id)
 
     carbon_saved = session.exec(statement).first()
 
@@ -304,6 +304,9 @@ def increment_streak(session: Session, customer):
     try:
         if streak != None:
             # check date 
+            if streak.last == datetime.now().date():
+                return # streak is not adjusted if last was same day
+
             last = streak.last + timedelta(days=7)
             if last >= datetime.now().date(): # streak is in date
                 streak.count +=1

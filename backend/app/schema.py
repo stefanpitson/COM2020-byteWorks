@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime
 from typing import List, Optional
 from datetime import date, time
 
@@ -12,6 +13,7 @@ class CustomerRead(BaseModel):
     name: str
     post_code: str
     store_credit: float
+    carbon_saved: float
 
 class VendorRead(BaseModel):
     vendor_id: int
@@ -21,6 +23,9 @@ class VendorRead(BaseModel):
     post_code: str
     phone_number: str
     opening_hours: str
+    total_revenue: float
+    carbon_saved: float
+    food_saved: float
     photo: Optional[str]
 
 # ___AUTH SCHEMAS___  
@@ -30,42 +35,37 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
-# This is what the API actually expects to receive
+# information returned on log in
 class LoginResponse(BaseModel):
-    access_token: str
+    access_token: str # <--- access token for future authentication 
     token_type: str
     user: UserData
-     # Nested class to keep the JSON structure
     class UserData(BaseModel):
         user_id: int
         email: str
         role: str
 
-# sign up 
+# sign up for customer
 class CustomerSignupRequest(BaseModel):
     user: UserData
-    # Nested class to keep the JSON structure
     class UserData(BaseModel):
         email: str
         password: str
         role: str
 
     customer: CustomerData
-    # Nested class to keep the JSON structure
     class CustomerData(BaseModel):
         name: str
         post_code: str
 
+# sign up for vendor 
 class VendorSignupRequest(BaseModel):
     user: UserData
-    # Nested class to keep the JSON structure
     class UserData(BaseModel):
         email: str
         password: str
         role: str
-
     vendor: VendorData
-    # Nested class to keep the JSON structure
     class VendorData(BaseModel):
         name: str
         street: str
@@ -74,21 +74,21 @@ class VendorSignupRequest(BaseModel):
         phone_number: str
         opening_hours: str
 
-
+#data for updating the customer 
+# all are optional as only updated information is given
 class CustomerUpdate(BaseModel):
     user: UserUpdateData
-
     class UserUpdateData(BaseModel):
         email: Optional[str] = None
         old_password : Optional[str] = None
         new_password : Optional[str] = None
 
     customer: CustomerUpdateData
-
     class CustomerUpdateData(BaseModel):
         name: Optional[str] = None
         post_code: Optional[str] = None
 
+#data for updating the vendor 
 class VendorUpdate(BaseModel):
     user: UserUpdateData
 
@@ -125,7 +125,7 @@ class TemplateCreate(BaseModel):
     # This is the key: the frontend sends a list of existing Allergen IDs
     allergen_titles: List[str] = []
 
-
+# returns the information on each bundle
 class TemplateRead(BaseModel):
     template_id: int
     title: str
@@ -138,6 +138,7 @@ class TemplateRead(BaseModel):
     is_vegan: bool
     is_vegetarian: bool
     vendor: int
+    photo: Optional[str]
     allergens: List["AllergenRead"] = []
     class AllergenRead(BaseModel):
         allergen_id: int
@@ -189,14 +190,14 @@ class VendReservationRead(BaseModel):
     reservation_id : int
     bundle_id : int
     customer_id : int
-    time_created : time
+    time_created : datetime
     status : str
 
 class CustReservationRead(BaseModel):
     reservation_id : int
     bundle_id : int
     customer_id : int
-    time_created : time
+    time_created : datetime
     code : int
     status : str
 
@@ -222,6 +223,24 @@ class VendorList(BaseModel):
 
 class PickupCode(BaseModel):
     pickup_code: int
+
+class StreakRead(BaseModel):
+    streak_id: int
+    customer_id: int
+    count: int
+    started: date
+    last: date
+    ended:bool
+
+
+class StreakRead(BaseModel):
+    streak_id: int
+    customer_id: int
+    count: int
+    started: date
+    last: date
+    ended:bool
+
 
 class ForecastDatapoint(BaseModel):
     bundle_name: str        

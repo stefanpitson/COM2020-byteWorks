@@ -1,7 +1,7 @@
 import api from "./axiosConfig";
 import type { Vendor } from "../types";
 
-export const getVendorProfile = async () => {
+export const getVendorProfile = async (): Promise<Vendor> => {
   const response = await api.get<Vendor>("/vendors/profile");
 
   return response.data;

@@ -21,7 +21,9 @@ export interface Vendor {
   post_code: string;
   opening_hours: string;
   phone_number: string;
+  total_revenue: number;
   carbon_saved: number;
+  food_saved: number;
   validated: boolean;
   photo: string;
 }
@@ -30,16 +32,75 @@ export interface Template {
   template_id: number;
   title: string;
   description: string;
+  estimated_value:number;
   cost: number;
   meat_percent: number;
   carb_percent: number;
   veg_percent: number;
   carbon_saved: number;
+  weight: number;
   is_vegan: boolean;
   is_vegetarian: boolean;
   vendor?: number;
+  photo?: string;
   allergens: {
     allergen_id: number;
     title: string;
   }[];
 }
+
+export interface AnalyticDataPoint {
+  bundle_name: string;
+  no_show: number;
+  posted: number;
+  predicted: number;
+  recommendation: string;
+}
+
+
+export interface WeekData {
+  week_date: string; 
+  datapoints: AnalyticDataPoint[];
+}
+
+
+export interface Reservation {
+  reservation_id: number;
+  bundle_id: number;
+  customer_id: number;
+  time_created: string;
+  code: number;
+  status: string;
+};
+
+export interface VendorReservation {
+  reservation_id: number;
+  bundle_id: number;
+  customer_id: number;
+  time_created: string;
+  status: string;
+  code?: number; // vendor does not see real code initially
+}
+
+export interface Streak {
+  count: number;
+  last: string; 
+}
+
+export interface AnalyticDataPoint {
+  bundle_name: string;
+  no_show: number;
+  posted: number;
+  predicted: number;
+  recommendation: string;
+}
+
+export interface WeekData {
+  week_date: string; 
+  datapoints: AnalyticDataPoint[];
+}
+
+export interface Analytics {
+  week_data: WeekData[];
+}
+

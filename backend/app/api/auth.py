@@ -10,7 +10,7 @@ router = APIRouter()
 
 # this module handles the login and registering for users
 
-@router.post("/login", response_model=LoginResponse)
+@router.post("/login", response_model=LoginResponse, tags=["Auth"], summary="Main Log in for both vendors and customers.")
 def login(
     credentials: LoginRequest, 
     session: Session = Depends(get_session)
@@ -36,7 +36,7 @@ def login(
     }
 
 
-@router.post("/register/customer")
+@router.post("/register/customer", tags=["Auth","Customers"], summary="Create a new customer account")
 def register_customer(
     data: CustomerSignupRequest, 
     session: Session = Depends(get_session)
@@ -77,7 +77,7 @@ def register_customer(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/register/vendor")
+@router.post("/register/vendor", tags=["Auth","Vendors"], summary="Create a new vendor account")
 def register_vendor(
     data: VendorSignupRequest, 
     session: Session = Depends(get_session)

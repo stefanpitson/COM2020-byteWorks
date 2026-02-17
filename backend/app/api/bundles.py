@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException 
-from sqlmodel import Session, select, func
+from sqlmodel import Session, select 
 from app.core.database import get_session
-from app.models import Template, Allergen, Bundle, Reservation
-from app.schema import BundleCreate, CustBundleList, BundleRead, VendBundleList
+from app.models import Template, Bundle, Reservation
+from app.schema import BundleCreate, BundleRead, VendBundleList
 from app.api.deps import get_current_user
 from datetime import datetime
 
 router = APIRouter()
 
 # post a bundle 
-@router.post("/create", tags=["bundles"], summary="Create an amount of bundles for a specified template")
+@router.post("/create", tags=["Bundles"], summary="Create an amount of bundles for a specified template")
 def create_bundles(
     data: BundleCreate,
     session: Session = Depends(get_session),
@@ -41,7 +41,7 @@ def create_bundles(
         raise HTTPException(status_code=500, detail=str(e))
     
 # get bundles for store view 
-@router.get("/mystore", response_model=VendBundleList, tags=["bundles"], summary="Gets a list of bundles that are current, and not picked up yet")
+@router.get("/mystore", response_model=VendBundleList, tags=["Bundles"], summary="Gets a list of bundles that are current, and not picked up yet")
 def vendor_list_bundles(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
@@ -51,7 +51,6 @@ def vendor_list_bundles(
         raise HTTPException(status_code=403, detail="Not a vendor account")
     
     today = datetime.now().date()
-    #vendor = current_user.vendor_profile.vendor_id
 
     statement = (select(Bundle)
             .join(Reservation, Bundle.bundle_id == Reservation.bundle_id, isouter=True)
