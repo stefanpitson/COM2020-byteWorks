@@ -271,7 +271,7 @@ export default function VendorTemplateManager() {
             </div>
             
             <button 
-              onClick={() => navigate('/templates/new')}
+              onClick={() => navigate('/vendor/template')}
               className="ml-4 shrink-0 flex items-center gap-2 bg-gray-800 text-white px-4 py-2 rounded-xl hover:bg-black transition-colors"
             >
               <PlusIcon />
@@ -283,7 +283,7 @@ export default function VendorTemplateManager() {
             <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300">
               <p className="text-gray-500 mb-4">You haven't created any bundle templates yet.</p>
               <button 
-                onClick={() => navigate('/templates/new')}
+                onClick={() => navigate('/vendor/template')}
                 className="text-blue-600 font-bold hover:underline"
               >
                 Create your first template
