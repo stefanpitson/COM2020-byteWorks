@@ -106,7 +106,7 @@ export default function VendorAnalytics() {
           </button>
         </div>
 
-        {/* TOP ROW: QUICK STATS CARDS */}
+        {/* Big stats from vendor */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
             <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Lifetime Revenue</p>
@@ -122,7 +122,7 @@ export default function VendorAnalytics() {
           </div>
         </div>
 
-        {/* WEEKLY BAR CHARTS STACK */}
+        {/* Bar charts */}
         <div className="space-y-10">
           <div className="flex items-center gap-4">
             <h2 className="text-2xl font-bold text-gray-800">Weekly Breakdown</h2>
