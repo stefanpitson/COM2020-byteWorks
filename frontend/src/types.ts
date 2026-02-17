@@ -64,6 +64,42 @@ export interface WeekData {
 }
 
 
+export interface Reservation {
+  reservation_id: number;
+  bundle_id: number;
+  customer_id: number;
+  time_created: string;
+  code: number;
+  status: string;
+};
+
+export interface VendorReservation {
+  reservation_id: number;
+  bundle_id: number;
+  customer_id: number;
+  time_created: string;
+  status: string;
+  code?: number; // vendor does not see real code initially
+}
+
+export interface Streak {
+  count: number;
+  last: string; 
+}
+
+export interface AnalyticDataPoint {
+  bundle_name: string;
+  no_show: number;
+  posted: number;
+  predicted: number;
+  recommendation: string;
+}
+
+export interface WeekData {
+  week_date: string; 
+  datapoints: AnalyticDataPoint[];
+}
+
 export interface Analytics {
   week_data: WeekData[];
 }
