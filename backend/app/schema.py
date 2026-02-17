@@ -233,15 +233,6 @@ class StreakRead(BaseModel):
     ended:bool
 
 
-class StreakRead(BaseModel):
-    streak_id: int
-    customer_id: int
-    count: int
-    started: date
-    last: date
-    ended:bool
-
-
 class ForecastDatapoint(BaseModel):
     bundle_name: str        
     predicted: int # predicted reservations
