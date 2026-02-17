@@ -41,7 +41,7 @@ def create_bundles(
         raise HTTPException(status_code=500, detail=str(e))
     
 # get bundles for store view 
-@router.get("/mystore/", response_model=VendBundleList, tags=["Bundles"], summary="Gets a list of bundles that are current, and not picked up yet")
+@router.get("/mystore", response_model=VendBundleList, tags=["Bundles"], summary="Gets a list of bundles that are current, and not picked up yet")
 def vendor_list_bundles(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
