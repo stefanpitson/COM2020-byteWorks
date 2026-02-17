@@ -6,6 +6,20 @@ interface TemplateListResponse {
   templates: Template[];
 }
 
+export interface CreateTemplatePayload {
+  title: string;
+  description: string;
+  cost: number;
+  estimated_value: number;
+  weight: number;
+  meat_percent: number;
+  carb_percent: number;
+  veg_percent: number;
+  is_vegan: boolean;
+  is_vegetarian: boolean;
+  allergen_titles: string[]; 
+}
+
 export async function getVendorTemplates(vendorId: number): Promise<TemplateListResponse> {
   const response = await axios.get<TemplateListResponse>(
     `/templates/vendor/${vendorId}`
@@ -26,3 +40,17 @@ export async function getTemplateById(templateId: number): Promise<Template> {
   );
   return response.data;
 }
+
+export async function createTemplate(payload: CreateTemplatePayload): Promise<Template> {
+  const response = await axios.post<Template>("/templates", payload);
+  return response.data;
+}
+
+export const uploadTemplateImage = async (templateId: number, imageData: FormData) => {
+  const response = await axios.post(`/templates/upload-image/${templateId}`, imageData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
