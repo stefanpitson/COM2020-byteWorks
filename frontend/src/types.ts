@@ -49,6 +49,14 @@ export interface Template {
   }[];
 }
 
+export interface Reservation {
+  reservation_id: number;
+  bundle_id: number;
+  customer_id: number;
+  time_created: string;
+  code: number;
+  status: string;
+};
 export interface Streak {
   count: number;
   last: string; 
