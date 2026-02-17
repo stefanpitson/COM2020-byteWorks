@@ -45,3 +45,12 @@ export async function createTemplate(payload: CreateTemplatePayload): Promise<Te
   const response = await axios.post<Template>("/templates", payload);
   return response.data;
 }
+
+export const uploadTemplateImage = async (templateId: number, imageData: FormData) => {
+  const response = await axios.post(`/templates/upload-image/${templateId}`, imageData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};

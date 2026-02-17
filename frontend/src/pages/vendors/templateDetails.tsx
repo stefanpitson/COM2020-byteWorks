@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import { useNavigate } from "react-router-dom";
-import { createTemplate } from "../../api/templates";
+import { createTemplate, uploadTemplateImage } from "../../api/templates";
 import CeleryImg from "../../assets/allergens/Celery.png";
 import CrustaceansImg from "../../assets/allergens/Crustaceans.png";
 import EggImg from "../../assets/allergens/Egg.png";
@@ -31,6 +31,8 @@ export default function TemplateDetails() {
     const [inclusions, setInclusions] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     const ALLERGEN_LIST = [
         { name: "Celery", image: CeleryImg },
@@ -60,30 +62,45 @@ export default function TemplateDetails() {
         return Object.keys(newErrors).length === 0;
     };
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        setSelectedImage(file);
+        setImagePreview(URL.createObjectURL(file));
+        }
+    };
+
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (!validateForm()) return;
 
         setIsLoading(true);
         try {
-        await createTemplate({
-            title: title,
-            description: description,
-            cost: parseFloat(cost),
-            estimated_value: parseFloat(estimatedValue),
-            weight: parseFloat(weight),
-            meat_percent: (parseFloat(meatPercent) || 0) / 100,
-            carb_percent: (parseFloat(carbPercent) || 0) / 100,
-            veg_percent: (parseFloat(vegPercent) || 0) / 100,
-            is_vegan: inclusions.includes("vegan"),
-            is_vegetarian: inclusions.includes("vegetarian"),
-            allergen_titles: allergens 
-        });
-        navigate("/vendor/dashboard"); 
+            const response = await createTemplate({
+                title: title,
+                description: description,
+                cost: parseFloat(cost),
+                estimated_value: parseFloat(estimatedValue),
+                weight: parseFloat(weight),
+                meat_percent: (parseFloat(meatPercent) || 0) / 100,
+                carb_percent: (parseFloat(carbPercent) || 0) / 100,
+                veg_percent: (parseFloat(vegPercent) || 0) / 100,
+                is_vegan: inclusions.includes("vegan"),
+                is_vegetarian: inclusions.includes("vegetarian"),
+                allergen_titles: allergens 
+            });
+
+            if(selectedImage) {
+                const imageData = new FormData();
+                imageData.append("image", selectedImage)
+                await uploadTemplateImage(response.template_id, imageData)
+            }
+
+            navigate("/vendor/dashboard"); 
         } catch (error) {
-        console.error("Template creation failed:", error);
+            console.error("Template creation failed:", error);
         } finally {
-        setIsLoading(false);
+            setIsLoading(false);
         }
     }
 
@@ -122,9 +139,25 @@ export default function TemplateDetails() {
         {/* --- Left Column --- */}
             <div className="md:col-span-1 relative md:border-r border-gray-200 md:pr-12 flex flex-col">
             
-                <div className="bg-grayed border-2 border-dashed border-gray-300 rounded-xl h-[250px] flex items-center justify-center text-gray-500 text-sm mt-8 mb-8 cursor-pointer hover:bg-white transition-colors shadow-sm">
-                    <span>+ Upload Image</span>
-                </div>
+                <label className="bg-grayed border-2 border-dashed border-gray-300 rounded-xl h-[250px] flex items-center justify-center text-gray-500 text-sm mt-8 mb-8 cursor-pointer hover:bg-white transition-colors shadow-sm relative overflow-hidden group">
+                    {imagePreview ? (
+                        <>
+                            <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span className="text-white font-medium">Change Image</span>
+                            </div>
+                        </>
+                    ) : (
+                        <span>+ Upload Image</span>
+                    )}
+
+                    <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={handleFileChange} 
+                    />
+                </label>
 
                 <label className="block mb-4">
                     <span className="text-sm font-medium text-gray-700">Bundle Name</span>

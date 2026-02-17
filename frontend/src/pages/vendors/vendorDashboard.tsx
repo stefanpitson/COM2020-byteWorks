@@ -128,9 +128,17 @@ export default function VendorTemplateManager() {
         <div className="flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-200 transition-all hover:shadow-md">
         <div className="relative h-44 bg-gray-100 overflow-hidden">
             {/* Template Image Placeholder */}
-            <div className="absolute inset-0 bg-[hsl(var(--primary)/0.05)] flex items-center justify-center text-[hsl(var(--primary))]">
-                <BagIcon />
-            </div>
+            {template.photo ? (
+                <img 
+                    src={resolveImageUrl(template.photo) || placeholder} 
+                    alt={template.title} 
+                    className="w-full h-full object-cover" 
+                />
+            ) : (
+                <div className="absolute inset-0 bg-[hsl(var(--primary)/0.05)] flex items-center justify-center text-[hsl(var(--primary))]">
+                    <BagIcon />
+                </div>
+            )}
             
             <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-full shadow-sm ${isOutOfStock ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-white/95 text-[hsl(var(--accent))]'}`}>
                 <span className="text-xs font-bold">
