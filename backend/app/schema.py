@@ -21,6 +21,9 @@ class VendorRead(BaseModel):
     post_code: str
     phone_number: str
     opening_hours: str
+    total_revenue: float
+    carbon_saved: float
+    food_saved: float
     photo: Optional[str]
 
 # ___AUTH SCHEMAS___  
