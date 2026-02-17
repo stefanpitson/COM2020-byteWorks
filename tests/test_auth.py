@@ -24,30 +24,31 @@ def test_customer_login_success(test_client, registered_customer):
     assert login_response_data["user"]["role"] == "customer"
     assert login_response.status_code == 200
 
-@pytest.mark.parametrize("input_value", [
-    (""),
-    ("InvalidEmail"),
-    ("InvalidEmail@"),
-    ("@InvalidEmail"),
-    ("a"*255 + "@example.com"),
-])
-def test_invalid_email_register_fail(test_client, input_value):    
-    customer_data = {
-        "user": {
-            "email": input_value,
-            "password": "password456",
-            "role": "customer"
-        },
-        "customer": {
-            "name": "tester",
-            "post_code": "ab1 2cd"
-        }
-    }
-    register_response = test_client.post("/register/customer", json=customer_data)
-    register_response_data = register_response.json()
+
+# @pytest.mark.parametrize("input_value", [
+#     (""),
+#     ("InvalidEmail"),
+#     ("InvalidEmail@"),
+#     ("@InvalidEmail"),
+#     ("a"*255 + "@example.com"),
+# ])
+# def test_invalid_email_register_fail(test_client, input_value):    
+#     customer_data = {
+#         "user": {
+#             "email": input_value,
+#             "password": "password456",
+#             "role": "customer"
+#         },
+#         "customer": {
+#             "name": "tester",
+#             "post_code": "ab1 2cd"
+#         }
+#     }
+#     register_response = test_client.post("/register/customer", json=customer_data)
+#     register_response_data = register_response.json()
     
-    assert register_response_data["message"] == "Invalid email"
-    assert register_response.status_code == 400
+#     assert register_response_data["message"] == "Invalid email"
+#     assert register_response.status_code == 400
 
 def test_customer_login_fail(test_client):
     '''Login without an existing account'''

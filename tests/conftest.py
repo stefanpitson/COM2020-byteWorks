@@ -123,7 +123,7 @@ def registered_customer(test_client):
         },
         "customer": {
             "name": "tester",
-            "post_code": "ab1 2cd"
+            "post_code": "SW1A 1AA"
         }
     }
     response = test_client.post("/register/customer", json=customer_data)

@@ -103,7 +103,7 @@ def test_patch_profile_post_code_success(test_client, registered_customer, custo
             "user": {},
             "customer": 
             {
-                "post_code": "XY9 8WS"
+                "post_code": "SW1A 1AA"
             }
         }
     )
