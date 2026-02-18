@@ -7,7 +7,7 @@ from app.models import (
 )
 
 
-
+# make a vendor name and templates here to be used later on
 VENDOR_NAME = "Good Food Market"
 TEMPLATES = [
     {"title": "Vegan Bowl", "description": "Hearty plant-based bowl",
@@ -32,6 +32,7 @@ TEMPLATES = [
      "is_vegan": False, "is_vegetarian": True, "popularity": 0.5},
 ]
 
+# create the customers ti be used later
 CUSTOMERS = [
     {"name": "Alice", "post_code": "SW1A 1AA"},
     {"name": "Bob", "post_code": "E1 6QL"},
@@ -40,26 +41,30 @@ CUSTOMERS = [
     {"name": "Eve", "post_code": "G1 2FF"},
 ]
 
-# Time slots per week: (day_of_week, hour, minute, demand_factor)
+# create time slots per week
 TIME_SLOTS = [
-    (0, 17, 0, 0.7),   # Monday 5pm
-    (2, 12, 0, 1.0),   # Wednesday 12pm
-    (4, 18, 0, 1.5),   # Friday 6pm
+    (0, 17, 0, 0.7),  
+    (2, 12, 0, 1.0),   
+    (4, 18, 0, 1.5),   
 ]
 
-WEEKS_OF_HISTORY = 6
-START_DATE = date.today() - timedelta(weeks=WEEKS_OF_HISTORY)
-
-# Base ranges
+# possible ranges/ rates
 POSTED_RANGE = (15, 35)
 BASE_RESERVATION_RATE = (0.5, 0.9)
 NO_SHOW_RATE = (0.05, 0.2)
 
-# -------------------------------------------------------
 
-def seed():
-    with Session(engine) as session:
-        # 1. Create vendor user and vendor
+
+def seed(weeks_of_history: int = 6):
+    """
+    we seed the database (specified in the .emv file) witn weeks_of_history weeks of data 
+    ranges are defined externally -> an arbitrary amount of histroy may be created
+    Only 1 vendor
+    """
+    start_date = date.today() - timedelta(weeks=weeks_of_history)
+
+    with Session(engine) as session: # used the session from the url defined in .env
+        # make a vendor amd user entities to represent vendor
         vendor_user = User(
             password_hash="hashed_placeholder",
             email="vendor@goodfood.com",
@@ -68,6 +73,7 @@ def seed():
         session.add(vendor_user)
         session.flush()
 
+        # vendor entity
         vendor = Vendor(
             user_id=vendor_user.user_id,
             name=VENDOR_NAME,
@@ -80,9 +86,8 @@ def seed():
         )
         session.add(vendor)
         session.flush()
-        print(f"Created vendor {vendor.name} with ID {vendor.vendor_id}")
 
-        # 2. Create customers
+        # make customers and users to represent customers with semi realistic credentials
         customer_ids = []
         for c in CUSTOMERS:
             user = User(
@@ -102,9 +107,8 @@ def seed():
             session.add(customer)
             session.flush()
             customer_ids.append(customer.customer_id)
-        print(f"Created {len(customer_ids)} customers")
 
-        # 3. Create templates (store popularity for later use)
+        # make the temolates based on information defined at the top
         template_records = []
         for t in TEMPLATES:
             popularity = t['popularity']
@@ -119,33 +123,32 @@ def seed():
                 "id": template.template_id,
                 "popularity": popularity
             })
-        print(f"Created {len(template_records)} templates")
 
-        # 4. Generate historical bundles and reservations
-        total_bundles = 0
-        total_reservations = 0
 
-        for week in range(WEEKS_OF_HISTORY):
-            week_start = START_DATE + timedelta(weeks=week)
+        # we go through all the weeks in the predefined history
+        for week in range(weeks_of_history):
+            # set the week start
+            week_start = start_date + timedelta(weeks=week)
             for dow, hour, minute, demand_factor in TIME_SLOTS:
                 slot_date = week_start + timedelta(days=dow)
-                if slot_date > date.today():
+                if slot_date > date.today(): # scip slot dates in the future
                     continue
                 slot_time = time(hour, minute)
 
+                # go through template records which have now been creates
                 for template in template_records:
                     template_id = template["id"]
                     popularity = template["popularity"]
 
-                    # Number of bundles posted in this batch
+                    # random number of bundles posted in this batch based on predefined range
                     posted = random.randint(*POSTED_RANGE)
 
-                    # Reservation probability
+                    # set the reserved rate to calculate how many reservations
                     base_rate = random.uniform(*BASE_RESERVATION_RATE)
                     reservation_rate = min(base_rate * popularity * demand_factor, 0.95)
                     reserved = int(posted * reservation_rate)
 
-                    # No-show rate
+                    # no-show rate is defined similarly
                     no_show_rate = random.uniform(*NO_SHOW_RATE)
                     no_shows = int(reserved * no_show_rate) if reserved > 0 else 0
 
@@ -163,37 +166,35 @@ def seed():
                         session.flush()
                         bundle_ids.append(bundle.bundle_id)
 
-                    total_bundles += posted
 
-                    # Decide which bundles are reserved and handle no‑shows
+                    # set reserved bundles and handle no‑shows
                     if reserved > 0:
                         reserved_bundle_ids = random.sample(bundle_ids, reserved)
                         no_show_bundle_ids = random.sample(reserved_bundle_ids, no_shows) if no_shows > 0 else []
 
                         for b_id in reserved_bundle_ids:
                             cust_id = random.choice(customer_ids)
-                            # Update bundle
+                            # Update the bundle
                             stmt = select(Bundle).where(Bundle.bundle_id == b_id)
                             bundle = session.exec(stmt).one()
                             bundle.purchased_by = cust_id
 
                             status = 'no_show' if b_id in no_show_bundle_ids else 'collected'
-
+                            # create the reservation entity
                             reservation = Reservation(
                                 bundle_id=b_id,
                                 customer_id=cust_id,
-                                time_created=datetime.now().time(),
+                                time_created=datetime.now(),
                                 status=status,
-                                code=random.randint(100000, 999999)
+                                code=random.randint(1000, 9999) # accept small risk of collision just for seeded dataset. IRL collisions handled
                             )
                             session.add(reservation)
-                            total_reservations += 1
 
                             if status == 'collected':
                                 bundle.picked_up = True
 
         session.commit()
-        print(f"Seeding complete. Created {total_bundles} bundles and {total_reservations} reservations.")
+
 
 if __name__ == "__main__":
     seed()

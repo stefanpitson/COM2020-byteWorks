@@ -173,5 +173,6 @@ class Forecast_Output(SQLModel, table=True):
     model_type: str = Field(default = "seasonal_naive") # to show what model made the predicition since many different models could make the same forecast
     reservation_prediction: int # how many of these bundles will be sell
     no_show_prediction: int 
+    recomendation: str
     rationale:str 
     confidence:float 

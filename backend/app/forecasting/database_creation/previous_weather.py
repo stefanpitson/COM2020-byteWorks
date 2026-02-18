@@ -118,5 +118,5 @@ def update_weather_for_vendor(
 
 
 if __name__ == "__main__":
-    result = update_weather_for_vendor(vendor_id=2, days_back=60)
+    result = update_weather_for_vendor(vendor_id=1, days_back=60)
     print(result)
