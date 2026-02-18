@@ -4,3 +4,4 @@ backend/.cache.sqlite
 .env
 backend/__pycache__/*
 frontend/package-lock.json
+**/__pycache__/
