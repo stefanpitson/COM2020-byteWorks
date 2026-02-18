@@ -58,6 +58,16 @@ export default function TemplateDetails() {
         if (!cost) newErrors.cost = "Cost is required";
         if (!estimatedValue) newErrors.estimatedValue = "Estimated value is required";
         if (!weight) newErrors.weight = "Weight is required";
+
+        const m = parseFloat(meatPercent) || 0;
+        const c = parseFloat(carbPercent) || 0;
+        const v = parseFloat(vegPercent) || 0;
+        const total = m + c + v;
+
+        if (total !== 100) {
+            newErrors.percentages = `Total is ${total}%. Percentages must add up to exactly 100%.`;
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -97,8 +107,21 @@ export default function TemplateDetails() {
             }
 
             navigate("/vendor/dashboard"); 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Template creation failed:", error);
+            
+            if (error.response && error.response.data && error.response.data.detail) {
+                const backendError = error.response.data.detail;
+
+                if (backendError === "Template already registered") {
+                    // This puts the red text directly under the "Bundle Name" box
+                    setErrors((prev) => ({ ...prev, title: "This bundle name is already taken" }));
+                } else {
+                    // If it's some other error (like "Percentages do not add up"), show it generally
+                    alert(`Error: ${backendError}`);
+                }
+            }
+
         } finally {
             setIsLoading(false);
         }
@@ -289,6 +312,14 @@ export default function TemplateDetails() {
                         className={getInputClass()} placeholder="e.g. 30"
                     />
                     </label>
+                    {errors.percentages && (
+                            <div className="p-2 bg-red-50 text-red-600 text-xs rounded border border-red-100 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 shrink-0">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                                </svg>
+                                {errors.percentages}
+                            </div>
+                        )}
                 </div>
                 </div>
                 
