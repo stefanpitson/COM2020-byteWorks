@@ -32,9 +32,9 @@ Alex - QA and testing
 
 most likely to choose:
 
-project 4 - barcode traceability
+project 4 - barcode traceability: feasibility concerns, getting data for the products may be difficult 
 
-project 8 - food waste prevention
+project 8 - food waste prevention: stronger of the 2 as it does not require external information that can be hard to trace. 
 
 ### physical notes
 
@@ -92,23 +92,22 @@ Andrew (Technical lead) will establish a skeleton of the project to start Develo
 Product owner - Stefan
 Scrum Master - Joe
 ### Design:
-Will use sockets
 Front and back will communicate using JSONs passed back and forth between the 2 of them.
 #### 2-3 servers:
 **DB** - Postgres SQL 
 **Back End** - python 
 - quicker prototyping 
-- fast API over Django flask
-	- compile time catching 
-	- equal familiarity 
-	- data validation is automatic 
-	- creates spec automatic spec 
+- fast API over Django flask 
+	- compile time catching - help prevent bugs
+	- equal familiarity - most of the team hasn't worked extensively with either 
+	- data validation is automatic - prevent issues with malformed data, preventing issues that might go unnoticed otherwise
+	- creates automatic specification/docs - makes it easier for both front end and back end to know what endpoints there are. 
 
-**Front End** - typescript/react framework
+**Front End** - typescript/react framework 
 - simple 
 - tested 
 - shared open api
-#### Future Needs for Technical Plan
+#### Future Needs for Technical Plan 
 ER Diagram 
 ##### Plan of Web Pages:
 -login: required before accessing the website
@@ -133,8 +132,17 @@ To summarise:
 - install python 3.14.2, node js latest, postgressql 18
 - set up local DB
 - create venv 
-- start front and backend 
+- start front and backend
 
+#### issues 
+This meeting lasted over 3 hours as each individual had different issues that need to be worked through to get all of the packages working, common issues were:
+- pip not installing correctly with python
+- conflicting versions of python 
+- paths not being set properly 
+- npm from node needing greater permissions 
+- misunderstandings on the postgres installation leading to issues
+
+Individually as well Alex's mac required a very different installation process. 
 
 # Meeting 5 - 26/01
 ### Attendance
@@ -157,11 +165,15 @@ The ER Diagram can be accessed at:
 https://lucid.app/lucidchart/9be3478b-b033-4e02-a547-7e9217e29243/edit?invitationId=inv_0d92ce72-aacd-479e-9018-7f7f074c59fe&page=0_0# 
 
 Security and logging-in was discussed, JWT were decided as a way to authenticate users.
-## Details
+## Discussions 
+With the expanding understanding of requirements, the stack we plan to use was discussed as maybe too much overhead, that a more simple solution may be better and easier to work with. Concerns were lowered when comparing to other options like flask, or switching languages to java. Discussion highlighted that concerns mainly stemmed from the unfamiliarity, and that with practice it will make more sense. 
+
+Entities for the ER diagram and the database created lots of different opinions, entities like the templates and bundles were considered being merged, similarly badges, forecast entities and others were discussed if necessary.
+
+The proposition of a business entity was heavily discussed, this entity would link different vendors together, and then allow a business wide view of analytics, with the final decision being that this would not be implemented, due to speculated complexity with regards to accounts, and the different analytic views. 
 
 ### key decisions
-We came to the decision that the search page should feature stores/shops, and that you click-through to view bundles for that particular store/shop, at least for the first demo. 
-
+We came to the decision that the search page should feature stores/shops, and that you click-through to view bundles for that particular store/shop. This decision was chosen to manage complexity. Having a page of stores is much easier to create and provides similar level of functionality. 
 
 # Meeting 7 - 30/01
 ### Attendance 
@@ -179,7 +191,7 @@ Demonstrate schema changes
 Discuss user authentication 
 Allocation of new tickets
 
-We discussed how to implement what comes next and planned to individually learn what was there, looking more into the side we were going to be working with. So for frontend the typescript with tailscale, for the backend learning the FastAPI and sqlmodel libraries. 
+We discussed how to implement what comes next and planned to individually learn what was there, looking more into the side we were going to be working with. So for frontend the react/node.js, for the backend learning the FastAPI and sqlmodel libraries. 
 
 ## assignments 
 #### frontend 
@@ -218,39 +230,39 @@ Alfie - further design work
 All but Alfie and Arden 
 
 ## Overview
-Due to scheduling issues we had an asynchronous meeting where we discussed specific work we have started and what we are getting on with (1), their progress(2), if we need help with anything(3) and what they are planning to do next (4). 
+Due to scheduling issues we had an asynchronous meeting where we discussed specific work we have started and what we are getting on with (1), their progress(2), if we need help with anything(3) and what they are planning to do next (4). This was done over the discord in the meetings channel. 
 ## Info
-Andrew:
+#### Andrew:
 1-Ive been working on creasing Vendor accounts and uploading their vendor Images
 2-I've gotten the functionality implemented and the images can be see in the codebase
 3-I would like some help from anyone else in Frontend (Alex/Stefan) to help polish it up, make the colour schemes and style consistent.
 4-How that vendors can be created, I would like to work on displaying vendors for the Customer homepage
 
-Alex:
+#### Alex:
 1-I'm currently working on the verification of the user inputs for the creating user page
 2-I have the verification for all fields not being empty and the length of name to not be longer than 32 charecters working and appearing with red text
 3-Not sure if theres anything i really need help with at this moemnt but will update if i do
 4-I'll work on polishing up all the screens that have been made to have a consisten colour scheme
 
-Joe:
+#### Joe:
 1-Currently working on implementing template and bundle end points.
 2-templates are mostly done apart from update, bundles should be relatively quick.
 3-No current help needed
 4-Reservation end points are next
 
-Stefan:
+#### Stefan:
 1-currently working on error messages and some refinement of login system
 2-have some basic working error messages, going to add protection to the sign in and sign up buttons and password view toggles
 3-all good right now
 4-will create the first version of the README next
 
-Magnus:
+#### Magnus:
 1-working on Tests for all the endpoints, including Auth, Customer, Vendor..
 2-I've made a local test database that copies the existing model and lives for the duration of the test program, so as of now I am simply creating extensive tests.
 3-No help needed, but its on test-main repo, people can simply go into tests directory and make tests easily following the format in the program if needed.
 4-Waiting on functional logic to test that is separate from endpoints. Happy to help others if needed!!
 
-Jack:
+#### Jack:
 1-On updating customer settings so that customers can change their email, name etc
 2-Nearly finished
 3-None
@@ -262,7 +274,7 @@ All but Alfie
 
 ## Overview
 We met with the TAs and discussed where the project was at. 
-Highlighting the need to beguin creating the documentation, namely -(assignment):
+Highlighting the need to beguin creating the documentation, namely:
 -prototype report 
 -risk register
 -ethical and legal considerations 
@@ -274,21 +286,21 @@ Highlighting the need to beguin creating the documentation, namely -(assignment)
 All but Alfie 
 
 ## Overview 
-We discussed what is left to be implemented for the demo:
+We discussed what is left to be implemented for the demo: 
 - reservation end points need completing
 - pages for customer view of vendors
 - pages for vendor home page
 - pages for booking bundles 
 - pages for collecting bundles
 
-We also discussed what documentation is left to do:
-- prototype report
+We also discussed what documentation is left to do: 
+- prototype report 
 - slides for presentation 
-- testing report
+- testing report 
 
 planning to work hard over the weekend to have the project ready for the demo
 
-# Meeting 12 - 16/02
+# Meeting 12 - 15/02
 ## Attendance
 All present 
 
@@ -297,4 +309,40 @@ We discussed what needs to be implemented before the demo:
 
 #### Endpoints:
 - calculate earnings
-- 
+- streaks 
+- basic forecasting 
+
+#### Front end:
+- analytics page 
+- streaks added to customer nav bar 
+
+### Presentation:
+we reviewed the current condition of the presentation and referenced specification to see what needs to be covered.
+
+# Meeting 13 - 16/02
+## Attendance
+All present 
+
+## Overview
+We assigned sections and roles for the presentation and practiced the presentation. 
+
+### Roles 
+
+Alex - click through slides and demo 
+
+Stefan - introduction (30s)
+
+Alfie - explain demo (login + dashboards) (2mins)
+
+Jack - explain demo (ordering + collection codes) (2mins)
+
+Arden - explain demo / analytics plan (explains analytics page) (1min)
+
+Andrew - technical overview (1.5min)
+
+Magnus - testing and evaluation (1min)
+
+Joe - Limitations and Next Steps (1.5mins)
+
+leaving 30 seconds of 'wiggle room' in our 10 minutes. 
+
