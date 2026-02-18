@@ -1,7 +1,5 @@
 from datetime import datetime, timedelta
 
-from app.schema import VendorList
-
 def test_create_bundle_success(test_client, vendor_login_response, template_factory):
     template_factory()
     token = vendor_login_response["access_token"]

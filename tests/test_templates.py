@@ -1,6 +1,5 @@
-from tempfile import template
-from turtle import title
 import pytest
+from pathlib import Path
 
 def test_create_template_without_allergies_success(test_client, vendor_login_response):
     token = vendor_login_response["access_token"]
@@ -132,6 +131,31 @@ def test_create_template_with_invalid_percentages(test_client, vendor_login_resp
    assert template_response_data["detail"] == "Percentages do not add up to 1"
    assert template_response.status_code == 400
 
+def test_upload_image_success(test_client, vendor_login_response, template_factory):
+    token = vendor_login_response["access_token"]
+    template_factory()
+    fixture_path = Path(__file__).parent / "fixtures" / "testimage.jpg"
+    with fixture_path.open("rb") as f:
+        image_response = test_client.post(
+            "/templates/upload-image/1",
+            headers={"Authorization": "Bearer " + token},
+            files={"image": ("testimage.jpg", f, "image/jpg")
+            }
+        )
+    image_response_data = image_response.json()
+    assert image_response_data["status"] == "success"
+    assert image_response_data["image_url"].startswith("static/")
+    assert image_response_data["image_url"].lower().endswith((".png", ".jpg", ".jpeg", ".gif", ".webp"))
+
+def test_upload_with_no_image_fail(test_client, vendor_login_response):
+    token = vendor_login_response["access_token"]
+    image_response = test_client.post(
+        "/templates/upload-image/1",
+        headers={"Authorization": "Bearer " + token},
+        files={}
+    )
+    assert image_response.status_code == 422
+
 def test_get_template_success(test_client, vendor_login_response, template_factory):
     token = vendor_login_response["access_token"]
     template_factory()
@@ -176,5 +200,24 @@ def test_get_list_of_templates_of_a_wrong_vendor_fail(test_client, vendor_login_
     assert templates_list_response_data["detail"] == "Not the correct vendor"
     assert templates_list_response.status_code == 403
 
-# def test_get_number_of_bundles_for_a_template_success(test_client):
-#     return
+def test_get_number_of_bundles_for_a_template_success(test_client, vendor_login_response, template_factory, registered_bundle):
+    token = vendor_login_response["access_token"]
+    template_factory()
+    count_response = test_client.get("/templates/count/1",
+                        headers={"Authorization":"Bearer " + token}
+                    )
+    
+    count_response_data = count_response.json()
+    assert count_response_data == 5
+    assert count_response.status_code == 200
+
+def test_get_number_of_bundles_for_a_template_with_no_bundles_success(test_client, vendor_login_response, template_factory):
+    token = vendor_login_response["access_token"]
+    template_factory()
+    count_response = test_client.get("/templates/count/1",
+                        headers={"Authorization":"Bearer " + token}
+                    )
+    
+    count_response_data = count_response.json()
+    assert count_response_data == 0
+    assert count_response.status_code == 200
