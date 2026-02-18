@@ -158,7 +158,15 @@ export default function TemplateDetails() {
   return (
     <div className="min-h-screen w-full flex justify-center bg-background p-10 font-sans">
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-[1100px] w-full">
-        
+        <div className="col-span-1 md:col-span-3 flex justify-end">
+            <button 
+                type="button" // Good practice to prevent accidental form submission
+                onClick={() => navigate(-1)}
+                className="text-sm font-bold text-gray-500 hover:text-gray-800 transition-colors"
+            >
+                ← Back to Dashboard
+            </button>
+        </div>
         {/* --- Left Column --- */}
             <div className="md:col-span-1 relative md:border-r border-gray-200 md:pr-12 flex flex-col">
             
