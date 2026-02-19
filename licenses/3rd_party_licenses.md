@@ -1,11 +1,91 @@
 # 3rd Party Software Licenses
 
-This document contains the licenses for all third-party dependencies.
+Generated audit of third-party dependencies and their legal notices.
+
+## Summary Table
+
+| Name | Version | License | Author |
+| :--- | :--- | :--- | :--- |
+| PyJWT | 2.10.1 | MIT License | José Padilla |
+| PyYAML | 6.0.3 | MIT License | Ingy döt Net |
+| SQLAlchemy | 2.0.45 | MIT | See License Text |
+| annotated-doc | 0.0.4 | MIT | Sebastián Ramírez |
+| annotated-types | 0.7.0 | MIT License | the contributors |
+| anyio | 4.12.1 | MIT | Alex Grönholm |
+| argon2-cffi | 25.1.0 | MIT | Hynek Schlawack and the argon2-cffi contributors |
+| argon2-cffi-bindings | 25.1.0 | MIT | Hynek Schlawack |
+| attrs | 25.4.0 | MIT | Hynek Schlawack and the attrs contributors |
+| cattrs | 25.3.0 | MIT License | Tin Tvrtković |
+| certifi | 2026.1.4 | Mozilla Public License 2.0 (MPL 2.0) | See License Text |
+| cffi | 2.0.0 | MIT | See License Text |
+| charset-normalizer | 3.4.4 | MIT | TAHRI Ahmed R. |
+| click | 8.3.1 | BSD-3-Clause | See License Text |
+| colorama | 0.4.6 | BSD License | Jonathan Hartley |
+| contourpy | 1.3.3 | BSD License | ContourPy Developers. |
+| cryptography | 46.0.4 | Apache-2.0 OR BSD-3-Clause | See License Text |
+| cycler | 0.12.1 | BSD License | matplotlib project |
+| ecdsa | 0.19.1 | MIT | Brian Warner |
+| fastapi | 0.128.0 | MIT | Sebastián Ramírez |
+| flatbuffers | 25.9.23 | Apache Software License | See License Text |
+| fonttools | 4.61.1 | MIT | Just van Rossum |
+| greenlet | 3.3.0 | MIT AND Python-2.0 | See License Text |
+| h11 | 0.16.0 | MIT License | Nathaniel J. Smith <njs@pobox.com> and other contributors |
+| httptools | 0.7.1 | MIT | MagicStack Inc.  http://magic.io |
+| idna | 3.11 | BSD-3-Clause | Kim Davies and contributors. |
+| jh2 | 5.0.10 | MIT | Cory Benfield and contributors |
+| joblib | 1.5.3 | BSD-3-Clause | The joblib developers. |
+| kiwisolver | 1.4.9 | BSD License | Nucleic Development Team |
+| matplotlib | 3.10.8 | Python Software Foundation License | American Mathematical Society (http://www.ams.org). |
+| niquests | 3.17.0 | Apache-2.0 | See License Text |
+| numpy | 2.4.1 | BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0 | NumPy Developers. |
+| openmeteo_requests | 1.7.5 | MIT License | Open-Meteo |
+| openmeteo_sdk | 1.25.0 | MIT License | See License Text |
+| packaging | 26.0 | Apache-2.0 OR BSD-2-Clause | See License Text |
+| pandas | 3.0.0 | BSD License | AQR Capital Management, LLC, Lambda Foundry, Inc. and PyData Development Team |
+| passlib | 1.7.4 | BSD | Assurance Technologies, LLC. |
+| pgeocode | 0.5.0 | BSD License | Symerio |
+| pillow | 12.1.0 | MIT-CMU | by the Brotli Authors. |
+| platformdirs | 4.9.1 | MIT | See License Text |
+| psycopg2-binary | 2.9.11 | GNU Library or Lesser General Public License (LGPL) | See License Text |
+| pyasn1 | 0.6.2 | BSD-2-Clause | Ilya Etingof <etingof@gmail.com> |
+| pycparser | 3.0 | BSD-3-Clause | Eli Bendersky |
+| pydantic | 2.12.5 | MIT | to present Pydantic Services Inc. and individual contributors. |
+| pydantic_core | 2.41.5 | MIT | Samuel Colvin |
+| pyparsing | 3.3.2 | MIT | Paul McGuire |
+| python-dateutil | 2.9.0.post0 | Apache Software License; BSD License | Gustavo Niemeyer <gustavo@niemeyer.net> |
+| python-dotenv | 1.2.1 | BSD-3-Clause | Saurabh Kumar (python-dotenv), 2013, Ted Tieken (django-dotenv-rw), 2013, Jacob Kaplan-Moss (django-dotenv) |
+| python-jose | 3.5.0 | MIT License | Michael Davis |
+| python-multipart | 0.0.22 | Apache-2.0 | See License Text |
+| qh3 | 1.5.6 | BSD License | Jeremy Lainé. |
+| requests | 2.32.5 | Apache Software License | See License Text |
+| requests-cache | 1.3.0 | BSD-2-Clause | Roman Haritonov |
+| retry-requests | 2.0.0 | GNU General Public License v3 or later (GPLv3+) | Free Software Foundation, Inc. <https://fsf.org/> |
+| rsa | 4.9.1 | Apache Software License | See License Text |
+| scikit-learn | 1.8.0 | BSD-3-Clause | The scikit-learn developers. |
+| scipy | 1.17.0 | BSD License | Enthought, Inc. 2003, SciPy Developers. |
+| six | 1.17.0 | MIT License | Benjamin Peterson |
+| sqlmodel | 0.0.31 | MIT | Sebastián Ramírez |
+| starlette | 0.50.0 | BSD-3-Clause | See License Text |
+| threadpoolctl | 3.6.0 | BSD License | threadpoolctl contributors |
+| typing-inspection | 0.4.2 | MIT | See License Text |
+| typing_extensions | 4.15.0 | PSF-2.0 | Python Software Foundation; |
+| tzdata | 2025.3 | Apache-2.0 | Paul Ganssle (Google) |
+| uk-postcode-utils | 1.1 | GNU Affero General Public License v3 | UK |
+| url-normalize | 2.2.1 | MIT | Nikolay Panov |
+| urllib3 | 2.6.3 | MIT | Andrey Petrov and contributors. |
+| urllib3-future | 2.15.903 | MIT | Andrey Petrov and contributors. |
+| uvicorn | 0.40.0 | BSD-3-Clause | See License Text |
+| wassima | 2.0.5 | MIT | See License Text |
+| watchfiles | 1.1.1 | MIT License | to present Samuel Colvin |
+| websockets | 16.0 | BSD-3-Clause | See License Text |
 
 ---
 
-## PyJWT (v2.10.1)
-**License Type:** MIT License
+## Full License Texts
+
+### PyJWT (v2.10.1)
+- **License Type:** MIT License
+- **Author:** José Padilla
 
 ```text
 The MIT License (MIT)
@@ -33,8 +113,9 @@ SOFTWARE.
 
 ---
 
-## PyYAML (v6.0.3)
-**License Type:** MIT License
+### PyYAML (v6.0.3)
+- **License Type:** MIT License
+- **Author:** Ingy döt Net
 
 ```text
 Copyright (c) 2017-2021 Ingy döt Net
@@ -61,41 +142,9 @@ SOFTWARE.
 
 ---
 
-## Pygments (v2.19.2)
-**License Type:** BSD License
-
-```text
-Copyright (c) 2006-2022 by the respective authors (see AUTHORS file).
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-* Redistributions of source code must retain the above copyright
-  notice, this list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright
-  notice, this list of conditions and the following disclaimer in the
-  documentation and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-```
-
----
-
-## SQLAlchemy (v2.0.45)
-**License Type:** MIT
+### SQLAlchemy (v2.0.45)
+- **License Type:** MIT
+- **Author:** See License Text
 
 ```text
 Copyright 2005-2025 SQLAlchemy authors and contributors <see AUTHORS file>.
@@ -121,8 +170,9 @@ SOFTWARE.
 
 ---
 
-## annotated-doc (v0.0.4)
-**License Type:** MIT
+### annotated-doc (v0.0.4)
+- **License Type:** MIT
+- **Author:** Sebastián Ramírez
 
 ```text
 The MIT License (MIT)
@@ -150,8 +200,9 @@ THE SOFTWARE.
 
 ---
 
-## annotated-types (v0.7.0)
-**License Type:** MIT License
+### annotated-types (v0.7.0)
+- **License Type:** MIT License
+- **Author:** the contributors
 
 ```text
 The MIT License (MIT)
@@ -179,8 +230,9 @@ SOFTWARE.
 
 ---
 
-## anyio (v4.12.1)
-**License Type:** MIT
+### anyio (v4.12.1)
+- **License Type:** MIT
+- **Author:** Alex Grönholm
 
 ```text
 The MIT License (MIT)
@@ -207,8 +259,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## argon2-cffi (v25.1.0)
-**License Type:** MIT
+### argon2-cffi (v25.1.0)
+- **License Type:** MIT
+- **Author:** Hynek Schlawack and the argon2-cffi contributors
 
 ```text
 The MIT License (MIT)
@@ -236,8 +289,9 @@ SOFTWARE.
 
 ---
 
-## argon2-cffi-bindings (v25.1.0)
-**License Type:** MIT
+### argon2-cffi-bindings (v25.1.0)
+- **License Type:** MIT
+- **Author:** Hynek Schlawack
 
 ```text
 The MIT License (MIT)
@@ -265,8 +319,9 @@ SOFTWARE.
 
 ---
 
-## attrs (v25.4.0)
-**License Type:** MIT
+### attrs (v25.4.0)
+- **License Type:** MIT
+- **Author:** Hynek Schlawack and the attrs contributors
 
 ```text
 The MIT License (MIT)
@@ -294,8 +349,9 @@ SOFTWARE.
 
 ---
 
-## cattrs (v25.3.0)
-**License Type:** MIT License
+### cattrs (v25.3.0)
+- **License Type:** MIT License
+- **Author:** Tin Tvrtković
 
 ```text
 MIT License
@@ -311,8 +367,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## certifi (v2026.1.4)
-**License Type:** Mozilla Public License 2.0 (MPL 2.0)
+### certifi (v2026.1.4)
+- **License Type:** Mozilla Public License 2.0 (MPL 2.0)
+- **Author:** See License Text
 
 ```text
 This package contains a modified version of ca-bundle.crt:
@@ -339,8 +396,9 @@ one at http://mozilla.org/MPL/2.0/.
 
 ---
 
-## cffi (v2.0.0)
-**License Type:** MIT
+### cffi (v2.0.0)
+- **License Type:** MIT
+- **Author:** See License Text
 
 ```text
 Except when otherwise stated (look for LICENSE files in directories or
@@ -368,8 +426,9 @@ documentation is licensed as follows:
 
 ---
 
-## charset-normalizer (v3.4.4)
-**License Type:** MIT
+### charset-normalizer (v3.4.4)
+- **License Type:** MIT
+- **Author:** TAHRI Ahmed R.
 
 ```text
 MIT License
@@ -397,8 +456,9 @@ SOFTWARE.
 
 ---
 
-## click (v8.3.1)
-**License Type:** BSD-3-Clause
+### click (v8.3.1)
+- **License Type:** BSD-3-Clause
+- **Author:** See License Text
 
 ```text
 Copyright 2014 Pallets
@@ -433,8 +493,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## colorama (v0.4.6)
-**License Type:** BSD License
+### colorama (v0.4.6)
+- **License Type:** BSD License
+- **Author:** Jonathan Hartley
 
 ```text
 Copyright (c) 2010 Jonathan Hartley
@@ -468,8 +529,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## contourpy (v1.3.3)
-**License Type:** BSD License
+### contourpy (v1.3.3)
+- **License Type:** BSD License
+- **Author:** ContourPy Developers.
 
 ```text
 BSD 3-Clause License
@@ -505,8 +567,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## cryptography (v46.0.4)
-**License Type:** Apache-2.0 OR BSD-3-Clause
+### cryptography (v46.0.4)
+- **License Type:** Apache-2.0 OR BSD-3-Clause
+- **Author:** See License Text
 
 ```text
 This software is made available under the terms of *either* of the licenses
@@ -516,8 +579,9 @@ under the terms of *both* these licenses.
 
 ---
 
-## cycler (v0.12.1)
-**License Type:** BSD License
+### cycler (v0.12.1)
+- **License Type:** BSD License
+- **Author:** matplotlib project
 
 ```text
 Copyright (c) 2015, matplotlib project
@@ -551,8 +615,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## ecdsa (v0.19.1)
-**License Type:** MIT
+### ecdsa (v0.19.1)
+- **License Type:** MIT
+- **Author:** Brian Warner
 
 ```text
 "python-ecdsa" Copyright (c) 2010 Brian Warner
@@ -583,8 +648,9 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## fastapi (v0.128.0)
-**License Type:** MIT
+### fastapi (v0.128.0)
+- **License Type:** MIT
+- **Author:** Sebastián Ramírez
 
 ```text
 The MIT License (MIT)
@@ -612,8 +678,9 @@ THE SOFTWARE.
 
 ---
 
-## flatbuffers (v25.9.23)
-**License Type:** Apache Software License
+### flatbuffers (v25.9.23)
+- **License Type:** Apache Software License
+- **Author:** See License Text
 
 ```text
 Apache License
@@ -821,8 +888,9 @@ Apache License
 
 ---
 
-## fonttools (v4.61.1)
-**License Type:** MIT
+### fonttools (v4.61.1)
+- **License Type:** MIT
+- **Author:** Just van Rossum
 
 ```text
 MIT License
@@ -850,8 +918,9 @@ SOFTWARE.
 
 ---
 
-## greenlet (v3.3.0)
-**License Type:** MIT AND Python-2.0
+### greenlet (v3.3.0)
+- **License Type:** MIT AND Python-2.0
+- **Author:** See License Text
 
 ```text
 The following files are derived from Stackless Python and are subject to the
@@ -888,8 +957,9 @@ THE SOFTWARE.
 
 ---
 
-## h11 (v0.16.0)
-**License Type:** MIT License
+### h11 (v0.16.0)
+- **License Type:** MIT License
+- **Author:** Nathaniel J. Smith <njs@pobox.com> and other contributors
 
 ```text
 The MIT License (MIT)
@@ -918,43 +988,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## httpcore (v1.0.9)
-**License Type:** BSD-3-Clause
-
-```text
-Copyright © 2020, [Encode OSS Ltd](https://www.encode.io/).
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-* Redistributions of source code must retain the above copyright notice, this
-  list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-
-* Neither the name of the copyright holder nor the names of its
-  contributors may be used to endorse or promote products derived from
-  this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-```
-
----
-
-## httptools (v0.7.1)
-**License Type:** MIT
+### httptools (v0.7.1)
+- **License Type:** MIT
+- **Author:** MagicStack Inc.  http://magic.io
 
 ```text
 The MIT License
@@ -982,28 +1018,9 @@ THE SOFTWARE.
 
 ---
 
-## httpx (v0.28.1)
-**License Type:** BSD License
-
-```text
-Copyright © 2019, [Encode OSS Ltd](https://www.encode.io/).
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
-* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-
-* Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-```
-
----
-
-## idna (v3.11)
-**License Type:** BSD-3-Clause
+### idna (v3.11)
+- **License Type:** BSD-3-Clause
+- **Author:** Kim Davies and contributors.
 
 ```text
 BSD 3-Clause License
@@ -1041,37 +1058,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## iniconfig (v2.3.0)
-**License Type:** MIT
-
-```text
-The MIT License (MIT)
-
-Copyright (c) 2010 - 2023 Holger Krekel and others
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
-
----
-
-## jh2 (v5.0.10)
-**License Type:** MIT
+### jh2 (v5.0.10)
+- **License Type:** MIT
+- **Author:** Cory Benfield and contributors
 
 ```text
 The MIT License (MIT)
@@ -1099,8 +1088,9 @@ THE SOFTWARE.
 
 ---
 
-## joblib (v1.5.3)
-**License Type:** BSD-3-Clause
+### joblib (v1.5.3)
+- **License Type:** BSD-3-Clause
+- **Author:** The joblib developers.
 
 ```text
 BSD 3-Clause License
@@ -1136,8 +1126,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## kiwisolver (v1.4.9)
-**License Type:** BSD License
+### kiwisolver (v1.4.9)
+- **License Type:** BSD License
+- **Author:** Nucleic Development Team
 
 ```text
 =========================
@@ -1215,8 +1206,9 @@ to indicate the copyright and license terms:
 
 ---
 
-## matplotlib (v3.10.8)
-**License Type:** Python Software Foundation License
+### matplotlib (v3.10.8)
+- **License Type:** Python Software Foundation License
+- **Author:** American Mathematical Society (http://www.ams.org).
 
 ```text
 License agreement for matplotlib versions 1.3.0 and later
@@ -2012,8 +2004,9 @@ License:
 
 ---
 
-## niquests (v3.17.0)
-**License Type:** Apache-2.0
+### niquests (v3.17.0)
+- **License Type:** Apache-2.0
+- **Author:** See License Text
 
 ```text
 Apache License
@@ -2194,8 +2187,9 @@ Apache License
 
 ---
 
-## numpy (v2.4.1)
-**License Type:** BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0
+### numpy (v2.4.1)
+- **License Type:** BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0
+- **Author:** NumPy Developers.
 
 ```text
 Copyright (c) 2005-2025, NumPy Developers.
@@ -3115,8 +3109,9 @@ Public License instead of this License.  But first, please read
 
 ---
 
-## openmeteo_requests (v1.7.5)
-**License Type:** MIT License
+### openmeteo_requests (v1.7.5)
+- **License Type:** MIT License
+- **Author:** Open-Meteo
 
 ```text
 MIT License
@@ -3144,8 +3139,9 @@ SOFTWARE.
 
 ---
 
-## openmeteo_sdk (v1.25.0)
-**License Type:** MIT License
+### openmeteo_sdk (v1.25.0)
+- **License Type:** MIT License
+- **Author:** See License Text
 
 ```text
 UNKNOWN
@@ -3153,8 +3149,9 @@ UNKNOWN
 
 ---
 
-## packaging (v26.0)
-**License Type:** Apache-2.0 OR BSD-2-Clause
+### packaging (v26.0)
+- **License Type:** Apache-2.0 OR BSD-2-Clause
+- **Author:** See License Text
 
 ```text
 This software is made available under the terms of *either* of the licenses
@@ -3164,8 +3161,9 @@ under the terms of *both* these licenses.
 
 ---
 
-## pandas (v3.0.0)
-**License Type:** BSD License
+### pandas (v3.0.0)
+- **License Type:** BSD License
+- **Author:** AQR Capital Management, LLC, Lambda Foundry, Inc. and PyData Development Team
 
 ```text
 BSD 3-Clause License
@@ -3203,8 +3201,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## passlib (v1.7.4)
-**License Type:** BSD
+### passlib (v1.7.4)
+- **License Type:** BSD
+- **Author:** Assurance Technologies, LLC.
 
 ```text
 .. -*- restructuredtext -*-
@@ -3327,8 +3326,9 @@ and are released under the `Creative Commons License <https://www.eff.org/copyri
 
 ---
 
-## pgeocode (v0.5.0)
-**License Type:** BSD License
+### pgeocode (v0.5.0)
+- **License Type:** BSD License
+- **Author:** Symerio
 
 ```text
 BSD 3-Clause License
@@ -3364,8 +3364,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## pillow (v12.1.0)
-**License Type:** MIT-CMU
+### pillow (v12.1.0)
+- **License Type:** MIT-CMU
+- **Author:** by the Brotli Authors.
 
 ```text
 The Python Imaging Library (PIL) is
@@ -4989,8 +4990,9 @@ freely, subject to the following restrictions:
 
 ---
 
-## platformdirs (v4.9.1)
-**License Type:** MIT
+### platformdirs (v4.9.1)
+- **License Type:** MIT
+- **Author:** See License Text
 
 ```text
 MIT License
@@ -5018,37 +5020,9 @@ SOFTWARE.
 
 ---
 
-## pluggy (v1.6.0)
-**License Type:** MIT License
-
-```text
-The MIT License (MIT)
-
-Copyright (c) 2015 holger krekel (rather uses bitbucket/hpk42)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
-
----
-
-## psycopg2-binary (v2.9.11)
-**License Type:** GNU Library or Lesser General Public License (LGPL)
+### psycopg2-binary (v2.9.11)
+- **License Type:** GNU Library or Lesser General Public License (LGPL)
+- **Author:** See License Text
 
 ```text
 psycopg2 and the LGPL
@@ -5104,8 +5078,9 @@ the pattern ``psycopg/adapter*.{h,c}`` and ``psycopg/microprotocol*.{h,c}``:
 
 ---
 
-## pyasn1 (v0.6.2)
-**License Type:** BSD-2-Clause
+### pyasn1 (v0.6.2)
+- **License Type:** BSD-2-Clause
+- **Author:** Ilya Etingof <etingof@gmail.com>
 
 ```text
 Copyright (c) 2005-2020, Ilya Etingof <etingof@gmail.com>
@@ -5136,8 +5111,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## pycparser (v3.0)
-**License Type:** BSD-3-Clause
+### pycparser (v3.0)
+- **License Type:** BSD-3-Clause
+- **Author:** Eli Bendersky
 
 ```text
 pycparser -- A C parser in Python
@@ -5171,8 +5147,9 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## pydantic (v2.12.5)
-**License Type:** MIT
+### pydantic (v2.12.5)
+- **License Type:** MIT
+- **Author:** to present Pydantic Services Inc. and individual contributors.
 
 ```text
 The MIT License (MIT)
@@ -5200,8 +5177,9 @@ SOFTWARE.
 
 ---
 
-## pydantic_core (v2.41.5)
-**License Type:** MIT
+### pydantic_core (v2.41.5)
+- **License Type:** MIT
+- **Author:** Samuel Colvin
 
 ```text
 The MIT License (MIT)
@@ -5229,8 +5207,9 @@ SOFTWARE.
 
 ---
 
-## pyparsing (v3.3.2)
-**License Type:** MIT
+### pyparsing (v3.3.2)
+- **License Type:** MIT
+- **Author:** Paul McGuire
 
 ```text
 Copyright (c) 2003-2025  Paul McGuire
@@ -5257,74 +5236,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## pytest (v9.0.2)
-**License Type:** MIT
-
-```text
-The MIT License (MIT)
-
-Copyright (c) 2004 Holger Krekel and others
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
-
----
-
-## pytest-sugar (v1.1.1)
-**License Type:** BSD License
-
-```text
-BSD 3-Clause License
-
-Copyright (c) 2013, Teemu <orkkiolento at gmail dot com>
-Copyright (c) 2013, Janne Vanhala
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its
-   contributors may be used to endorse or promote products derived from
-   this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-```
-
----
-
-## python-dateutil (v2.9.0.post0)
-**License Type:** Apache Software License; BSD License
+### python-dateutil (v2.9.0.post0)
+- **License Type:** Apache Software License; BSD License
+- **Author:** Gustavo Niemeyer <gustavo@niemeyer.net>
 
 ```text
 Copyright 2017- Paul Ganssle <paul@ganssle.io>
@@ -5385,8 +5299,9 @@ The above BSD License Applies to all code, even that also covered by Apache 2.0.
 
 ---
 
-## python-dotenv (v1.2.1)
-**License Type:** BSD-3-Clause
+### python-dotenv (v1.2.1)
+- **License Type:** BSD-3-Clause
+- **Author:** Saurabh Kumar (python-dotenv), 2013, Ted Tieken (django-dotenv-rw), 2013, Jacob Kaplan-Moss (django-dotenv)
 
 ```text
 Copyright (c) 2014, Saurabh Kumar (python-dotenv), 2013, Ted Tieken (django-dotenv-rw), 2013, Jacob Kaplan-Moss (django-dotenv)
@@ -5420,8 +5335,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## python-jose (v3.5.0)
-**License Type:** MIT License
+### python-jose (v3.5.0)
+- **License Type:** MIT License
+- **Author:** Michael Davis
 
 ```text
 The MIT License (MIT)
@@ -5449,8 +5365,9 @@ SOFTWARE.
 
 ---
 
-## python-multipart (v0.0.22)
-**License Type:** Apache-2.0
+### python-multipart (v0.0.22)
+- **License Type:** Apache-2.0
+- **Author:** See License Text
 
 ```text
 Copyright 2012, Andrew Dunham
@@ -5470,8 +5387,9 @@ limitations under the License.
 
 ---
 
-## qh3 (v1.5.6)
-**License Type:** BSD License
+### qh3 (v1.5.6)
+- **License Type:** BSD License
+- **Author:** Jeremy Lainé.
 
 ```text
 Copyright (c) 2019 Jeremy Lainé.
@@ -5503,8 +5421,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## requests (v2.32.5)
-**License Type:** Apache Software License
+### requests (v2.32.5)
+- **License Type:** Apache Software License
+- **Author:** See License Text
 
 ```text
 Apache License
@@ -5685,8 +5604,9 @@ Apache License
 
 ---
 
-## requests-cache (v1.3.0)
-**License Type:** BSD-2-Clause
+### requests-cache (v1.3.0)
+- **License Type:** BSD-2-Clause
+- **Author:** Roman Haritonov
 
 ```text
 BSD 2-Clause License
@@ -5719,8 +5639,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## retry-requests (v2.0.0)
-**License Type:** GNU General Public License v3 or later (GPLv3+)
+### retry-requests (v2.0.0)
+- **License Type:** GNU General Public License v3 or later (GPLv3+)
+- **Author:** Free Software Foundation, Inc. <https://fsf.org/>
 
 ```text
 GNU GENERAL PUBLIC LICENSE
@@ -6401,8 +6322,9 @@ Public License instead of this License.  But first, please read
 
 ---
 
-## rsa (v4.9.1)
-**License Type:** Apache Software License
+### rsa (v4.9.1)
+- **License Type:** Apache Software License
+- **Author:** See License Text
 
 ```text
 Copyright 2011 Sybren A. Stüvel <sybren@stuvel.eu>
@@ -6422,8 +6344,9 @@ limitations under the License.
 
 ---
 
-## scikit-learn (v1.8.0)
-**License Type:** BSD-3-Clause
+### scikit-learn (v1.8.0)
+- **License Type:** BSD-3-Clause
+- **Author:** The scikit-learn developers.
 
 ```text
 BSD 3-Clause License
@@ -6487,8 +6410,9 @@ VC\atlmfc\lib\amd64\mfcmifc80.dll
 
 ---
 
-## scipy (v1.17.0)
-**License Type:** BSD License
+### scipy (v1.17.0)
+- **License Type:** BSD License
+- **Author:** Enthought, Inc. 2003, SciPy Developers.
 
 ```text
 Copyright (c) 2001-2002 Enthought, Inc. 2003, SciPy Developers.
@@ -7407,8 +7331,9 @@ Public License instead of this License.  But first, please read
 
 ---
 
-## six (v1.17.0)
-**License Type:** MIT License
+### six (v1.17.0)
+- **License Type:** MIT License
+- **Author:** Benjamin Peterson
 
 ```text
 Copyright (c) 2010-2024 Benjamin Peterson
@@ -7433,8 +7358,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## sqlmodel (v0.0.31)
-**License Type:** MIT
+### sqlmodel (v0.0.31)
+- **License Type:** MIT
+- **Author:** Sebastián Ramírez
 
 ```text
 The MIT License (MIT)
@@ -7462,8 +7388,9 @@ THE SOFTWARE.
 
 ---
 
-## starlette (v0.50.0)
-**License Type:** BSD-3-Clause
+### starlette (v0.50.0)
+- **License Type:** BSD-3-Clause
+- **Author:** See License Text
 
 ```text
 Copyright © 2018, [Encode OSS Ltd](https://www.encode.io/).
@@ -7497,35 +7424,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## termcolor (v3.3.0)
-**License Type:** MIT
-
-```text
-Copyright (c) 2008-2011 Volvox Development Team
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-```
-
----
-
-## threadpoolctl (v3.6.0)
-**License Type:** BSD License
+### threadpoolctl (v3.6.0)
+- **License Type:** BSD License
+- **Author:** threadpoolctl contributors
 
 ```text
 Copyright (c) 2019, threadpoolctl contributors
@@ -7556,8 +7457,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## typing-inspection (v0.4.2)
-**License Type:** MIT
+### typing-inspection (v0.4.2)
+- **License Type:** MIT
+- **Author:** See License Text
 
 ```text
 MIT License
@@ -7585,8 +7487,9 @@ SOFTWARE.
 
 ---
 
-## typing_extensions (v4.15.0)
-**License Type:** PSF-2.0
+### typing_extensions (v4.15.0)
+- **License Type:** PSF-2.0
+- **Author:** Python Software Foundation;
 
 ```text
 A. HISTORY OF THE SOFTWARE
@@ -7872,8 +7775,9 @@ PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## tzdata (v2025.3)
-**License Type:** Apache-2.0
+### tzdata (v2025.3)
+- **License Type:** Apache-2.0
+- **Author:** Paul Ganssle (Google)
 
 ```text
 Apache Software License 2.0
@@ -7895,8 +7799,9 @@ limitations under the License.
 
 ---
 
-## uk-postcode-utils (v1.1)
-**License Type:** GNU Affero General Public License v3
+### uk-postcode-utils (v1.1)
+- **License Type:** GNU Affero General Public License v3
+- **Author:** UK
 
 ```text
 mySociety.org Software Licensing
@@ -8598,8 +8503,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 
 ---
 
-## url-normalize (v2.2.1)
-**License Type:** MIT
+### url-normalize (v2.2.1)
+- **License Type:** MIT
+- **Author:** Nikolay Panov
 
 ```text
 MIT License
@@ -8627,8 +8533,9 @@ SOFTWARE.
 
 ---
 
-## urllib3 (v2.6.3)
-**License Type:** MIT
+### urllib3 (v2.6.3)
+- **License Type:** MIT
+- **Author:** Andrey Petrov and contributors.
 
 ```text
 MIT License
@@ -8656,8 +8563,9 @@ SOFTWARE.
 
 ---
 
-## urllib3-future (v2.15.903)
-**License Type:** MIT
+### urllib3-future (v2.15.903)
+- **License Type:** MIT
+- **Author:** Andrey Petrov and contributors.
 
 ```text
 MIT License
@@ -8685,8 +8593,9 @@ SOFTWARE.
 
 ---
 
-## uvicorn (v0.40.0)
-**License Type:** BSD-3-Clause
+### uvicorn (v0.40.0)
+- **License Type:** BSD-3-Clause
+- **Author:** See License Text
 
 ```text
 Copyright © 2017-present, [Encode OSS Ltd](https://www.encode.io/).
@@ -8720,8 +8629,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## wassima (v2.0.5)
-**License Type:** MIT
+### wassima (v2.0.5)
+- **License Type:** MIT
+- **Author:** See License Text
 
 ```text
 MIT License
@@ -8749,8 +8659,9 @@ SOFTWARE.
 
 ---
 
-## watchfiles (v1.1.1)
-**License Type:** MIT License
+### watchfiles (v1.1.1)
+- **License Type:** MIT License
+- **Author:** to present Samuel Colvin
 
 ```text
 The MIT License (MIT)
@@ -8778,8 +8689,9 @@ SOFTWARE.
 
 ---
 
-## websockets (v16.0)
-**License Type:** BSD-3-Clause
+### websockets (v16.0)
+- **License Type:** BSD-3-Clause
+- **Author:** See License Text
 
 ```text
 Copyright (c) Aymeric Augustin and contributors
