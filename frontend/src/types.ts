@@ -49,39 +49,6 @@ export interface Template {
   }[];
 }
 
-export interface AnalyticDataPoint {
-  bundle_name: string;
-  no_show: number;
-  posted: number;
-  predicted: number;
-  recommendation: string;
-}
-
-
-export interface WeekData {
-  week_date: string; 
-  datapoints: AnalyticDataPoint[];
-}
-
-
-export interface Reservation {
-  reservation_id: number;
-  bundle_id: number;
-  customer_id: number;
-  time_created: string;
-  code: number;
-  status: string;
-};
-
-export interface VendorReservation {
-  reservation_id: number;
-  bundle_id: number;
-  customer_id: number;
-  time_created: string;
-  status: string;
-  code?: number; // vendor does not see real code initially
-}
-
 export interface Streak {
   count: number;
   last: string; 
@@ -89,10 +56,15 @@ export interface Streak {
 
 export interface AnalyticDataPoint {
   bundle_name: string;
+  predicted_sales: number;
   no_show: number;
-  posted: number;
-  predicted: number;
+  chance_of_no_show: number;
+  day: string;
+  start_time: string;
+  end_time: string;
+  confidence: number;
   recommendation: string;
+  rationale: string;
 }
 
 export interface WeekData {

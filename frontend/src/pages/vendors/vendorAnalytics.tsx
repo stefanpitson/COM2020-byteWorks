@@ -23,9 +23,9 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 
     return (
       <div className="bg-white p-4 shadow-xl rounded-2xl border border-gray-100 max-w-sm">
-        <p className="font-bold text-gray-800 mb-2">{label}</p>
+        <p className="font-bold text-gray-800 mb-2">{label} ({extraData.day})</p>
         
-        {/* Render the standard bars (Posted, Predicted, No Shows) */}
+        {/* Render the standard bars (Predicted Sold, No Shows) */}
         <div className="space-y-1 mb-3 border-b border-gray-50 pb-3">
           {payload.map((entry: Payload<ValueType, NameType>, index: number) => (
             <p key={index} className="text-sm flex justify-between gap-4" style={{ color: entry.color }}>
@@ -33,16 +33,44 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
               <span className="font-mono font-bold">{entry.value}</span>
             </p>
           ))}
+          <p className="text-sm flex justify-between gap-4 text-purple-600">
+            <span>No Show Prob:</span>
+            <span className="font-mono font-bold">{(extraData.chance_of_no_show * 100).toFixed(1)}%</span>
+          </p>
         </div>
 
         {/* Render the Recommendation if it exists */}
         {extraData.recommendation && (
-          <div className="bg-blue-50 p-2.5 rounded-xl">
+          <div className="bg-blue-50 p-2.5 rounded-xl mb-2">
             <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">
               Recommendation
             </p>
             <p className="text-xs text-blue-700 leading-relaxed">
               {extraData.recommendation}
+            </p>
+          </div>
+        )}
+
+        {/* Render the Rationale if it exists */}
+        {extraData.rationale && (
+          <div className="bg-gray-50 p-2.5 rounded-xl mb-2">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+              Rationale
+            </p>
+            <p className="text-xs text-gray-600 leading-relaxed italic">
+              {extraData.rationale}
+            </p>
+          </div>
+        )}
+
+        {/* Render the Confidence if it exists */}
+        {extraData.confidence && (
+          <div className="bg-gray-50 p-2.5 rounded-xl">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+              Confidence
+            </p>
+            <p className="text-xs text-gray-600 leading-relaxed italic">
+              {extraData.confidence}
             </p>
           </div>
         )}
@@ -151,10 +179,7 @@ export default function VendorAnalytics() {
                     <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f9fafb' }} />
                     <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ paddingBottom: '20px' }} />
                     
-                    {/* The 2 Bars per Bundle */}
-                    {/* The Posted bar is hidden for now */}
-                    {/* <Bar name="Posted" dataKey="posted" fill="#94a3b8" radius={[4, 4, 0, 0]} barSize={20} /> */}
-                    <Bar name="Predicted Sold" dataKey="predicted" fill="#22c55e" radius={[4, 4, 0, 0]} barSize={20} />
+                    <Bar name="Predicted Sold" dataKey="predicted_sales" fill="#22c55e" radius={[4, 4, 0, 0]} barSize={20} />
                     <Bar name="Predicted No Shows" dataKey="no_show" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={20} />
                   </BarChart>
                 </ResponsiveContainer>
