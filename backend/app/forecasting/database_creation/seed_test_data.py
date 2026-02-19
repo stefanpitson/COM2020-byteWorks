@@ -2,6 +2,7 @@ import random
 from datetime import datetime, timedelta, date, time
 from sqlmodel import Session, select
 from app.core.database import engine
+from app.core.security import get_password_hash
 from app.models import (
     User, Vendor, Customer, Template, Bundle, Reservation
 )
@@ -66,7 +67,7 @@ def seed(weeks_of_history: int = 6):
     with Session(engine) as session: # used the session from the url defined in .env
         # make a vendor amd user entities to represent vendor
         vendor_user = User(
-            password_hash="hashed_placeholder",
+            password_hash=get_password_hash("vendorpass"),
             email="vendor@goodfood.com",
             role="vendor"
         )
@@ -91,7 +92,7 @@ def seed(weeks_of_history: int = 6):
         customer_ids = []
         for c in CUSTOMERS:
             user = User(
-                password_hash="hashed_placeholder",
+                password_hash=get_password_hash("customerpass"),
                 email=c["name"].lower() + "@example.com",
                 role="customer"
             )

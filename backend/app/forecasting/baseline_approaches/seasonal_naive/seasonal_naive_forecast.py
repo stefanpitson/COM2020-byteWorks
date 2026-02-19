@@ -4,15 +4,18 @@ from app.models import Forecast_Input, Forecast_Output, Template
 from app.core.database import engine
 from datetime import date, timedelta, datetime
 from app.forecasting.baseline_approaches.seasonal_naive.evaluate_seasonal_naive import get_naive_confidence_for_bundle_day
+from typing import Optional
 
 
-
-def generate_naive_forecast(vendor_id: int, target_date: date) -> str:
+def generate_naive_forecast(vendor_id: int, target_date: Optional[date] = None) -> str:
     """
     Creates a naive forecast by looking at
     performance exactly 7 days prior to target_date.
     This then creates an output entity for a given week
     """
+    if target_date is None:
+        target_date = date.today() + timedelta(days=1)
+
     with Session(engine) as session:
         # look back one week
         historical_date = target_date - timedelta(days=7)
@@ -51,12 +54,17 @@ def generate_naive_forecast(vendor_id: int, target_date: date) -> str:
 
 
 
-def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date: date) -> dict:
+def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date: Optional[date] = None) -> dict:
     """
     for a vendor create the output forecast entities using the seasonal naive model
     for a particular week starting on tartget_start_date
     return: in object json format the forcast for a particular format
     """
+
+    if target_start_date is None:
+        target_start_date = date.today() + timedelta(days=1)
+
+
     # set the start date as a week before the target date to allow for easier calculations
     historical_start = target_start_date - timedelta(days=7)
     historical_end = historical_start + timedelta(days=6)
