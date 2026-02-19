@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query, Depends
 from sqlmodel import Session
 from app.core.database import get_session
 from app.schema import ForecastChartResponse
-from app.forecasting.seasonal_naive_forecast import get_naive_forecast_chart
+from app.forecasting.baseline_approaches.seasonal_naive.seasonal_naive_forecast import get_naive_forecast_chart
 from datetime import date
 from datetime import timedelta
 
