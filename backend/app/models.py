@@ -160,8 +160,8 @@ class Forecast_Input(SQLModel, table=True):
     discount: float = Field(default = 0.0) # number 0 - 1 indicating the level of discount from original price e.g. 0.3 = 30% discount
     precipitation: float = Field(default = -1.0)
     bundles_posted: int = Field(default = 0)
-    bundles_reserved: int = Field(default = 0.0)
-    no_shows: int = Field(default = 0.0)
+    bundles_reserved: int = Field(default = 0)
+    no_shows: int = Field(default = 0)
 
 class Forecast_Output(SQLModel, table=True):
     output_id: Optional[int] = Field(default=None, primary_key=True)
@@ -173,6 +173,6 @@ class Forecast_Output(SQLModel, table=True):
     model_type: str = Field(default = "seasonal_naive") # to show what model made the predicition since many different models could make the same forecast
     reservation_prediction: int # how many of these bundles will be sell
     no_show_prediction: int 
-    recomendation: str
+    recommendation: str
     rationale:str 
     confidence:float 

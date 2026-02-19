@@ -66,7 +66,7 @@ const MOCK_ANALYTICS: Analytics = {
 
 export async function getVendorAnalytics(): Promise<Analytics> {
   try {
-    const response = await api.get<Analytics>("/forecast/naive");
+    const response = await api.get<Analytics>("/forecast/naive", {});
     return response.data;
   } catch (error) {
     console.warn("API Analytics call failed. Falling back to mock data.", error);
