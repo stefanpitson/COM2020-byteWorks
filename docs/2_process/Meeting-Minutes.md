@@ -346,3 +346,43 @@ Joe - Limitations and Next Steps (1.5mins)
 
 leaving 30 seconds of 'wiggle room' in our 10 minutes. 
 
+
+
+# Meeting 14 - 24/06 
+## Attendance 
+All present
+
+## Overview 
+discussed next steps for the project 
+
+### Tasks
+Andrew - assist with implementing analytics / user settings page 
+Alfie - adding endpoints for badges 
+Alex - front end for badges pages
+Arden - Review requirements / implementing analytics 
+Jack - adding customer credit endpoint / opening times rework 
+Stefan - customer credit page 
+Joe - rework reservation end point / patch method for vendors 
+Magnus - user testing, automated test 
+
+#### Badges
+we discussed need for badges, and how we want to implement them: 
+- streaks
+- first bundles 
+- CO2 saved 
+
+#### Leaderboards 
+need a leaderboard for customers, details were not discussed
+
+#### admins 
+we discussed what is needed, planning one page to start with
+other needed functions 
+- validate vendors 
+- remove bad accounts 
+- view all reports 
+
+#### Discussion 
+We discussed how we want to implement opening times, and if it should reflect when they close for normal business, or after that time, if we want to add pick up times for a bundle. 
+We decided that the alternatives create scope creep and add unnecessary complexity. 
+
+We also discussed a messaging system for customers and vendors, some argued that it could be useful for communicating with the vendor, this was also dismissed as scope creep, and unnecessary when we provide a phone number for the vendor. 
