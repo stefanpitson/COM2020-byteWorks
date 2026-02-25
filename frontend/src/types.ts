@@ -90,7 +90,3 @@ export interface ForecastWeekData {
   datapoints: ForecastDataPoint[];
 }
 
-export interface ForecastChart {
-  week_data: ForecastWeekData[];
-}
-
