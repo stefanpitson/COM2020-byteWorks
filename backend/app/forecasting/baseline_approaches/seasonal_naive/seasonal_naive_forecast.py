@@ -4,7 +4,8 @@ from app.models import Forecast_Input, Forecast_Output, Template
 from app.core.database import engine
 from datetime import date, timedelta, datetime
 from app.forecasting.baseline_approaches.seasonal_naive.evaluate_seasonal_naive import get_naive_confidence_for_bundle_day
-from typing import Optional
+from typing import Optional, List
+from app.schema import ForecastChartResponse, ForecastDatapoint, ForecastWeekData
 
 
 def generate_naive_forecast(vendor_id: int, target_date: Optional[date] = None) -> str:
@@ -83,7 +84,7 @@ def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date
 
     # execute the statement
     results = session.exec(stmt).all()
-    datapoints = []
+    datapoints: List[ForecastDatapoint]
 
     # loop through the results 
     for record, title in results:
@@ -160,29 +161,30 @@ def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date
             session.add(current_forecast)
 
         # build data to be sent to frontend
-        datapoints.append({
-            "bundle_name": title,                 
-            "predicted_sales": bundles_reserved,
-            "chance_of_no_show": chance_of_no_show,
-            "day": day_name,
-            "start_time": record.slot_start.isoformat(),
-            "end_time": record.slot_end.isoformat(),
-            "no_show": no_shows,
-            "confidence": current_forecast.confidence,
-            "recommendation": recommendation,
-            "rationale": rationale
-        })
+        datapoints.append(ForecastDatapoint(
+            bundle_name = title,                 
+            predicted_sales = bundles_reserved,
+            chance_of_no_show = chance_of_no_show,
+            day = day_name,
+            start_time = record.slot_start.isoformat(),
+            end_time = record.slot_end.isoformat(),
+            no_show = no_shows,
+            confidence = current_forecast.confidence,
+            recommendation = recommendation,
+            rationale = rationale)
+        )
 
     session.commit()
 
-    return {
-        "week_data": [
-            {
-                "week_date": target_start_date.isoformat(),
-                "datapoints": datapoints
-            }
-        ]
-    }
+    weekData = ForecastWeekData(
+        week_date = target_start_date.isoformat(),
+        datapoints = datapoints
+    )
+    response = ForecastChartResponse()
+    response.week_data.append(weekData)
+
+    return response
+
 if __name__ == "__main__":
     today = date.today()
     target = today + timedelta(days=1)
