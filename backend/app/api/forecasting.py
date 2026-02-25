@@ -25,6 +25,8 @@ def naive_forecast(
 
     try:
         # pass logic to dedicated function
-        return get_naive_forecast_chart(session, vendor_id, start_date)
+        forecastResponse = get_naive_forecast_chart(session, vendor_id, start_date)
+        return forecastResponse
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal Forecasting Error: {str(e)}")
