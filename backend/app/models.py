@@ -13,7 +13,7 @@ class User_Badge(SQLModel, table=True):
 class User(SQLModel, table=True):
     user_id: Optional[int] = Field(default=None, primary_key=True)
     password_hash:str
-    email:str
+    email:str = Field(unique=True)
     role: str
 
     vendor_profile: Optional["Vendor"] = Relationship(
