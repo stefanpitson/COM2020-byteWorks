@@ -235,14 +235,19 @@ class StreakRead(BaseModel):
 
 class ForecastDatapoint(BaseModel):
     bundle_name: str        
-    predicted: int # predicted reservations
-    no_show: int  # predicted no-shows
-    posted: int = 0             
-    recommendation: str = ""        
+    predicted_sales: int
+    no_show: int
+    chance_of_no_show: float
+    day: str
+    start_time: str
+    end_time: str
+    confidence: float
+    recommendation: str
+    rationale: str
 
 class ForecastWeekData(BaseModel):
     week_date: str
     datapoints: List[ForecastDatapoint]
 
 class ForecastChartResponse(BaseModel):
-    data: dict
+    week_data: List[ForecastWeekData]

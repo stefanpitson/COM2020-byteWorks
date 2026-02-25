@@ -4,7 +4,8 @@ from app.models import Forecast_Input, Forecast_Output, Template
 from app.core.database import engine
 from datetime import date, timedelta, datetime
 from app.forecasting.baseline_approaches.seasonal_naive.evaluate_seasonal_naive import get_naive_confidence_for_bundle_day
-from typing import Optional
+from typing import Optional, List
+from app.schema import ForecastChartResponse, ForecastDatapoint, ForecastWeekData
 
 
 def generate_naive_forecast(vendor_id: int, target_date: Optional[date] = None) -> str:
@@ -41,6 +42,7 @@ def generate_naive_forecast(vendor_id: int, target_date: Optional[date] = None) 
                 reservation_prediction=record.bundles_reserved,
                 no_show_prediction=record.no_shows,
                 model_type="seasonal_naive",
+                recommendation=f"Post {record.bundles_reserved} bundles on {target_date.strftime('%a')}",
                 rationale=f"we assume {target_date} will sell a similar number of bundles as {historical_date} given {record.bundles_reserved} bundles are posted",
                 confidence=get_naive_confidence_for_bundle_day(vendor_id=vendor_id, template_id=record.template_id, target_date=target_date)
             )
@@ -82,17 +84,25 @@ def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date
 
     # execute the statement
     results = session.exec(stmt).all()
-    datapoints = []
+    datapoints: List[ForecastDatapoint]
 
     # loop through the results 
     for record, title in results:
+        if not record.slot_start or not record.slot_end:
+            continue
+
         predicted_date = record.date + timedelta(days=7)
         day_name = predicted_date.strftime("%A")        
         day_abbr = predicted_date.strftime("%a")
+        
+        # Ensure values are not None
+        bundles_reserved = record.bundles_reserved or 0
+        no_shows = record.no_shows or 0
+        
         # calculate no show chance as no_show / no_show+predicted
-        total_reserved_and_no_show = record.bundles_reserved + record.no_shows
+        total_reserved_and_no_show = bundles_reserved + no_shows
         chance_of_no_show = (
-            round(record.no_shows / total_reserved_and_no_show, 3)
+            round(no_shows / total_reserved_and_no_show, 3)
             if total_reserved_and_no_show > 0 else 0.0
         ) 
 
@@ -103,13 +113,13 @@ def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date
 
         # create recomedation string before - specific to naive model
         recommendation = (
-            f"Post {record.bundles_reserved} {title} bundles on {day_abbr} "
+            f"Post {bundles_reserved} {title} bundles on {day_abbr} "
             f"by {rec_start_str}"
         )
         # create rationale string before - specific to naive model
         rationale = (
-            f"last {day_abbr} sold {record.bundles_reserved} {title} bundles, "
-            f"therefore you will sell {record.bundles_reserved} this {day_abbr}"
+            f"last {day_abbr} sold {bundles_reserved} {title} bundles, "
+            f"therefore you will sell {bundles_reserved} this {day_abbr}"
         )
 
         # Upsert forecast output - avoid duplicates
@@ -124,56 +134,57 @@ def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date
             )
         ).first()
 
+        current_forecast = None
         # in the case there already existse the forecast we are tying to make
         if existing:
-            existing.reservation_prediction = record.bundles_reserved
-            existing.no_show_prediction = record.no_shows
-            existing.recomendation = recommendation
+            existing.reservation_prediction = bundles_reserved
+            existing.no_show_prediction = no_shows
+            existing.recommendation = recommendation
             existing.rationale = rationale
             existing.confidence = get_naive_confidence_for_bundle_day(vendor_id=vendor_id, template_id=record.template_id, target_date=existing.date)
             session.add(existing)
+            current_forecast = existing
         else:
-            forecast = Forecast_Output(
+            current_forecast = Forecast_Output(
                 vendor_id=vendor_id,
                 template_id=record.template_id,
                 date=predicted_date,
                 slot_start=record.slot_start,
                 slot_end=record.slot_end,
-                reservation_prediction=record.bundles_reserved,
-                no_show_prediction=record.no_shows,
+                reservation_prediction=bundles_reserved,
+                no_show_prediction=no_shows,
                 model_type="seasonal_naive",
-                recomendation=recommendation,
+                recommendation=recommendation,
                 rationale=rationale,
                 confidence=get_naive_confidence_for_bundle_day(vendor_id=vendor_id, template_id=record.template_id, target_date=predicted_date)
             )
-            session.add(forecast)
+            session.add(current_forecast)
 
         # build data to be sent to frontend
-        datapoints.append({
-            "bundle_name": title,                 
-            "predicted_sales": record.bundles_reserved,
-            "chance_of_no_show": chance_of_no_show,
-            "day": day_name,
-            "start_time": record.slot_start.isoformat(),
-            "end_time": record.slot_end.isoformat(),
-            "no_show": record.no_shows,
-            "confidence": existing.confidence if existing else forecast.confidence,
-            "recommendation": recommendation,
-            "rationale": rationale
-        })
+        datapoints.append(ForecastDatapoint(
+            bundle_name = title,                 
+            predicted_sales = bundles_reserved,
+            chance_of_no_show = chance_of_no_show,
+            day = day_name,
+            start_time = record.slot_start.isoformat(),
+            end_time = record.slot_end.isoformat(),
+            no_show = no_shows,
+            confidence = current_forecast.confidence,
+            recommendation = recommendation,
+            rationale = rationale)
+        )
 
     session.commit()
 
-    return {
-        "data": {
-            "week_data": [
-                {
-                    "week_date": target_start_date.isoformat(),
-                    "datapoints": datapoints
-                }
-            ]
-        }
-    }
+    weekData = ForecastWeekData(
+        week_date = target_start_date.isoformat(),
+        datapoints = datapoints
+    )
+    response = ForecastChartResponse()
+    response.week_data.append(weekData)
+
+    return response
+
 if __name__ == "__main__":
     today = date.today()
     target = today + timedelta(days=1)

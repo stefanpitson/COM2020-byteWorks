@@ -72,7 +72,7 @@ export interface Streak {
   last: string; 
 }
 
-export interface AnalyticDataPoint {
+export interface ForecastDataPoint {
   bundle_name: string;
   predicted_sales: number;
   no_show: number;
@@ -85,12 +85,12 @@ export interface AnalyticDataPoint {
   rationale: string;
 }
 
-export interface WeekData {
+export interface ForecastWeekData {
   week_date: string; 
-  datapoints: AnalyticDataPoint[];
+  datapoints: ForecastDataPoint[];
 }
 
-export interface Analytics {
-  week_data: WeekData[];
+export interface ForecastChart {
+  week_data: ForecastWeekData[];
 }
 
