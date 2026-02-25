@@ -186,6 +186,7 @@ if __name__ == "__main__":
 
 
 # to run inside backend
+# python -m app.core.database
 # python -m app.forecasting.database_creation.seed_test_data
 # python -m app.forecasting.database_creation.generate_input_forecasts
 # python -m app.forecasting.database_creation.previous_weather
