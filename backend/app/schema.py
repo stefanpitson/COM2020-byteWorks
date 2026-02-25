@@ -248,6 +248,3 @@ class ForecastDatapoint(BaseModel):
 class ForecastWeekData(BaseModel):
     week_date: str
     datapoints: List[ForecastDatapoint]
-
-class ForecastChartResponse(BaseModel):
-    week_data: List[ForecastWeekData]

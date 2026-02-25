@@ -5,7 +5,7 @@ from app.core.database import engine
 from datetime import date, timedelta, datetime
 from app.forecasting.baseline_approaches.seasonal_naive.evaluate_seasonal_naive import get_naive_confidence_for_bundle_day
 from typing import Optional, List
-from app.schema import ForecastChartResponse, ForecastDatapoint, ForecastWeekData
+from app.schema import ForecastDatapoint, ForecastWeekData
 
 
 def generate_naive_forecast(vendor_id: int, target_date: Optional[date] = None) -> str:
@@ -84,7 +84,7 @@ def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date
 
     # execute the statement
     results = session.exec(stmt).all()
-    datapoints: List[ForecastDatapoint]
+    datapoints: List[ForecastDatapoint] = []
 
     # loop through the results 
     for record, title in results:
@@ -180,10 +180,8 @@ def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date
         week_date = target_start_date.isoformat(),
         datapoints = datapoints
     )
-    response = ForecastChartResponse()
-    response.week_data.append(weekData)
 
-    return response
+    return weekData
 
 if __name__ == "__main__":
     today = date.today()
