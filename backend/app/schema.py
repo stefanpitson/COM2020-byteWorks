@@ -232,3 +232,14 @@ class StreakRead(BaseModel):
     last: date
     ended:bool
 
+
+class BadgeRead(BaseModel):
+    badge_id: int
+    title: str
+    description: str
+    metric: str
+    threshold: float
+
+class BadgeList(BaseModel):
+    total_count: int
+    badges: List[BadgeRead]

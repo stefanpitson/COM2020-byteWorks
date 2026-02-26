@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from app.core.database import get_session
 from app.models import User, Streak
-from app.schema import CustomerRead, CustomerUpdate, StreakRead
+from app.schema import CustomerRead, CustomerUpdate, StreakRead, BadgeRead
 from app.api.deps import get_current_user
 from app.core.security import verify_password, get_password_hash
 from ukpostcodeutils import validation
-from typing import Optional
+from typing import Optional, List
 
 router = APIRouter()
 
@@ -95,3 +95,19 @@ def get_streak(
 
     streak = session.exec(statement).first()
     return streak
+
+# get customer badges. If the user is not a customer or does not have a customer profile, they should not have access to this endpoint and an error message should be given.
+@router.get("/badges", response_model=List[BadgeRead], tags=["Customer", "Badges"], summary="Get the badges for the current customer")
+def get_customer_badges(
+    session: Session = Depends(get_session),
+    current_user = Depends(get_current_user)
+    ):
+
+    if current_user.role != "customer":     #if the user is not a customer, they should not have access to this endpoint
+        raise HTTPException(status_code=403, detail="Not a customer account")
+        
+    if not current_user.customer_profile:   #if the user does not have a customer profile, they should not have access to this endpoint
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    return current_user.badges
+

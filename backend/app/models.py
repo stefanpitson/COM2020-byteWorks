@@ -34,6 +34,9 @@ class Badge(SQLModel, table=True):
     description: str
     user_role:str = Field(default="user")
 
+    metric: str # the type of variable the badge is tracking (e.g: "carbon_saved", "streak_count", etc)
+    threshold: float # the value the metric has to reach for the badge to be awarded
+
     users: List["User"] = Relationship( # for the linking table
         back_populates="badges",         # having this means we dont have to write join statements
         link_model=User_Badge
