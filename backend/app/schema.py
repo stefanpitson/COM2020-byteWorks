@@ -192,6 +192,9 @@ class VendReservationRead(BaseModel):
     customer_id : int
     time_created : datetime
     status : str
+    template_id: int
+    title: str
+    photo: str 
 
 class CustReservationRead(BaseModel):
     reservation_id : int
@@ -200,6 +203,9 @@ class CustReservationRead(BaseModel):
     time_created : datetime
     code : int
     status : str
+    template_id: int
+    title: str
+    photo: str 
 
 class CustReservationList(BaseModel):
     total_count:int

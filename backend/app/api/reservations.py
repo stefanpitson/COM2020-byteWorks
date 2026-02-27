@@ -116,7 +116,7 @@ def get_reservation_customer(
                                    code = reservation.code,
                                    status = reservation.status)
 
-@router.get("/customer", response_model= CustReservationList, tags=["Reservations"], summary="Get one reservation details")
+@router.get("/customer", response_model= CustReservationList, tags=["Reservations"], summary="Get list of reservation details")
 def get_list_of_reservations_customer(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
@@ -126,27 +126,35 @@ def get_list_of_reservations_customer(
     if current_user.role != "customer":
         raise HTTPException(status_code=403, detail = "Not customer")
 
-    statement = select(Reservation).where(Reservation.customer_id == current_user.customer_profile.customer_id)
+    statement = (select(Reservation,Template)
+                 .join(Bundle, Bundle.bundle_id == Reservation.bundle_id)
+                 .join(Template, Template.template_id == Bundle.bundle_id)    
+                 .where(Reservation.customer_id == current_user.customer_profile.customer_id)
+    )
     reservations = session.exec(statement).all()
 
     count = len(reservations)
 
     customer_reservations = []
 
-    for reservation in reservations:
+    for reservation, template in reservations:
         customer_reservations.append(CustReservationRead(reservation_id = reservation.reservation_id, 
                                    bundle_id = reservation.bundle_id, 
                                    customer_id = reservation.customer_id,
                                    time_created = reservation.time_created,
                                    code = reservation.code,
-                                   status = reservation.status))
+                                   status = reservation.status,
+                                   template_id = template.template_id,
+                                   title = template.title,
+                                   photo = template.photo
+                                   ))
     
     return{
         "total_count":count,
         "bundles": customer_reservations
     }
 
-@router.get("/vendor", response_model= VendReservationList, tags=["Reservations"], summary="Get one reservation details")
+@router.get("/vendor", response_model= VendReservationList, tags=["Reservations"], summary="Get list of reservation details")
 def get_list_of_reservations_vendor(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
@@ -156,21 +164,31 @@ def get_list_of_reservations_vendor(
     if current_user.role != "vendor":
         raise HTTPException(status_code=403, detail = "Not vendor")
 
-    statement = select(Reservation).where(Template.vendor == current_user.vendor_profile.vendor_id, 
-                                          Reservation.bundle_id == Bundle.bundle_id,
-                                          Bundle.template_id == Template.template_id)
+
+
+    statement =(select(Reservation,Template)
+                .join(Bundle, Bundle.bundle_id == Reservation.bundle_id)
+                .join(Template, Template.template_id == Bundle.bundle_id)
+                .where(Template.vendor == current_user.vendor_profile.vendor_id, 
+                        Reservation.bundle_id == Bundle.bundle_id,
+                        Bundle.template_id == Template.template_id)
+                )
+    
     reservations = session.exec(statement).all()
 
     count = len(reservations)
 
     vendor_reservations = []
 
-    for reservation in reservations:
+    for reservation, template in reservations:
         vendor_reservations.append(VendReservationRead(reservation_id = reservation.reservation_id, 
                                    bundle_id = reservation.bundle_id, 
                                    customer_id = reservation.customer_id,
                                    time_created = reservation.time_created,
-                                   status = reservation.status))
+                                   status = reservation.status,
+                                   template_id = template.template_id,
+                                   title = template.title,
+                                   photo = template.photo))
     
     return{
         "total_count":count,
