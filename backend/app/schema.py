@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
 from datetime import date, time
+import re
 
 # schemas contains what the frontend will send and expect in return 
 
@@ -232,3 +233,11 @@ class StreakRead(BaseModel):
     last: date
     ended:bool
 
+class CreditTopUpDetails(BaseModel):
+    credit_top_up : float
+    first_line_address : str
+    postcode : str
+    name_on_card : str
+    card_number : str
+    expiry_id : str
+    cvv : date
