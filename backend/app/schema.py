@@ -239,5 +239,5 @@ class CreditTopUpDetails(BaseModel):
     postcode : str
     name_on_card : str
     card_number : str
-    expiry_id : str
+    expiry_date : str
     cvv : date
