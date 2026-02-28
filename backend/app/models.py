@@ -13,7 +13,7 @@ class User_Badge(SQLModel, table=True):
 class User(SQLModel, table=True):
     user_id: Optional[int] = Field(default=None, primary_key=True)
     password_hash:str
-    email:str
+    email:str = Field(unique=True)
     role: str
 
     vendor_profile: Optional["Vendor"] = Relationship(
@@ -155,17 +155,24 @@ class Forecast_Input(SQLModel, table=True):
     #time the bundles were posted, this should be able to grab from bundles table, but 
     # could have issues if there aren't any
     date: Date = Field(default_factory=lambda:datetime.now().date()) # basically tells the db to use this function to populate it
-    precipitation: float = Field(default_factory=lambda:random()) # may want to change this 
-    bundles_posted: int 
-    bundles_reserved: int 
-    no_shows: int 
+    slot_start: Time # this is the start of the 2 HOUR SLOT representing time POSTED
+    slot_end: Time # this is the end of the 2 HOUR SLOT representing time POSTED
+    discount: float = Field(default = 0.0) # number 0 - 1 indicating the level of discount from original price e.g. 0.3 = 30% discount
+    precipitation: float = Field(default = -1.0)
+    bundles_posted: int = Field(default = 0)
+    bundles_reserved: int = Field(default = 0)
+    no_shows: int = Field(default = 0)
 
 class Forecast_Output(SQLModel, table=True):
     output_id: Optional[int] = Field(default=None, primary_key=True)
     vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id")
     template_id: Optional[int] = Field(default=None, foreign_key="template.template_id")
-    date: Date = Field(default_factory=lambda:datetime.now().date())
-    reservation_prediction: int 
+    date: Date = Field(default_factory=lambda:datetime.now().date()) # predcited day to sell
+    slot_start: Time # this is the start of the 2 HOUR SLOT representing time predicted sale time
+    slot_end: Time # this is the end of the 2 HOUR SLOT representing time predicted sale time
+    model_type: str = Field(default = "seasonal_naive") # to show what model made the predicition since many different models could make the same forecast
+    reservation_prediction: int # how many of these bundles will be sell
     no_show_prediction: int 
+    recommendation: str
     rationale:str 
     confidence:float 
