@@ -36,7 +36,7 @@ const isValidLuhn = (number: string) => {
     for (let i = digits.length - 1; i >= 0; i--) {
         let digit = parseInt(digits.charAt(i));
         if (shouldDouble) {
-        if ((digit *= 2) > 9) digit -= 9;
+            if ((digit *= 2) > 9) digit -= 9;
         }
         sum += digit;
         shouldDouble = !shouldDouble;
@@ -93,9 +93,8 @@ export default function CustomerCredit() {
     };
 
     const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let val = e.target.value.replace(/\D/g, "");
+        let val = e.target.value.replace(/\D/g, "").slice(0, 19);
 
-        if (val.length > 16) val = val.slice(0, 19);
         const formatted = val.replace(/(\d{4})(?=\d)/g, "$1 ");
 
         setCardNumber(formatted);
@@ -282,7 +281,7 @@ export default function CustomerCredit() {
                                             type="text"
                                             value={cardNumber}
                                             onChange={handleCardNumberChange}
-                                            maxLength={19}
+                                            maxLength={23}
                                             placeholder="0000 0000 0000 0000"
                                             className={getInputClass(!isLuhnValid || errors.cardNumber ? "error" : undefined)}
                                         />
