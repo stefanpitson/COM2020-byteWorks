@@ -245,6 +245,13 @@ def finalise_reservation(
     current_user = Depends(get_current_user)
     ):
 
+    if pickup_code_obj == None:
+        raise HTTPException(status_code=404, detail="No pickup code object")
+    
+    if pickup_code_obj.pickup_code == None:
+        raise HTTPException(status_code=404, detail="No pick up code sent in the object")
+
+
     pickup_code = pickup_code_obj.pickup_code
 
     statement = select(Reservation).where(Reservation.reservation_id == reservation_id)
@@ -267,7 +274,7 @@ def finalise_reservation(
                                             Bundle.bundle_id == reservation.bundle_id)
 
     if pickup_code != reservation.code:
-        raise HTTPException(status_code=403, detail="Customer does not the correct accepting code")
+        raise HTTPException(status_code=403, detail="Customer does not have the correct accepting code")
 
     statement = select(Template.carbon_saved).where(Template.template_id == Bundle.template_id,
                                                     Bundle.bundle_id == reservation.bundle_id)
