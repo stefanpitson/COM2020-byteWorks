@@ -175,7 +175,7 @@ export default function CustomerCredit() {
                 cvv: cvc
             };
 
-            await api.post("/customer/addcredit", payload);
+            await api.post("/customers/addcredit", payload);
 
             setSuccess(true);
             setTimeout(() => {

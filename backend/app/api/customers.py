@@ -2,11 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from app.core.database import get_session
 from app.models import User, Streak
-from app.schema import CustomerRead, CustomerUpdate, StreakRead, CardDetailsEnter
+from app.schema import CustomerRead, CustomerUpdate, StreakRead, CreditTopUpDetails
 from app.api.deps import get_current_user
 from app.core.security import verify_password, get_password_hash
 from ukpostcodeutils import validation
 from typing import Optional
+from datetime import datetime
 import re
 
 router = APIRouter()
@@ -137,7 +138,7 @@ def add_credit_customer(
         raise HTTPException(status_code=404, detail="No CVV entered")
 
     # Credit top up validation - ensures that the credit is within a valid range
-    if card_details.credit_top_up < 5 or card_details.credit_top_Up > 100:
+    if card_details.credit_top_up < 5 or card_details.credit_top_up > 100:
         raise HTTPException(status_code=404, detail="Outside of the credit top-up range")
     
     # Postcode and Address validation - ensures the postcode is a real postcode and that 
@@ -158,7 +159,7 @@ def add_credit_customer(
         raise HTTPException(status_code=404, detail = "Debit/Credit Card is expired")
 
     #CVV validation (ensures it is numeric and only 3 characters)
-    if not card_details.cvv.isdigits():
+    if not card_details.cvv.isdigit():
         raise HTTPException(status_code=404, detail = "CVV should only include digits")
     if len(card_details.cvv) != 3:
         raise HTTPException(status_code=404, detail = "CVV is not three digits")
@@ -191,10 +192,10 @@ def add_credit_customer(
     card_number_len = len(card_details.card_number)
     for index in range(card_number_len-2, -1, -1):
         if should_double:
-            sum_total += 2 * (card_details.card_number[index])
+            sum_total += 2 * int(card_details.card_number[index])
             should_double = False
         else:
-            sum_total += (card_details.card_number[index])
+            sum_total += int(card_details.card_number[index])
             should_double = True
     if (sum_total + int(card_details.card_number[card_number_len-1])) % 10 != 0:
         raise HTTPException(status_code = 404, detail = "Card number is not valid")
@@ -202,5 +203,12 @@ def add_credit_customer(
     # If all above is correct, then all the card information could be correct (we do not know for
     # sure as we are not querying a bank for actual details)
     current_user.customer_profile.store_credit += card_details.credit_top_up
+    
+    try:
+        session.add(current_user)
+        session.commit()
+    except Exception as e:
+        session.rollback() # If anything fails
+        raise HTTPException(status_code=500, detail=str(e))
 
     return {"message": "Credit added successfully"}
