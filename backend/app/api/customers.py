@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from app.core.database import get_session
-from app.models import User, Streak
+from app.models import User, Streak, Badge, User_Badge
 from app.schema import CustomerRead, CustomerUpdate, StreakRead, BadgeRead
 from app.api.deps import get_current_user
 from app.core.security import verify_password, get_password_hash
@@ -96,9 +96,9 @@ def get_streak(
     streak = session.exec(statement).first()
     return streak
 
-# get customer badges. If the user is not a customer or does not have a customer profile, they should not have access to this endpoint and an error message should be given.
-@router.get("/badges", response_model=List[BadgeRead], tags=["Customer", "Badges"], summary="Get the badges for the current customer")
-def get_customer_badges(
+# get badges achieved by the customer. If the user is not a customer or does not have a customer profile, they should not have access to this endpoint and an error message should be given.
+@router.get("/badges/owned", response_model=List[BadgeRead], tags=["Customer", "Badges"], summary="Get the badges for the current customer")
+def get_customer_owned_badges(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
     ):
@@ -109,5 +109,40 @@ def get_customer_badges(
     if not current_user.customer_profile:   #if the user does not have a customer profile, they should not have access to this endpoint
         raise HTTPException(status_code=404, detail="Profile not found")
 
-    return current_user.badges
+    statement = (
+        select(Badge)
+        .join(Badge.users)
+        .where(User.user_id == current_user.user_id)
+    )
 
+    badges = session.exec(statement).all()
+    return badges
+
+# get the badges not achieved by the customer. If the user is not a customer or does not have a customer profile, they should not have access to this endpoint and an error message should be given.
+
+@router.get("/badges/unowned", response_model=List[BadgeRead], tags=["Customer", "Badges"], summary="Get unowned badges for the current customer")
+def get_customer_unowned_badges(
+    session: Session = Depends(get_session),
+    current_user = Depends(get_current_user)
+    ):
+
+    if current_user.role != "customer":
+        raise HTTPException(status_code=403, detail="Not a customer account")
+        
+    if not current_user.customer_profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    # gets all badge_ids the user already owns
+    owned_subquery = (
+        select(User_Badge.badge_id)
+        .where(User_Badge.user_id == current_user.user_id)
+    )
+
+    statement = (
+        select(Badge)
+        .where(Badge.user_role == "customer")               # only customer badges
+        .where(Badge.badge_id.not_in(owned_subquery))       # exclude owned ones
+    )
+    
+    badges = session.exec(statement).all()
+    return badges
