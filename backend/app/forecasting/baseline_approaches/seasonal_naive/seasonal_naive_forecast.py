@@ -32,24 +32,53 @@ def generate_naive_forecast(vendor_id: int, target_date: Optional[date] = None) 
             return f"No historical data found for vendor {vendor_id} on {historical_date}."
 
         for record in historical_data:
-            # create the forecast output
-            new_forecast = Forecast_Output(
-                vendor_id=vendor_id,
-                template_id=record.template_id,
-                date=target_date,
-                slot_start=record.slot_start,
-                slot_end=record.slot_end,
-                reservation_prediction=record.bundles_reserved,
-                no_show_prediction=record.no_shows,
-                model_type="seasonal_naive",
-                recommendation=f"Post {record.bundles_reserved} bundles on {target_date.strftime('%a')}",
-                rationale=f"we assume {target_date} will sell a similar number of bundles as {historical_date} given {record.bundles_reserved} bundles are posted",
-                confidence=get_naive_confidence_for_bundle_day(vendor_id=vendor_id, template_id=record.template_id, target_date=target_date)
-            )
-            session.add(new_forecast)
 
+            #make a statement to represent the potential output forecast we want to make
+            existing_statement = select(Forecast_Output).where(
+                Forecast_Output.vendor_id == vendor_id,
+                Forecast_Output.template_id == record.template_id,
+                Forecast_Output.date == target_date,
+                Forecast_Output.slot_start == record.slot_start,
+                Forecast_Output.slot_end == record.slot_end,
+                Forecast_Output.model_type == "seasonal_naive"
+            )
+            # execute the statement
+            forecast_exists = session.exec(existing_statement).first()
+
+            # if the presumed forecast above does exists in the DB already
+            if forecast_exists:
+                # we update the existing statement (it will likely already be up to date)
+                forecast_exists.reservation_prediction = record.bundles_reserved
+                forecast_exists.no_show_prediction = record.no_shows
+                forecast_exists.confidence = get_naive_confidence_for_bundle_day(
+                    vendor_id=vendor_id, 
+                    template_id=record.template_id, 
+                    target_date=target_date
+                )
+                # add the updated model
+                session.add(forecast_exists)
+
+            else:
+                # in the case where no matching output forecast has been found
+                # create the forecast output
+                new_forecast = Forecast_Output(
+                    vendor_id=vendor_id,
+                    template_id=record.template_id,
+                    date=target_date,
+                    slot_start=record.slot_start,
+                    slot_end=record.slot_end,
+                    reservation_prediction=record.bundles_reserved,
+                    no_show_prediction=record.no_shows,
+                    model_type="seasonal_naive",
+                    recommendation=f"Post {record.bundles_reserved} bundles on {target_date.strftime('%a')}",
+                    rationale=f"we assume {target_date} will sell a similar number of bundles as {historical_date} given {record.bundles_reserved} bundles are posted",
+                    confidence=get_naive_confidence_for_bundle_day(vendor_id=vendor_id, template_id=record.template_id, target_date=target_date)
+                )
+                session.add(new_forecast)
+
+        # commit the session and return a descriptive string of the changes
         session.commit()
-       
+        return f"generated forecast for vendor: {vendor_id} on day: {target_date}"
 
 
 
@@ -84,7 +113,7 @@ def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date
 
     # execute the statement
     results = session.exec(stmt).all()
-    datapoints: List[ForecastDatapoint] = []
+    datapoints: List[ForecastDatapoint] = []  # empty custom datapoint defined in schema.py
 
     # loop through the results 
     for record, title in results:
@@ -133,7 +162,7 @@ def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date
                 Forecast_Output.model_type == "seasonal_naive"
             )
         ).first()
-
+        # assume None
         current_forecast = None
         # in the case there already existse the forecast we are tying to make
         if existing:
@@ -143,8 +172,9 @@ def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date
             existing.rationale = rationale
             existing.confidence = get_naive_confidence_for_bundle_day(vendor_id=vendor_id, template_id=record.template_id, target_date=existing.date)
             session.add(existing)
-            current_forecast = existing
+            current_forecast = existing # update flag if that particular forecast with already exting forecast after it has been updated
         else:
+            # otherwise make the forecast from scratch
             current_forecast = Forecast_Output(
                 vendor_id=vendor_id,
                 template_id=record.template_id,
