@@ -1,4 +1,5 @@
 import axios from "axios";
+import { clearAuthSession } from "../utils/authSession";
 
 const api = axios.create({
   baseURL: "/api",
@@ -24,6 +25,20 @@ api.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      console.warn("Session expired. Redirecting to login...");
+
+      clearAuthSession()
+
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
 );
 
 export default api;

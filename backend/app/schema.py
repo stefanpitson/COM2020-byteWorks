@@ -232,3 +232,19 @@ class StreakRead(BaseModel):
     last: date
     ended:bool
 
+
+class ForecastDatapoint(BaseModel):
+    bundle_name: str        
+    predicted_sales: int
+    no_show: int
+    chance_of_no_show: float
+    day: str
+    start_time: str
+    end_time: str
+    confidence: float
+    recommendation: str
+    rationale: str
+
+class ForecastWeekData(BaseModel):
+    week_date: str
+    datapoints: List[ForecastDatapoint]
