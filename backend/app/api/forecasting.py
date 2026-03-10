@@ -6,9 +6,11 @@ from app.schema import ForecastWeekData
 from app.forecasting.baseline_approaches.seasonal_naive.seasonal_naive_forecast import get_naive_forecast_chart
 from datetime import date
 from datetime import timedelta
+from fastapi import HTTPException
 
 router = APIRouter()
 
+# may need to be a post method as this modifies the DB
 @router.get("/naive", response_model=ForecastWeekData)
 def naive_forecast(
     # default to tomorrow 
@@ -22,6 +24,12 @@ def naive_forecast(
     vendor_id = current_user.vendor_profile.vendor_id
     if not start_date:
         start_date = date.today() + timedelta(days=1)
+
+    if start_date > date.today()+timedelta(days=7):
+        raise HTTPException(
+            status_code=400,
+            detail= f"Seasonal naive forecast cannot predict more than 7 days in the future, requested start date: {start_date} is too far in the future."
+        )
 
     try:
         # pass logic to dedicated function
