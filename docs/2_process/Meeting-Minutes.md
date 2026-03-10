@@ -386,3 +386,62 @@ We discussed how we want to implement opening times, and if it should reflect wh
 We decided that the alternatives create scope creep and add unnecessary complexity. 
 
 We also discussed a messaging system for customers and vendors, some argued that it could be useful for communicating with the vendor, this was also dismissed as scope creep, and unnecessary when we provide a phone number for the vendor. 
+
+# Meeting 15 - 27/02
+### Attendance
+All but Joe
+
+## Overview
+We discussed:
+ensuring what was discussed on Tuesday will be done for next Monday
+clarification of the spec and what it was asking
+
+Alex:
+ 
+Working on badges with Alfie
+
+Alfie:
+  
+Working on badges with Alex
+Created branch and started working on logic to give badges
+Designing what the badges and types of them will be
+
+Jack
+  
+Working on adding some minor fixes to reservation
+Adding a way to declare reservations to be no-shows
+Adding endpoint to add credit to the customer account
+
+Stefan
+  
+Working on front-end for adding credit to user account
+
+Arden:
+  
+Adding moving average baseline for forecasting
+
+Magnus:
+  
+Furthering testing and the seeding by the spec
+
+Andrew:
+  
+Working on the front-end user settings page
+
+# Meeting 16 - 10/03 
+### Attendance 
+All in attendance 
+
+## Overview 
+
+We updated the trello board and eliminated tasks on the trello board that did not fit into scope.
+
+### Tasks
+Alex - Badges and Leaderboards frontend
+Alife - Backend for badges, and skeleton demo order
+Andrew - Settings frontend pages
+Arden - forecasting bullshit
+Zeliang - User acceptance document creation, and manual end-to-end tests
+Jack - FIx credit endpoint,  create opening hours endpoint and create backend for postcode / distance calculation
+Joe - Backend for user / vendor report interactions
+Stefan - frontend for user / vendor report interactions
