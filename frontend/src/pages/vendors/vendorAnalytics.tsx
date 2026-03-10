@@ -164,6 +164,12 @@ export default function VendorAnalytics() {
               </h3>
               
               <div className="h-[350px] w-full">
+                {data?.datapoints.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-gray-500 space-y-2"> 
+                  <p className="text-lg font-medium">No data points available for this week</p> 
+                  <p className="text-sm">New analytics will appear once transactions occur.</p>     
+                  </div> 
+                ):(
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data?.datapoints} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
@@ -181,7 +187,8 @@ export default function VendorAnalytics() {
                     <Bar name="Predicted Sold" dataKey="predicted_sales" fill="#22c55e" radius={[4, 4, 0, 0]} barSize={20} />
                     <Bar name="Predicted No Shows" dataKey="no_show" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={20} />
                   </BarChart>
-                </ResponsiveContainer>
+                </ResponsiveContainer>)
+              }
               </div>
             </div>
   
