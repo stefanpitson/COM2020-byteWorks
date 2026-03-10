@@ -230,67 +230,67 @@ export default function VendorTemplateManager() {
         {vendor && (
           <div className="flex flex-col gap-8 mb-12">
             
-            {/* Top Row: Brand & Profile */}
-            <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col lg:flex-row items-center gap-10">
+            <div className="flex lg:flex-row items-stretch gap-6" > 
               {/* Profile Photo */}
-              <div className="w-48 h-48 md:w-56 md:h-56 shrink-0 rounded-3xl overflow-hidden shadow-xl border-4 border-white">
-                <img
-                  src={resolveImageUrl(vendor.photo) || placeholder}
-                  alt={vendor.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              {/* Brand Info */}
-              <div className="flex-1 text-center lg:text-left">
-                <div className="flex flex-col md:flex-row md:items-center gap-3 mb-2 justify-center lg:justify-start">
-                  <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800">My Shop</h1>
-                  <span className="hidden md:block w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
-                  <p className="text-xl font-bold text-gray-400">{vendor.name}</p>
+                <div className="w-[30%] rounded-3xl overflow-hidden shadow-xl">
+                  <img
+                    src={resolveImageUrl(vendor.photo) || placeholder}
+                    alt={vendor.name}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <p className="text-gray-500 mb-8 max-w-2xl mx-auto lg:mx-0">
-                  Welcome back! Track your shop's performance and manage your daily inventory below.
-                </p>
-
-                <div className="flex flex-col md:flex-row items-center justify-center lg:justify-start gap-6">
-                  <div className="flex items-start gap-3 bg-gray-50 p-4 rounded-2xl border border-gray-100 w-full sm:w-auto">
-                      <div className="p-2.5 bg-orange-50 text-[hsl(var(--accent))] rounded-xl shrink-0">
-                          <MapPinIcon />
-                      </div>
-                      <div className="text-left">
-                          <h3 className="font-bold text-gray-400 text-[10px] uppercase tracking-widest mb-0.5">Location</h3>
-                          <p className="text-gray-700 font-bold text-sm">
-                              {vendor.street}, {vendor.city}, {vendor.post_code}
-                          </p>
-                      </div>
+            
+              {/* Top Row: Brand & Profile */}
+              <div className="w-[70%] bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col lg:flex-row items-center gap-10">
+                {/* Vendor Info */}
+                <div className="flex-1 text-center lg:text-left">
+                  <div className="flex flex-col md:flex-row md:items-center gap-3 mb-2 justify-center lg:justify-start">
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800">My Shop</h1>
                   </div>
+                  <p className="text-gray-500 mb-8 max-w-2xl mx-auto lg:mx-0">
+                    Welcome back! Track your shop's performance and manage your daily inventory below.
+                  </p>
 
-                  {vendor.opening_hours && (
+                  <div className="flex flex-col md:flex-row items-center justify-center lg:justify-start gap-6">
                     <div className="flex items-start gap-3 bg-gray-50 p-4 rounded-2xl border border-gray-100 w-full sm:w-auto">
-                        <div className="p-2.5 bg-blue-50 text-blue-500 rounded-xl shrink-0">
-                            <ClockIcon />
+                        <div className="p-2.5 bg-orange-50 text-[hsl(var(--accent))] rounded-xl shrink-0">
+                            <MapPinIcon />
                         </div>
                         <div className="text-left">
-                            <h3 className="font-bold text-gray-400 text-[10px] uppercase tracking-widest mb-0.5">Open Hours</h3>
-                            <p className="text-gray-700 font-bold text-sm">{vendor.opening_hours}</p>
+                            <h3 className="font-bold text-gray-400 text-[10px] uppercase tracking-widest mb-0.5">Location</h3>
+                            <p className="text-gray-700 font-bold text-sm">
+                                {vendor.street}, {vendor.city}, {vendor.post_code}
+                            </p>
                         </div>
                     </div>
-                  )}
 
-                  <button 
-                    onClick={() => navigate('/vendor/analytics')}
-                    className="flex items-center gap-2 bg-gray-800 text-white px-6 py-3.5 rounded-2xl hover:bg-black transition-all hover:shadow-lg active:scale-95 shadow-sm shrink-0 w-full sm:w-auto justify-center"
-                  >
-                    <span className="font-bold text-sm">View Full Analytics</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                    </svg>
-                  </button>
+                    {vendor.opening_hours && (
+                      <div className="flex items-start gap-3 bg-gray-50 p-4 rounded-2xl border border-gray-100 w-full sm:w-auto">
+                          <div className="p-2.5 bg-blue-50 text-blue-500 rounded-xl shrink-0">
+                              <ClockIcon />
+                          </div>
+                          <div className="text-left">
+                              <h3 className="font-bold text-gray-400 text-[10px] uppercase tracking-widest mb-0.5">Open Hours</h3>
+                              <p className="text-gray-700 font-bold text-sm">{vendor.opening_hours}</p>
+                          </div>
+                      </div>
+                    )}
+
+                    <button 
+                      onClick={() => navigate('/vendor/analytics')}
+                      className="flex items-center gap-2 bg-gray-800 text-white px-6 py-3.5 rounded-2xl hover:bg-black transition-all hover:shadow-lg active:scale-95 shadow-sm shrink-0 w-full sm:w-auto justify-center"
+                    >
+                      <span className="font-bold text-sm">View Full Analytics</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Middle Row: Big stats from vendor */}
+            {/* Big stats for vendor */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 transition-all hover:shadow-md group">
                 <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1 group-hover:text-green-600 transition-colors">Lifetime Revenue</p>
