@@ -14,6 +14,7 @@ import CustomerBundleView from "./pages/customers/CustomerBundleView"
 import CustomerReservations from "./pages/customers/CustomerReservations";
 import VendorReservations from "./pages/vendors/VendorReservations";
 import TemplateDetails from "./pages/vendors/templateDetails";
+import CustomerCredit from "./pages/customers/CustomerCredit";
 import CustomerSettings from "./pages/customers/CustomerSettings";
 
 export default function App() {
@@ -22,11 +23,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
-
         <Route path="/vendor/signup" element={<VendorSignUp />} />
         <Route path="/customer/signup" element={<CustomerSignUp />} />
-
-        
 
         {/* Applies the navbar */}
         <Route element={<MainLayout />}>
@@ -36,6 +34,7 @@ export default function App() {
             <Route path="/vendor/:vendorId" element={<CustomerVendorView />} />
             <Route path="/bundle/:templateId" element={<CustomerBundleView />} />
             <Route path="/customer/reservations" element={<CustomerReservations />} />
+            <Route path="/customer/credit" element={<CustomerCredit />} />
             <Route path="/customer/settings" element={<CustomerSettings />} />
           </Route>
 
