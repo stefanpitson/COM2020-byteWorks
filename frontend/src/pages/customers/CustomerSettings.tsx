@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { getCustomerProfile, updateCustomerProfile, type CustomerUpdatePayload } from "../../api/customers";
 import type { Customer, User } from "../../types";
+import EyeIcon from "../../assets/icons/eye.svg?react";
+import EyeOffIcon from "../../assets/icons/eye-off.svg?react";
 import {  getPasswordStrength, type PasswordStrength, strengthConfig } from '../../utils/password';
 import { passwordCheck } from "../../api/auth";
 
@@ -20,25 +21,42 @@ const SettingsSection = ({ title, children }: { title: string, children: React.R
 );
 
 const SettingsRow = ({ label, value, onChange, type = "text", placeholder, error}
-  : { label: string, value: string, onChange: (val: string) => void, type?: string, placeholder?: string, error?: string }) => (
-  <div className="flex flex-col p-4 bg-white transition-colors">
-    <label className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-2">
-      {label}
-    </label>
-    <input
-      type={type}
-      value={value}
-      placeholder={placeholder}
-      onChange={(e) => onChange(e.target.value)}
-      className={`text-sm font-semibold bg-transparent focus:outline-none border-b pb-1 transition-colors ${
-        error 
-          ? 'border-red-500 text-red-600 focus:border-red-600' 
-          : 'border-transparent focus:border-gray-200 text-gray-800'
-      }`}
-    />
-    {error && <span className="text-[10px] text-red-500 font-bold mt-1 animate-in fade-in slide-in-from-top-1">{error}</span>}
-  </div>
-);
+  : { label: string, value: string, onChange: (val: string) => void, type?: string, placeholder?: string, error?: string }) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const isPassword = type === "password";
+
+  return (
+    <div className="flex flex-col p-4 bg-white transition-colors">
+      <label className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-2">
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          type={isPassword ? (showPassword ? "text" : "password") : type}
+          value={value}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          className={`w-full text-sm font-semibold bg-transparent focus:outline-none border-b pb-1 transition-colors ${
+            error 
+              ? 'border-red-500 text-red-600 focus:border-red-600' 
+              : 'border-transparent focus:border-gray-200 text-gray-800'
+          } ${isPassword ? 'pr-10' : ''}`}
+        />
+        {isPassword && (
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => setShowPassword(prev => !prev)}
+            className="absolute inset-y-0 right-0 flex items-center pr-1 text-gray-500 hover:text-gray-700"
+          >
+            {showPassword ? <EyeOffIcon className="size-5"/> : <EyeIcon className="size-5"/>}
+          </button>
+        )}
+      </div>
+      {error && <span className="text-[10px] text-red-500 font-bold mt-1 animate-in fade-in slide-in-from-top-1">{error}</span>}
+    </div>
+  );
+};
 
 export default function CustomerSettings() {
 
@@ -52,7 +70,6 @@ export default function CustomerSettings() {
 
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>("very-weak");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
