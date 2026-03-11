@@ -74,6 +74,12 @@ class VendorSignupRequest(BaseModel):
         phone_number: str
         opening_hours: str
 
+class PasswordCheck(BaseModel):
+    password: str
+
+class PasswordCheckRead(BaseModel):
+    valid: bool
+
 #data for updating the customer 
 # all are optional as only updated information is given
 class CustomerUpdate(BaseModel):
