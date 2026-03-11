@@ -230,9 +230,9 @@ export default function VendorTemplateManager() {
         {vendor && (
           <div className="flex flex-col gap-8 mb-12">
             
-            <div className="flex lg:flex-row items-stretch gap-6" > 
+            <div className="flex flex-col lg:flex-row items-stretch gap-6" > 
               {/* Profile Photo */}
-                <div className="w-[30%] rounded-3xl overflow-hidden shadow-xl">
+                <div className="w-full lg:w-[30%] h-64 lg:h-auto rounded-3xl overflow-hidden shadow-xl">
                   <img
                     src={resolveImageUrl(vendor.photo) || placeholder}
                     alt={vendor.name}
@@ -241,7 +241,7 @@ export default function VendorTemplateManager() {
                 </div>
             
               {/* Top Row: Brand & Profile */}
-              <div className="w-[70%] bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col lg:flex-row items-center gap-10">
+              <div className="w-full lg:w-[70%] bg-white p-6 md:p-10 rounded-3xl shadow-sm border border-gray-100 flex flex-col lg:flex-row items-center gap-10">
                 {/* Vendor Info */}
                 <div className="flex-1 text-center lg:text-left">
                   <div className="flex flex-col md:flex-row md:items-center gap-3 mb-2 justify-center lg:justify-start">
