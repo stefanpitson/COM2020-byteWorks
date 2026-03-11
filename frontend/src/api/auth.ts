@@ -91,3 +91,11 @@ export const uploadImage = async (
 
   return response.data;
 }
+
+export const passwordCheck = async (
+  password: string
+) => {
+  const response = await api.post<boolean>("/auth/password-check", { password });
+
+  return response.data;
+}
