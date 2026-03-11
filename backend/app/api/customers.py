@@ -161,9 +161,6 @@ def add_credit_customer(
     #CVV validation (ensures it is numeric and only 3 characters)
     if not card_details.cvv.isdigit():
         raise HTTPException(status_code=404, detail = "CVV should only include digits")
-    if len(card_details.cvv) != 3:
-        raise HTTPException(status_code=404, detail = "CVV is not three digits")
-    
     
     # Card number validation
     card_number_verified = False
