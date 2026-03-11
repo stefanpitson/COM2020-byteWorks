@@ -1,5 +1,5 @@
 import api from "./axiosConfig";
-import type { User, Customer, Vendor } from "../types";
+import type { User } from "../types";
 
 // LOGIN
 
@@ -28,10 +28,10 @@ export interface UserSignupData extends Omit<User, "user_id"> {
 
 // Customer
 
-export type CustomerSignupData = Omit<
-  Customer,
-  "customer_id" | "store_credit" | "carbon_saved" | "rating"
->;
+export type CustomerSignupData ={
+  name: string;
+  post_code: string;
+}
 
 export interface RegisterCustomerPayload {
   user: UserSignupData;
@@ -53,10 +53,14 @@ export const registerCustomer = async (
 
 // Vendor
 
-export type VendorSignupData = Omit<
-  Vendor,
-  "vendor_id" | "carbon_saved" | "validated" | "photo"
->;
+export type VendorSignupData = {
+  name: string;
+  street: string;
+  city: string;
+  post_code: string;
+  opening_hours: string;
+  phone_number: string;
+} 
 
 export interface RegisterVendorPayload {
   user: UserSignupData;

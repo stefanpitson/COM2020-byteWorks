@@ -12,9 +12,6 @@ from app.api.deps import get_current_user
 import uuid
 import shutil
 from datetime import datetime
-import uuid
-import shutil
-from datetime import datetime
 from app.core.security import verify_password, get_password_hash
 from ukpostcodeutils import validation
 
@@ -99,7 +96,7 @@ def update_vendor_profile(
 
 # get a list of bundles for the corresponding vendor
 # for customer view at store page 
-@router.get("/bundles/{vendor_id}",response_model=CustBundleList,tags=["bundles"], summary="gets a list of simple details for a stores bundles")
+@router.get("/bundles/{vendor_id}",response_model=CustBundleList,tags=["Bundles"], summary="gets a list of simple details for a stores bundles")
 def customer_list_bundles(
     vendor_id: int,
     session: Session = Depends(get_session),
@@ -190,11 +187,14 @@ async def upload_image(
     try:
         session.add(current_user.vendor_profile)
         session.commit()
+        return {"status": "success", "image_url": current_user.vendor_profile.photo}
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         session.rollback() # If anything fails
         raise HTTPException(status_code=500, detail=str(e))
     
-    return {"status": "success", "image_url": current_user.vendor_profile.photo}
     
 @router.get("", response_model= VendorList, tags=["Vendors"],summary="Gets all the Vendors for Customer View")
 def get_all_vendors(

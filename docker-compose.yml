@@ -1,3 +1,5 @@
+name: byteworks
+
 services:
   db:
     image: postgres:18

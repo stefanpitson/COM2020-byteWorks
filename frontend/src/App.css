@@ -3,7 +3,9 @@
 
 :root {
   /* Fresh, organic green */
-  --primary: 158 48% 46%; 
+  --primary: 158 69% 38%; 
+  /* Lighter, bright green */
+  --primary-hover: 158 48% 46%;
   /* Darker green for text/borders */
   --primary-dark: 160 50% 25%;
   /* NEW: Light Orange / Peach Background */

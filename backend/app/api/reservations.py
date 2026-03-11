@@ -4,7 +4,7 @@ from app.core.database import get_session
 from app.models import Template, Allergen, Bundle, Reservation, Customer, Vendor, Streak, User
 from app.schema import VendReservationRead, CustReservationRead, CustReservationList, VendReservationList, PickupCode
 from app.api.deps import get_current_user
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from random import randint
 
 router = APIRouter()
@@ -264,6 +264,7 @@ def finalise_reservation(
     # Gets the ID of the vendor that is responsible for the reservation
     statement = select(Template.vendor).where(Template.template_id == Bundle.template_id,
                                               Bundle.bundle_id == reservation.bundle_id)
+    
     reserveVendorID = session.exec(statement).first()
     if not reserveVendorID:
         raise HTTPException(status_code=403, detail = "Vendor behind reservation not found")
@@ -279,11 +280,15 @@ def finalise_reservation(
     if not customer:
                 raise HTTPException(status_code=403, detail = "Customer not found")
 
+    statement = select(Template.cost).where(Template.template_id == Bundle.template_id,
+                                            Bundle.bundle_id == reservation.bundle_id)
+
     if pickup_code != reservation.code:
         raise HTTPException(status_code=403, detail="Customer does not the correct accepting code")
 
     statement = select(Template.carbon_saved).where(Template.template_id == Bundle.template_id,
                                                     Bundle.bundle_id == reservation.bundle_id)
+
     carbon_saved = session.exec(statement).first()
     if not carbon_saved:
         raise HTTPException(status_code=403, detail = "Carbon saved value not found")
@@ -355,6 +360,9 @@ def increment_streak(session: Session, customer):
     try:
         if streak != None:
             # check date 
+            if streak.last == datetime.now().date():
+                return # streak is not adjusted if last was same day
+
             last = streak.last + timedelta(days=7)
             if last >= datetime.now().date(): # streak is in date
                 streak.count +=1
