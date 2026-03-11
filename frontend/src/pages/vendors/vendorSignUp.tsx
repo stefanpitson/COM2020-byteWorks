@@ -359,7 +359,7 @@ export default function VendorSignUp() {
               type="button"
               key="next-button"
               onClick={handleNext}
-              className="px-4 py-2 bg-green-600 text-white rounded"
+              className="px-4 py-2 bg-primary text-white rounded"
             >
               Next
             </button>
@@ -367,7 +367,7 @@ export default function VendorSignUp() {
             <button
               type="submit"
               key="submit-button"
-              className="px-4 py-2 bg-blue-600 text-white rounded"
+              className="px-4 py-2 bg-primary text-white rounded"
             >
               Submit Profile
             </button>
