@@ -10,8 +10,8 @@ from fastapi import HTTPException
 
 router = APIRouter()
 
-# may need to be a post method as this modifies the DB
-@router.get("/naive", response_model=ForecastWeekData)
+# changed to post for now as modifies the db
+@router.post("forecast/naive", response_model=ForecastWeekData)
 def naive_forecast(
     # default to tomorrow 
     start_date: date = Query(None, description="First day of the target week"),
