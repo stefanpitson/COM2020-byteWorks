@@ -246,3 +246,11 @@ class ReportRead(BaseModel):
     responded: bool
     response: str | None 
 
+class ReportRespond(BaseModel):
+    response:str
+
+class ReportList(BaseModel):
+    total_count: int
+    reports: List [ReportRead]
+
+    
