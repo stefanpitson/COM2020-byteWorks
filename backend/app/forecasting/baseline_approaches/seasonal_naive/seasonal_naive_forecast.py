@@ -74,6 +74,7 @@ def update_or_create(
         )
 
     # return the forecast
+    session.add(forecast)
     return forecast
 
 

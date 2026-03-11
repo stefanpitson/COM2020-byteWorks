@@ -1,10 +1,9 @@
 from sqlmodel import Session, select, func
 from app.models import Forecast_Input, Forecast_Output, Template
 from app.core.database import engine
-from datetime import date, timedelta
+from datetime import date, timedelta, time
 from typing import Optional, List
 from app.schema import ForecastDatapoint, ForecastWeekData
-from time import time
 import json
 
 
@@ -105,6 +104,7 @@ def update_or_create(
         )
 
     # return the forecast
+    session.add(forecast)
     return forecast
 
 
@@ -260,6 +260,8 @@ def get_moving_average_forecast_chart(session: Session, vendor_id: int, start_da
             rationale=output.rationale
         )
         datapoints.append(datapoint)
+
+    session.commit()
 
     # return the weekdatapoints object
     return ForecastWeekData(week_date=start_date.isoformat(), datapoints=datapoints)
