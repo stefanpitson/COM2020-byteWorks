@@ -5,6 +5,7 @@ from datetime import date, timedelta
 from typing import Optional, List
 from app.schema import ForecastDatapoint, ForecastWeekData
 from time import time
+import json
 
 
 
@@ -206,7 +207,7 @@ def generate_moving_average_forecast(
 
 
 # main function that the endpoint will call
-def moving_average_forecast_chart(session: Session, vendor_id: int, start_date: date = date.today()+timedelta(days=1)) -> ForecastWeekData:
+def get_moving_average_forecast_chart(session: Session, vendor_id: int, start_date: date = date.today()+timedelta(days=1)) -> ForecastWeekData:
     """
     class ForecastDatapoint(BaseModel):
     bundle_name: str        
@@ -269,4 +270,6 @@ def moving_average_forecast_chart(session: Session, vendor_id: int, start_date: 
 
 if __name__ == "__main__":
 
-    pass
+    with Session(engine) as session:
+        result = get_moving_average_forecast_chart(session, 1)
+        print(json.dumps(result, indent=2, default=str))

@@ -5,6 +5,7 @@ from datetime import date, timedelta, datetime, time
 from app.forecasting.baseline_approaches.seasonal_naive.evaluate_seasonal_naive import get_naive_confidence_for_bundle_day
 from typing import Optional, List
 from app.schema import ForecastDatapoint, ForecastWeekData
+import json
 
 
 
@@ -266,7 +267,6 @@ if __name__ == "__main__":
     print(f"Generating forecasts for week starting {target}")
     with Session(engine) as session:
         result = get_naive_forecast_chart(session, 1, target)
-        import json
         print(json.dumps(result, indent=2, default=str))
 
 
