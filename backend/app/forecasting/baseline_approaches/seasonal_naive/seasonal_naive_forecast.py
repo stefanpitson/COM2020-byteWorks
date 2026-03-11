@@ -1,11 +1,80 @@
-from datetime import date, timedelta
 from sqlmodel import Session, select
 from app.models import Forecast_Input, Forecast_Output, Template
 from app.core.database import engine
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta, datetime, time
 from app.forecasting.baseline_approaches.seasonal_naive.evaluate_seasonal_naive import get_naive_confidence_for_bundle_day
 from typing import Optional, List
 from app.schema import ForecastDatapoint, ForecastWeekData
+
+
+
+def update_or_create(
+    session: Session,
+    vendor_id: int,
+    template_id: int,
+    target_date: date,
+    slot_start: time,
+    slot_end: time,
+    model_type: str,
+    reservation_prediction: int,
+    no_show_prediction: int,
+    recommendation: str,
+    rationale: str,
+    confidence: float
+) -> Forecast_Output:
+
+    """
+    The function takes in all parameters of a potential output forecast
+    checks if the forecast already exists
+    if the forecast does exist update it
+    if the forecast does not exist then create it 
+    return the new or updated forecast
+    """
+    # we only need to check the below fields to ensure uniqueness (or in this case verify a duplcate)
+    stmnt = select(Forecast_Output).where(
+        Forecast_Output.vendor_id == vendor_id,
+        Forecast_Output.template_id == template_id,
+        Forecast_Output.date == target_date,
+        Forecast_Output.slot_start == slot_start,
+        Forecast_Output.slot_end == slot_end,
+        Forecast_Output.model_type == model_type,
+    )
+
+    # execute the session
+    existing = session.exec(stmnt).first()
+
+    # assume None at forst -> this is what will be returned
+    forecast = None
+
+    #if there does exist a session
+    if existing:
+        # update the remaining fields
+        existing.reservation_prediction = reservation_prediction
+        existing.no_show_prediction = no_show_prediction
+        existing.recommendation = recommendation
+        existing.rationale = rationale
+        existing.confidence = confidence
+        forecast = existing
+
+    else:
+        # otherwise we create the specified output forecast from scratch with the parameters 
+        forecast = Forecast_Output(
+            vendor_id=vendor_id,
+            template_id=template_id,
+            date=target_date,
+            slot_start=slot_start,
+            slot_end=slot_end,
+            model_type=model_type,
+            reservation_prediction=reservation_prediction,
+            no_show_prediction=no_show_prediction,
+            recommendation=recommendation,
+            rationale=rationale,
+            confidence=confidence
+        )
+
+    # return the forecast
+    return forecast
+
 
 
 def generate_naive_forecast(vendor_id: int, target_date: Optional[date] = None) -> str:
@@ -83,7 +152,7 @@ def generate_naive_forecast(vendor_id: int, target_date: Optional[date] = None) 
 
 
 
-
+# main function that the endpoint will call
 def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date: Optional[date] = None) -> dict:
     """
     for a vendor create the output forecast entities using the seasonal naive model
@@ -151,44 +220,21 @@ def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date
             f"therefore you will sell {bundles_reserved} this {day_abbr}"
         )
 
-        # Upsert forecast output - avoid duplicates
-        existing = session.exec(
-            select(Forecast_Output).where(
-                Forecast_Output.vendor_id == vendor_id,
-                Forecast_Output.template_id == record.template_id,
-                Forecast_Output.date == predicted_date,
-                Forecast_Output.slot_start == record.slot_start,
-                Forecast_Output.slot_end == record.slot_end,
-                Forecast_Output.model_type == "seasonal_naive"
+        # use the helper function for the upserting logic
+        current_forecast = update_or_create(session=session, 
+            vendor_id=vendor_id, 
+            template_id=record.template_id, 
+            target_date=predicted_date, 
+            slot_start=record.slot_start, 
+            slot_end=record.slot_end,
+            model_type="seasonal_naive",
+            reservation_prediction=bundles_reserved,
+            no_show_prediction=no_shows,
+            recommendation=recommendation,
+            rationale=rationale,
+            confidence=get_naive_confidence_for_bundle_day(vendor_id=vendor_id, template_id=record.template_id, target_date=predicted_date)
             )
-        ).first()
-        # assume None
-        current_forecast = None
-        # in the case there already existse the forecast we are tying to make
-        if existing:
-            existing.reservation_prediction = bundles_reserved
-            existing.no_show_prediction = no_shows
-            existing.recommendation = recommendation
-            existing.rationale = rationale
-            existing.confidence = get_naive_confidence_for_bundle_day(vendor_id=vendor_id, template_id=record.template_id, target_date=existing.date)
-            session.add(existing)
-            current_forecast = existing # update flag if that particular forecast with already exting forecast after it has been updated
-        else:
-            # otherwise make the forecast from scratch
-            current_forecast = Forecast_Output(
-                vendor_id=vendor_id,
-                template_id=record.template_id,
-                date=predicted_date,
-                slot_start=record.slot_start,
-                slot_end=record.slot_end,
-                reservation_prediction=bundles_reserved,
-                no_show_prediction=no_shows,
-                model_type="seasonal_naive",
-                recommendation=recommendation,
-                rationale=rationale,
-                confidence=get_naive_confidence_for_bundle_day(vendor_id=vendor_id, template_id=record.template_id, target_date=predicted_date)
-            )
-            session.add(current_forecast)
+
 
         # build data to be sent to frontend
         datapoints.append(ForecastDatapoint(
