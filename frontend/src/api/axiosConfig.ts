@@ -30,13 +30,15 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    const requestUrl = error.config?.url || "";
+    const isAuthRoute = requestUrl.includes("/login") || requestUrl.includes("/signup")
+
+    if (error.response && error.response.status === 401 && !isAuthRoute) {
       console.warn("Session expired. Redirecting to login...");
-
       clearAuthSession()
-
       window.location.href = "/login";
     }
+    
     return Promise.reject(error);
   }
 );
