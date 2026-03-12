@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from sqlmodel import SQLModel, create_engine, Session, select
-from app.models import Allergen
+from app.models import *
 
 # Main functions relating to database functionality
 
@@ -53,7 +53,6 @@ def get_session():
 
 # drops all tables
 def reset_db():
-    from app.models import User, Customer, Vendor
     print("Dropping all tables")
     SQLModel.metadata.drop_all(engine)
     print("Creating new tables")
