@@ -41,7 +41,7 @@ def update_or_create(
         Forecast_Output.model_type == model_type,
     )
 
-    # execute the session
+    # execute the statement
     existing = session.exec(stmnt).first()
 
     # assume None at forst -> this is what will be returned
@@ -206,16 +206,9 @@ def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date
             if total_reserved_and_no_show > 0 else 0.0
         ) 
 
-        
-        # Subtract one hour from slot_start for the recommendation for helpful preperaton time
-        rec_start = (datetime.combine(date.today(), record.slot_start) - timedelta(hours=1)).time()
-        rec_start_str = rec_start.strftime("%H:%M")
-
         # create recomedation string before - specific to naive model
         recommendation = (
-            f"Post {bundles_reserved} {title} bundles on {day_abbr} "
-            f"by {rec_start_str}"
-        )
+            f"Post {bundles_reserved} {title} bundles on {day_abbr} between {record.slot_start} and {record.slot_end}")
         # create rationale string before - specific to naive model
         rationale = (
             f"last {day_abbr} sold {bundles_reserved} {title} bundles, "
