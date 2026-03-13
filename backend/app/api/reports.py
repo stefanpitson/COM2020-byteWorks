@@ -23,7 +23,7 @@ def create_report(
     if not re.search(title_regex,data.title):
         raise HTTPException(status_code=46, detail="title of an invalid length")
     
-    complaint_regex = r'^(?=.{1,256}$)(.*?[a-zA-Z0-9]){32}.*$'
+    complaint_regex = r'^(?=.{1,1024}$)(.*?[a-zA-Z0-9]){32}.*$'
     if not re.search(complaint_regex, data.complaint):
         raise HTTPException(status_code=46, detail="complaint of an invalid length")
     
@@ -62,7 +62,10 @@ def get_list(
         reports = session.exec(statement).all()
         return {"total_count":len(reports), "reports":reports}
     
-    # if admin they cant see reports? 
+    elif current_user.role == "admin":
+        statement = select(Report)
+        reports = session.exec(statement).all()
+        return {"total_count":len(reports), "reports":reports}
 
 @router.post("/{report_id}/reply", tags=["Reports"], summary="vendor leaves a response to a report")
 def respond(
@@ -84,7 +87,7 @@ def respond(
     if report.responded == True:
         raise HTTPException(status_code=409, detail=" response already given")
     
-    response_regex = r'^(?=.{1,256}$)(.*?[a-zA-Z0-9]){10}.*$'
+    response_regex = r'^(?=.{1,1024}$)(.*?[a-zA-Z0-9]){10}.*$'
     if not re.search(response_regex, data.response):
         raise HTTPException(status_code=46, detail="complaint of an invalid length")
     
