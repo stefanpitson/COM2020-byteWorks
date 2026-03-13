@@ -123,16 +123,18 @@ export default function NavBar() {
           </div>
         )}
 
+        {/* Credit display and link to top up page */}
         {role === "customer" && storeCredit !== null && (
-          <div
+          <Link 
+            to="/customer/credit"
             className={`px-3 py-1 rounded-full text-sm font-semibold ${
               storeCredit === 0
                 ? "bg-red-100 text-red-600"
                 : "bg-[hsl(158,48%,46%)]/10 text-[hsl(158,48%,46%)]"
             }`}
           >
-           Balance: £{storeCredit.toFixed(2)}
-          </div>
+            Balance: £{storeCredit.toFixed(2)} 
+          </Link>
         )}
 
         <button
