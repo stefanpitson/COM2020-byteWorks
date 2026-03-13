@@ -433,7 +433,6 @@ Working on the front-end user settings page
 All in attendance 
 
 ## Overview 
-
 We updated the trello board and eliminated tasks on the trello board that did not fit into scope.
 
 ### Tasks
@@ -445,3 +444,24 @@ Zeliang - User acceptance document creation, and manual end-to-end tests
 Jack - FIx credit endpoint,  create opening hours endpoint and create backend for postcode / distance calculation
 Joe - Backend for user / vendor report interactions
 Stefan - frontend for user / vendor report interactions
+
+# Meeting 17 - 13/03
+### Attendance 
+All but Jack
+
+## Overview 
+discussed where each team members is at with their assigned work:
+Alex 	- working on: making the leaderboard page 
+Alfie 	- working on: making the leaderboard endpoint 
+Arden 	- working on: advanced forecasting and analytics 
+Andrew 	- finished: update page account for vendors and customers  
+		- working on: changes to forecasts 
+Magnus 	- working on: automated tests, manual test, user acceptance test, database seeding
+Stefan 	- working on: pages for reports 
+Joe 	- finished: endpoints for reports 
+		- working on: making endpoints for admin page,  
+		- working on: making endpoint for notifications
+Jack 	- not in attendance 
+
+### Discussion
+Implementation for pick up notifications was discussed, with how the current entries in the database can be used, or adding attributes to the entities. In the end, deciding to use current attributes in the end. 
