@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlmodel import Session, select, func
 from app.core.database import get_session
-from app.models import Template, Allergen, Bundle, Reservation, Customer
+from app.models import Template, Allergen, Bundle, Reservation, Customer, User
 from app.schema import TemplateCreate, TemplateList, TemplateRead
 from app.api.deps import get_current_user
 from datetime import datetime
@@ -185,3 +185,24 @@ def get_template(
         raise HTTPException(status_code=404, detail="Template not found")
     
     return template
+
+
+@router.delete("/delete/{template_id}", tags=["Templates"], summary="delete a template")
+def delete_template(
+    template_id : int, 
+    session:Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+    ):
+    
+    if current_user.role == "customer":
+        raise HTTPException(status_code=403, detail="Must be a vendor or admin to delete templates")
+    
+    statement = select(Template).where(Template.template_id == template_id)
+    template = session.exec(statement).first()
+
+    if current_user.role == "vendor" and current_user.vendor_profile.vendor_id != template.vendor:
+        raise HTTPException(status_code=403, detail="you are not the vendor of this template")
+    
+    # check if template has reserved bundles 
+
+    statement = select(Bundle, Reservation)

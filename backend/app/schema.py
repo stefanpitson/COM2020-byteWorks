@@ -28,6 +28,10 @@ class VendorRead(BaseModel):
     food_saved: float
     photo: Optional[str]
 
+class VendorList(BaseModel):
+    total_count: int
+    vendors: List[VendorRead]
+
 # ___AUTH SCHEMAS___  
 
 #login
