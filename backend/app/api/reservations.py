@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select, func
 from app.core.database import get_session
-from app.models import Template, Allergen, Bundle, Reservation, Customer, Vendor, Streak, User
+from app.models import Badge, Template, Allergen, Bundle, Reservation, Customer, Vendor, Streak, User
 from app.schema import VendReservationRead, CustReservationRead, CustReservationList, VendReservationList, PickupCode
 from app.api.deps import get_current_user
 from datetime import datetime, timedelta, date
@@ -256,10 +256,12 @@ def finalise_reservation(
 
     reserveVendorID = session.exec(statement).first()
 
+    # checks the vendor attempting to check the reservation is the one that made the bundle
     if current_user.role == "vendor":  
         if current_user.vendor_profile.vendor_id != reserveVendorID:
             raise HTTPException(status_code=403, detail="Not the correct vendor")
-        
+    
+    # get the customer that made the reservation and set to variable customer
     statement = select(Customer).where(Customer.customer_id == reservation.customer_id)
     customer = session.exec(statement).first()
 
@@ -269,18 +271,28 @@ def finalise_reservation(
     if pickup_code != reservation.code:
         raise HTTPException(status_code=403, detail="Customer does not the correct accepting code")
 
+
+    # Get the carbon saved from the template to be added to the customer and vendor total carbon saved
     statement = select(Template.carbon_saved).where(Template.template_id == Bundle.template_id,
                                                     Bundle.bundle_id == reservation.bundle_id)
-
     carbon_saved = session.exec(statement).first()
+
+    # Get the food saved from the template weight to be added to the customer and vendor total food saved
+    statement = select(Template.weight).where(Template.template_id == Bundle.template_id,
+                                              Bundle.bundle_id == reservation.bundle_id)
+    food_saved = session.exec(statement).first()
 
     reservation.status = "collected"
 
     statement = select(Vendor).where(Vendor.vendor_id == current_user.vendor_profile.vendor_id)
     vendor = session.exec(statement).first()
 
+    # add the carbon saved and food saved to the customer and vendor profiles
     customer.carbon_saved += carbon_saved
     vendor.carbon_saved += carbon_saved
+    customer.food_saved += food_saved
+    vendor.food_saved += food_saved
+
     try:
         increment_streak(session,customer)
         session.add(reservation)
@@ -331,6 +343,50 @@ def increment_streak(session: Session, customer):
         session.commit()
         return
     
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+# This handles the logic for awarding badges to users. Called whenever a reservation is completed
+def customer_verify_and_give_badges(customer: Customer, session: Session):
+
+    statement = select(Badge).where(Badge.user_role == "customer")
+    badges = session.exec(statement).all()
+
+    try:
+        for badge in badges:
+            if badge.metric == "carbon_saved": #if the badge is for carbon saved, get the customer's carbon saved value
+                value = customer.carbon_saved
+            
+            elif badge.metric == "food_saved": #if for food saved, get the customer's food saved value
+                value = customer.food_saved
+            
+            elif badge.metric == "streak_count": #if for streak count, get the customer's current streak count
+                statement = (
+                    select(Streak.count)
+                    .where(Streak.customer_id == customer.customer_id)
+                    .where(Streak.ended.is_(False))
+                )
+                value = session.exec(statement).first() or 0
+            
+            elif badge.metric == "bundles_saved": #if for bundles saved, get the number of reservations with status collected for that customer
+                statement = (
+                    select(func.count(Reservation.reservation_id))
+                    .where(Reservation.customer_id == customer.customer_id)
+                    .where(Reservation.status == "collected")
+                )
+                value = (session.exec(statement).first()+1) or 0
+
+            else:
+                continue
+
+            if value >= badge.threshold:
+                if badge not in customer.badges:
+                    customer.user.badges.append(badge)
+                    session.add(customer)
+
+        session.commit()
+
     except Exception as e:
         session.rollback()
         raise HTTPException(status_code=500, detail=str(e))

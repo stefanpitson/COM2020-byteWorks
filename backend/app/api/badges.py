@@ -1,34 +1,44 @@
+from http.client import HTTPException
+
 from sqlmodel import Session, select
 from app.core.database import get_session
-from app.models import User, Badge, Customer
+from app.models import Customer, Streak, Badge
 
 
 # This handles the logic for awarding badges to users. Called whenever a reservation is completed
-def customer_verify_and_give_badges(user: User, session: Session):
+def customer_verify_and_give_badges(customer: Customer, session: Session):
 
-    if user.role != "customer":
-        print("User is not a customer, cannot award badges")
-        return
-    
-    if not user.customer_profile:
-        print("User does not have a customer profile, cannot award badges")
-        return
-
-    statement = select(Badge).where(Badge.user_role == user.role)
+    statement = select(Badge).where(Badge.user_role == customer.role)
     badges = session.exec(statement).all()
 
-    for badge in badges:
-        if badge.metric == "carbon_saved":
-            value = user.customer_profile.carbon_saved
-        
-        elif badge.metric == "food_saved":
-            value = user.customer_profile.food_saved
-        
-        elif badge.metric == "streak_count":
-            value = user.customer_profile.streak_count
-        
-        
-        
-        else:
-            print(f"Unknown badge metric: {badge.metric}")
-            continue
+    try:
+        for badge in badges:
+            if badge.metric == "carbon_saved":
+                value = customer.customer_profile.carbon_saved
+            
+            elif badge.metric == "food_saved":
+                value = customer.customer_profile.food_saved
+            
+            elif badge.metric == "streak_count":
+                statement = (
+                    select(Streak.count)
+                    .where(Streak.customer_id == customer.customer_profile.customer_id)
+                    .where(Streak.ended.is_(False))
+                )
+                value = session.exec(statement).first() or 0
+
+            else:
+                continue
+
+            if value >= badge.threshold:
+                if badge not in customer.badges:
+                    customer.badges.append(badge)
+                    session.add(customer)
+
+        session.commit()
+
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
