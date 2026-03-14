@@ -254,6 +254,7 @@ class ReportList(BaseModel):
     reports: List [ReportRead]
 
     
+
 class ForecastDatapoint(BaseModel):
     bundle_name: str        
     predicted_sales: int
