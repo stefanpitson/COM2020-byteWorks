@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from sqlmodel import Session, select, func
+from sqlmodel import Session, select, func, delete
 from app.core.database import get_session
 from app.models import Template, Allergen, Bundle, Reservation, Customer, User
 from app.schema import TemplateCreate, TemplateList, TemplateRead
@@ -187,7 +187,7 @@ def get_template(
     return template
 
 
-@router.delete("/delete/{template_id}", tags=["Templates"], summary="delete a template")
+@router.delete("/{template_id}", tags=["Templates"], summary="delete a template")
 def delete_template(
     template_id : int, 
     session:Session = Depends(get_session),
@@ -203,6 +203,31 @@ def delete_template(
     if current_user.role == "vendor" and current_user.vendor_profile.vendor_id != template.vendor:
         raise HTTPException(status_code=403, detail="you are not the vendor of this template")
     
-    # check if template has reserved bundles 
+    # check if template has any active reservations 
 
-    statement = select(Bundle, Reservation)
+    statement = (select(Reservation)
+                .outerjoin(Bundle, Bundle.bundle_id == Reservation.bundle_id)
+                .where(Bundle.template_id == template_id,
+                       Bundle.date == datetime.now().date(),
+                       Reservation.status == "booked" 
+                       )
+                )
+    reservations = session.exec(statement).first()
+
+    if reservations:
+        raise HTTPException(status_code=400, detail="cannot delete template with active reservations")
+    
+    # delete all available bundles for the template
+    statement_b = delete(Bundle).where(Bundle.template_id == template_id,
+                                      Bundle.date == datetime.now().date(),
+                                        Bundle.purchased_by == None)
+        # delete the template 
+    statement_t = delete(Template).where(Template.template_id == template_id)
+    try:
+        session.exec(statement_b)
+        session.exec(statement_t)
+        session.commit()
+        return { "message":f"deleted template {template_id} successfully"}
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail= str(e))

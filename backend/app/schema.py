@@ -252,3 +252,7 @@ class ForecastDatapoint(BaseModel):
 class ForecastWeekData(BaseModel):
     week_date: str
     datapoints: List[ForecastDatapoint]
+
+class DeleteBundles(BaseModel):
+    template_id: int
+    amount: int
