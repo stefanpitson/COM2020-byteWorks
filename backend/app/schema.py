@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Dict
 from datetime import date, time
 
 # schemas contains what the frontend will send and expect in return 
@@ -22,7 +22,7 @@ class VendorRead(BaseModel):
     city: str
     post_code: str
     phone_number: str
-    opening_hours: str
+    # removed opening_hours and seperated into new end point.
     total_revenue: float
     carbon_saved: float
     food_saved: float
@@ -72,7 +72,7 @@ class VendorSignupRequest(BaseModel):
         city: str
         post_code: str
         phone_number: str
-        opening_hours: str
+        opening_hours: Dict[str, List[str]]
 
 #data for updating the customer 
 # all are optional as only updated information is given
@@ -105,7 +105,7 @@ class VendorUpdate(BaseModel):
         street: Optional[str] = None
         city: Optional[str] = None
         phone_number: Optional[str] = None
-        opening_hours: Optional[str] = None    
+        opening_hours: Dict[str, List[str]] = None    
 
 # ___ TEMPLATES & BUNDLES ___
 
@@ -248,3 +248,12 @@ class ForecastDatapoint(BaseModel):
 class ForecastWeekData(BaseModel):
     week_date: str
     datapoints: List[ForecastDatapoint]
+
+class OpeningHoursRead(BaseModel):
+    monday : List[time]
+    tuesday : List[time]
+    wednesday : List[time]
+    thursday : List[time]
+    friday : List[time]
+    saturday : List[time]
+    sunday : List[time]

@@ -4,10 +4,8 @@ from sqlmodel import Session, select, func, case, and_
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlmodel import Session, select, func, case, and_
 from app.core.database import get_session
-from app.models import User, Bundle, Template, Reservation, Vendor
-from app.schema import VendorRead, CustBundleList, VendorList, VendorUpdate
-from app.models import User, Bundle, Template, Reservation, Vendor
-from app.schema import VendorRead, CustBundleList, VendorList, VendorUpdate
+from app.models import User, Bundle, Template, Reservation, Vendor, OpenHours
+from app.schema import VendorRead, CustBundleList, VendorList, VendorUpdate, OpeningHoursRead
 from app.api.deps import get_current_user
 import uuid
 import shutil
@@ -46,6 +44,8 @@ def update_vendor_profile(
 
     # User is already a vendor 
 
+    vendor_id = current_user.vendor_profile.vendor_id
+
     if data.user.email != None:
         if session.exec(select(User).where(User.email == data.user.email)).first():
             raise HTTPException(status_code=400, detail="Email already registered")
@@ -78,10 +78,28 @@ def update_vendor_profile(
     if data.vendor.phone_number != None:
          current_user.vendor_profile.phone_number = data.vendor.phone_number
     
-    # May have to change when opening houts implementation is done properly
     if data.vendor.opening_hours != None:
-         current_user.vendor_profile.opening_hours = data.vendor.opening_hours
-    
+        DAY_NAMES = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+        DAY_NAMES_TO_INT = {"monday" : 0, "tuesday" : 1, "wednesday" : 2, "thursday" : 3, "friday" : 4, "saturday" : 5, "sunday": 6}
+        for day_name in DAY_NAMES:
+            if data.vendor.opening_hours[day_name]:
+                if check_opening_hours(data.vendor.opening_hours[day_name]):
+                    if (openHour := session.exec(select(OpenHours)
+                                                .where(OpenHours.day == DAY_NAMES_TO_INT[day_name], 
+                                                        OpenHours.vendor_id == vendor_id)).first()):
+                        openHour.openingHour = data.vendor.opening_hours[day_name][0]
+                        openHour.closingHour = data.vendor.opening_hours[day_name][1]
+                    else:
+                        openHour = OpenHours(vendor_id = vendor_id, 
+                                            day = DAY_NAMES_TO_INT[day_name], 
+                                            openingHour = data.vendor.opening_hours[day_name][0],
+                                            closingHour = data.vendor.opening_hours[day_name][1])
+                    session.add(openHour)
+                    # Commits later in the try statement
+                else:
+                    raise HTTPException(status_code = 403, detail = ("Incorrect opening times for " + day_name))
+                    
+
     # May have to change when photo implementation is done properly
     if data.vendor.photo != None:
          current_user.vendor_profile.photo = data.vendor.photo
@@ -94,6 +112,31 @@ def update_vendor_profile(
         raise HTTPException(status_code=500, detail=str(e))
     return {"message": "Customer updated successfully"}
 
+def check_opening_hours(
+    possible_hours : List[str],
+    ):
+    if possible_hours:
+                if len(possible_hours) == 2:
+                    newOpeningHour = possible_hours[0]
+                    newClosingHour = possible_hours[1]
+                    # Checks if either the opening and closing hour are the same and that they are both equal to either "allday" or "closed"
+                    # or checks if both the hours are numeric
+                    if (newOpeningHour == newClosingHour
+                        and (newOpeningHour == "closed" or newOpeningHour == "allday")): 
+                            return True
+                    
+                    # Checks if not closed or all day, that both the times are within the 24hr clock system
+                    elif (newOpeningHour.isnumeric() and newClosingHour.isnumeric()):
+                        if (int(newOpeningHour) < int (newClosingHour)
+                            and len(newOpeningHour) == 4 and newClosingHour == 4
+                            and int(newOpeningHour[0:2]) >= 0 and int(newOpeningHour[0:2]) < 24
+                            and int(newClosingHour[0:2]) >= 0 and int(newClosingHour[0:2]) < 24
+                            and int(newOpeningHour[2:4]) >= 0 and int(newOpeningHour[2:4]) < 60
+                            and int(newClosingHour[2:4]) >= 0 and int(newClosingHour[2:4]) < 60
+                            ): 
+                                return True
+    
+
 # get a list of bundles for the corresponding vendor
 # for customer view at store page 
 @router.get("/bundles/{vendor_id}",response_model=CustBundleList,tags=["Bundles"], summary="gets a list of simple details for a stores bundles")
@@ -102,10 +145,12 @@ def customer_list_bundles(
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user) # keep this as it does some checks
     ):
-    
         
-    if current_user.role == "vendor" and vendor_id != current_user.vendor_profile.vendor_id:
-        return HTTPException(status_code=403, detail="Not the correct vendor")
+    if current_user.role != "vendor":
+        raise HTTPException(status_code=403, detail="Not a vendor account")
+        
+    if not current_user.vendor_profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
 
     today = datetime.now().date()
 
@@ -269,3 +314,43 @@ def get_vendor_public_profile(
         raise HTTPException(status_code=404, detail="Vendor not found")
     return vendor
 
+@router.get("/{vendor_id}/opening_hours", response_model = OpeningHoursRead, tags=["Vendors"], summary = "Get the opening hours for a vendor")
+def get_vendor_opening_hours(
+    vendor_id: int,
+    session: Session = Depends(get_session),
+    current_user = Depends(get_current_user)
+    ):
+    if current_user.role != "vendor":
+        raise HTTPException(status_code=403, detail="Not a vendor account")
+        
+    if not current_user.vendor_profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
+    vendor = session.get(Vendor, vendor_id)
+    if not vendor:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+    
+    statement = (select(OpenHours)
+                 .where(OpenHours.vendor_id == vendor_id)
+                 )
+    openTimes = session.exec(statement)
+    
+    openingHoursReturnObject = OpeningHoursRead()
+    for dayOpenTimes in openTimes:
+        match dayOpenTimes.day:
+            case 0:
+                openingHoursReturnObject.monday = [dayOpenTimes.openingHour, dayOpenTimes.closingHour]
+            case 1:
+                openingHoursReturnObject.tuesday = [dayOpenTimes.openingHour, dayOpenTimes.closingHour]
+            case 2:
+                openingHoursReturnObject.wednesday = [dayOpenTimes.openingHour, dayOpenTimes.closingHour]
+            case 3:
+                openingHoursReturnObject.thursday = [dayOpenTimes.openingHour, dayOpenTimes.closingHour]
+            case 4:
+                openingHoursReturnObject.friday = [dayOpenTimes.openingHour, dayOpenTimes.closingHour]
+            case 5:
+                openingHoursReturnObject.saturday = [dayOpenTimes.openingHour, dayOpenTimes.closingHour]
+            case 6:
+                openingHoursReturnObject.sunday = [dayOpenTimes.openingHour, dayOpenTimes.closingHour]
+
+    return openingHoursReturnObject

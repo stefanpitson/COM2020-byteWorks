@@ -2,8 +2,9 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from app.core.database import get_session
-from app.models import Customer, User, Vendor
+from app.models import Customer, User, Vendor, OpenHours
 from app.core.security import get_password_hash, verify_password, create_access_token
+from app.api.vendors import check_opening_hours
 from app.schema import LoginResponse, LoginRequest, CustomerSignupRequest, VendorSignupRequest
 
 router = APIRouter()
@@ -106,9 +107,22 @@ def register_vendor(
             city =  data.vendor.city,
             street = data.vendor.street,
             phone_number = data.vendor.phone_number,
-            opening_hours = data.vendor.opening_hours,
             post_code = data.vendor.post_code,
         )
+
+        DAY_NAMES = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+        DAY_NAMES_TO_INT = {"monday" : 0, "tuesday" : 1, "wednesday" : 2, "thursday" : 3, "friday" : 4, "saturday" : 5, "sunday": 6}
+        for day_name in DAY_NAMES:
+            if data.vendor.opening_hours[day_name]:
+                if check_opening_hours(data.vendor.opening_hours[day_name]):
+                    openHour = OpenHours(vendor_id = new_vendor.vendor_id, 
+                                            day = DAY_NAMES_TO_INT[day_name], 
+                                            openingHour = data.vendor.opening_hours[day_name][0],
+                                            closingHour = data.vendor.opening_hours[day_name][1])
+                    session.add(openHour)
+                    # Commits later in the try statement
+                else:
+                    raise HTTPException(status_code = 403, detail = ("Incorrect opening hours for " + day_name))
 
         session.add(new_vendor)
         session.commit()
