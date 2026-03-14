@@ -14,6 +14,8 @@ import shutil
 from datetime import datetime
 from app.core.security import verify_password, get_password_hash
 from ukpostcodeutils import validation
+from geopy import distance, geocoders
+from geopy.geocoders import Nominatim
 
 router = APIRouter()
 
@@ -269,3 +271,33 @@ def get_vendor_public_profile(
         raise HTTPException(status_code=404, detail="Vendor not found")
     return vendor
 
+
+@router.get("/{vendor_id}/distance", response_model=float, tags=["Vendors"], summary="Get distance from a postcode to a vendor's postcode")
+def get_dist_to_vendor(
+    vendor_id: int,
+    session: Session = Depends(get_session),
+    current_user = Depends(get_current_user),
+    useMiles : bool = False
+    ):
+
+    
+    if current_user.role != "customer":
+        raise HTTPException(status_code=403, detail="Not a customer account")
+        
+    if not current_user.customer_profile:
+        raise HTTPException(status_code=404, detail="Customer profile not found")
+
+
+    vendor = session.get(Vendor, vendor_id)
+    if not vendor:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+
+    postcodeConvertor = Nominatim(user_agent="postcode_distance")
+
+    userLoc = postcodeConvertor.geocode(current_user.customer_profile.post_code)
+    vendorLoc = postcodeConvertor.geocode(vendor.post_code)
+    
+    if useMiles:
+        return distance.distance(userLoc, vendorLoc).miles
+    else:
+        return distance.distance(userLoc, vendorLoc).km
