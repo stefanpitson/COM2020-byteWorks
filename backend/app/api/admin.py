@@ -21,7 +21,7 @@ def delete_user(
     if current_user.role != "admin":
         raise HTTPException(status_code=401, detail="must be an admin to delete accounts")
     
-    statement = select(User).where(User.id == user_id)
+    statement = select(User).where(User.user_id == user_id)
     user = session.exec(statement).first()
 
     if not user: 
@@ -38,7 +38,7 @@ def delete_user(
     except Exception as e:
         session.rollback()
         raise HTTPException(status_code=500, detail=str(e))
-    return {"message":"user deleted successfully"}
+    return {"message":f"user {user_id} deleted successfully"}
 
 # vendor functions 
 
