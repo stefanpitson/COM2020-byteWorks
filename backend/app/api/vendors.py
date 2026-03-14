@@ -10,6 +10,7 @@ from app.api.deps import get_current_user
 import uuid
 import shutil
 from datetime import datetime
+from datetime import time
 from app.core.security import verify_password, get_password_hash
 from ukpostcodeutils import validation
 
@@ -354,3 +355,35 @@ def get_vendor_opening_hours(
                 openingHoursReturnObject.sunday = [dayOpenTimes.openingHour, dayOpenTimes.closingHour]
 
     return openingHoursReturnObject
+
+@router.get("/{vendor_id}/is_open", response_model = bool, tags=["Vendors"], summary = "Check if a vendor is open")
+def get_vendor_opening_hours(
+    vendor_id: int,
+    session: Session = Depends(get_session),
+    current_user = Depends(get_current_user)
+    ):
+    # Anyone should be able to run this so no need to check for current_user 
+    
+    vendor = session.get(Vendor, vendor_id)
+    if not vendor:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+    
+    statement = (select(OpenHours)
+                 .where(OpenHours.vendor_id == vendor_id)
+                 )
+    openTimes = session.exec(statement)
+    
+    currentDayNum = datetime.now().weekday()
+    currentTime = datetime.now().time()
+    isOpen = False
+    for dayOpenTimes in openTimes:
+        if dayOpenTimes.day == currentDayNum:
+            if dayOpenTimes.openingHour == "allday":
+                isOpen = True
+            else:
+                if dayOpenTimes.openingHour != "closed":
+                    if (time.fromisoformat(dayOpenTimes.openingHour[0:2] + ":" + dayOpenTimes.openingHour[2:4] + ":00") <= currentTime
+                        and currentTime < time.fromisoformat(dayOpenTimes.closingHour[0:2] + ":" + dayOpenTimes.closingHour[2:4] + ":00")):
+                        isOpen = True
+    
+    return isOpen
