@@ -146,6 +146,8 @@ class Report(SQLModel, table=True):
     complaint: str
     responded: bool = Field(default=False)
     response: Optional[str]
+    date_made: Date = Field(default_factory=lambda:datetime.now().date())
+    date_responded: Optional[Date] = Field(default=None)
 
 class Forecast_Input(SQLModel, table=True):
     record_id: Optional[int] = Field(default=None, primary_key=True)
