@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select, func
-from app.core.database import get_session
+from app.core.database import get_session, engine
+from app.core.security import get_password_hash
 from app.models import Template, Allergen, Bundle, Reservation, Customer, Vendor, Streak, User
 from app.schema import VendorList
 from app.api.deps import get_current_user
@@ -86,3 +87,19 @@ def validate_vendor(
 # delete vendor bundles and templates -- do this in bundles / templates 
 
 # viewing all the reports uses the same endpoints as normal 
+
+def create_admin():
+    with Session(engine) as session:
+        admin = User(email = "admin@byte.com", password_hash= get_password_hash("adminPass"), role ="admin")
+        try:
+            session.add(admin)
+            session.commit()
+            print("admin added successfully")
+        except Exception as e:
+            session.rollback()
+            print(f"error: {str(e)}")
+
+if __name__ == "__main__":
+    # create an admin account 
+   create_admin()
+    
