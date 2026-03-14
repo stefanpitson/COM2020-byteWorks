@@ -15,6 +15,7 @@ import CustomerReservations from "./pages/customers/CustomerReservations";
 import VendorReservations from "./pages/vendors/VendorReservations";
 import TemplateDetails from "./pages/vendors/templateDetails";
 import CustomerCredit from "./pages/customers/CustomerCredit";
+import CustomerReports from "./pages/customers/CustomerReports";
 
 export default function App() {
   return (
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="/bundle/:templateId" element={<CustomerBundleView />} />
             <Route path="/customer/reservations" element={<CustomerReservations />} />
             <Route path="/customer/credit" element={<CustomerCredit />} />
+            <Route path="/customer/reports" element={<CustomerReports />} />
           </Route>
 
           {/* Only Vendors allowed */}
@@ -44,6 +46,7 @@ export default function App() {
             <Route path="/vendor/analytics" element={<VendorAnalytics />} />
             <Route path="/vendor/reservations" element={<VendorReservations />} />
             <Route path="/vendor/template" element={<TemplateDetails />} />
+            {/*Route path="/vendor/reports" element={<VendorReports />} />*/}
           </Route>
         </Route>
       </Routes>
