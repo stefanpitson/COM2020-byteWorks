@@ -14,6 +14,7 @@ import CustomerBundleView from "./pages/customers/CustomerBundleView"
 import CustomerReservations from "./pages/customers/CustomerReservations";
 import VendorReservations from "./pages/vendors/VendorReservations";
 import TemplateDetails from "./pages/vendors/templateDetails";
+import CustomerBadges from "./pages/customers/CustomerBadges";
 
 export default function App() {
   return (
@@ -29,6 +30,8 @@ export default function App() {
 
         {/* Applies the navbar */}
         <Route element={<MainLayout />}>
+
+          <Route path="/customer/badges" element={<CustomerBadges />} />
           {/* Only Customers allowed */}
           <Route element={<ProtectedRoute allowedRole="customer" />}>
             <Route path="/customer/home" element={<CustomerHome />} />
