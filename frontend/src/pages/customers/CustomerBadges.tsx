@@ -16,55 +16,43 @@ interface LeaderboardEntry {
 }
 
 const MOCK_BADGES: Badge[] = [
-  {
-    badge_id: 1,
-    title: "Eco Warrior",
-    description: "Saved an impressive amount of carbon emissions by rescuing food.",
-    metric: "carbon_saved",
-    threshold: 50,
-  },
-  {
-    badge_id: 2,
-    title: "7-Day Streak",
-    description: "Picked up a bundle every day for a whole week!",
-    metric: "streak_count",
-    threshold: 7,
-  },
-  {
-    badge_id: 3,
-    title: "Food Rescuer",
-    description: "Saved your first 10 meals from going to the landfill.",
-    metric: "food_saved",
-    threshold: 10,
-  },
-  {
-    badge_id: 4,
-    title: "Neighborhood Hero",
-    description: "Supported local vendors and rescued over 100 meals.",
-    metric: "food_saved",
-    threshold: 100,
-  }
+  { badge_id: 1, title: "Spark", description: "Started your first streak!", metric: "streak_count", threshold: 1 },
+  { badge_id: 2, title: "Heating Up", description: "Maintained a 3-day streak.", metric: "streak_count", threshold: 3 },
+  { badge_id: 3, title: "On Fire", description: "A perfect week of rescuing food!", metric: "streak_count", threshold: 7 },
+  { badge_id: 4, title: "Unstoppable", description: "Two straight weeks of rescues.", metric: "streak_count", threshold: 14 },
+  { badge_id: 5, title: "Monthly Master", description: "An entire month of daily impact.", metric: "streak_count", threshold: 30 },
+  { badge_id: 6, title: "Legendary", description: "60 straight days! You are a rescuing machine.", metric: "streak_count", threshold: 60 },
+  { badge_id: 7, title: "First Rescue", description: "Rescued your very first bundle.", metric: "bundles_saved", threshold: 1 },
+  { badge_id: 8, title: "High Five", description: "Rescued 5 bundles from going to waste.", metric: "bundles_saved", threshold: 5 },
+  { badge_id: 9, title: "Perfect Ten", description: "Hit the double digits with 10 rescued bundles.", metric: "bundles_saved", threshold: 10 },
+  { badge_id: 10, title: "Bundle Boss", description: "Rescued 15 bundles.", metric: "bundles_saved", threshold: 15 },
+  { badge_id: 11, title: "Bundle Champion", description: "An incredible 20 bundles rescued!", metric: "bundles_saved", threshold: 20 },
+  { badge_id: 12, title: "Making a Dent", description: "Saved 1kg of food from the bin.", metric: "food_saved", threshold: 1 },
+  { badge_id: 13, title: "Heavy Lifter", description: "Saved 2kg of delicious food.", metric: "food_saved", threshold: 2 },
+  { badge_id: 14, title: "Triple Threat", description: "Saved 3kg of food.", metric: "food_saved", threshold: 3 },
+  { badge_id: 15, title: "Eco Champion", description: "Saved 4kg of food.", metric: "food_saved", threshold: 4 },
+  { badge_id: 16, title: "Waste Warrior", description: "A massive 5kg of food saved!", metric: "food_saved", threshold: 5 }
 ];
 
 const MOCK_LEADERBOARD: LeaderboardEntry[] = [
-  { id: 1, name: "Sarah", co2_saved: 142.5 },
-  { id: 2, name: "Alex", co2_saved: 128.0 },
-  { id: 3, name: "David", co2_saved: 115.2 },
-  { id: 4, name: "Emma", co2_saved: 98.7 },
+  { id: 1, name: "Sarah J.", co2_saved: 142.5 },
+  { id: 2, name: "Alex M.", co2_saved: 128.0 },
+  { id: 3, name: "David K.", co2_saved: 115.2 },
+  { id: 4, name: "Emma W.", co2_saved: 98.7 },
   { id: 5, name: "You", co2_saved: 85.4 },
-  { id: 6, name: "Chris", co2_saved: 72.1 },
-  { id: 7, name: "Jessica", co2_saved: 64.9 },
+  { id: 6, name: "Chris P.", co2_saved: 72.1 },
+  { id: 7, name: "Jessica T.", co2_saved: 64.9 },
 ];
 
 const getBadgeStyling = (metric: string, threshold: number) => {
-  if (metric === "carbon_saved") {
-    return { bg: "bg-[hsl(var(--primary)/0.1)]", text: "text-[hsl(var(--primary-dark))]", border: "border-[hsl(var(--primary)/0.2)]", icon: "🌍" };
+  if (metric === "streak_count" && threshold >= 30) {
+    return { bg: "bg-[hsl(var(--accent)/0.2)]", text: "text-[hsl(var(--accent))]", border: "border-[hsl(var(--accent)/0.4)]", icon: "👑" };
   }
   if (metric === "streak_count") {
     return { bg: "bg-[hsl(var(--accent)/0.15)]", text: "text-[hsl(var(--accent))]", border: "border-[hsl(var(--accent)/0.3)]", icon: "🔥" };
   }
-  if (metric === "food_saved" && threshold >= 100) {
-    return { bg: "bg-[hsl(var(--primary-dark)/0.1)]", text: "text-[hsl(var(--primary-dark))]", border: "border-[hsl(var(--primary-dark)/0.3)]", icon: "👑" };
+  if (metric === "bundles_saved") {
+    return { bg: "bg-[hsl(var(--primary-dark)/0.1)]", text: "text-[hsl(var(--primary-dark))]", border: "border-[hsl(var(--primary-dark)/0.3)]", icon: "🛍️" };
   }
   if (metric === "food_saved") {
     return { bg: "bg-[hsl(var(--primary)/0.1)]", text: "text-[hsl(var(--primary))]", border: "border-[hsl(var(--primary)/0.2)]", icon: "🍲" };
@@ -120,7 +108,7 @@ export default function CustomerBadges() {
                     : "text-[hsl(var(--text-main))] hover:bg-white/60"
                 }`}
               >
-                Leaderboard
+                Leaderboard 🌍
               </button>
             </div>
           </div>
@@ -152,7 +140,7 @@ export default function CustomerBadges() {
                   </p>
                   
                   <div className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-xl bg-opacity-50 ${style.bg} ${style.text}`}>
-                    Target: {badge.threshold} {badge.metric.replace("_", " ")}
+                    Target: {badge.threshold} {metricFormat(badge.metric)}
                   </div>
                 </div>
               );
@@ -172,7 +160,7 @@ export default function CustomerBadges() {
           <div className="max-w-3xl mx-auto">
             <div className="bg-white rounded-3xl border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
               <div className="bg-[hsl(var(--primary)/0.05)] px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                <span className="font-bold text-[hsl(var(--text-main))] uppercase tracking-wider text-xs">Rank & Username</span>
+                <span className="font-bold text-[hsl(var(--text-main))] uppercase tracking-wider text-xs">Rank & Rescuer</span>
                 <span className="font-bold text-[hsl(var(--text-main))] uppercase tracking-wider text-xs text-right">CO₂ Saved</span>
               </div>
               
@@ -230,4 +218,11 @@ export default function CustomerBadges() {
       </div>
     </div>
   );
+}
+
+function metricFormat(metric: string) {
+  if (metric === "streak_count") return "Days";
+  if (metric === "bundles_saved") return "Bundles";
+  if (metric === "food_saved") return "kg";
+  return metric.replace("_", " ");
 }
