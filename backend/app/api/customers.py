@@ -118,7 +118,7 @@ def get_customer_owned_badges(
     )
 
     badges = session.exec(statement).all()
-    return BadgeList(total_count=len(badges), badges=badges)
+    return {"total_count": len(badges), "badges": badges}
 
 # get the badges not achieved by the customer. If the user is not a customer or does not have a customer profile, they should not have access to this endpoint and an error message should be given.
 @router.get("/badges/unowned", response_model=BadgeList, tags=["Customer", "Badges"], summary="Get unowned badges for the current customer")
@@ -148,7 +148,7 @@ def get_customer_unowned_badges(
     )
     
     badges = session.exec(statement).all()
-    return BadgeList(total_count=len(badges), badges=badges)
+    return {"total_count": len(badges), "badges": badges}
 
 # return the leaderboard of customers sorted by food saved returns 10 or 11 entries depending on whether the current customer is in the top 10 or not. If the user is not a customer, they should not have access to this endpoint and an error message should be given.
 @router.get("/leaderboard", response_model=LeaderboardList, tags=["Leaderboard"], summary="Get the food saved leaderboard")

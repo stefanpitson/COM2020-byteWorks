@@ -247,6 +247,7 @@ class BadgeList(BaseModel):
 class LeaderboardEntry(BaseModel):
     customer_id: int
     rank: int
+    name: str
     food_saved: float
     is_you: bool
 
