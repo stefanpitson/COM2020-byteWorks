@@ -108,22 +108,19 @@ def register_vendor(
             street = data.vendor.street,
             phone_number = data.vendor.phone_number,
             post_code = data.vendor.post_code,
+            opening_hours = {}
         )
 
         DAY_NAMES = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
-        DAY_NAMES_TO_INT = {"monday" : 0, "tuesday" : 1, "wednesday" : 2, "thursday" : 3, "friday" : 4, "saturday" : 5, "sunday": 6}
         for day_name in DAY_NAMES:
             if data.vendor.opening_hours[day_name]:
                 if check_opening_hours(data.vendor.opening_hours[day_name]):
-                    openHour = OpenHours(vendor_id = new_vendor.vendor_id, 
-                                            day = DAY_NAMES_TO_INT[day_name], 
-                                            openingHour = data.vendor.opening_hours[day_name][0],
-                                            closingHour = data.vendor.opening_hours[day_name][1])
-                    session.add(openHour)
-                    # Commits later in the try statement
+                    new_vendor.vendor_profile.opening_hours[day_name] = data.vendor.opening_hours[day_name]
                 else:
                     raise HTTPException(status_code = 403, detail = ("Incorrect opening hours for " + day_name))
-
+            else:
+                # Assume vendor is closed if no data is sent for an individual day
+                new_vendor.vendor_profile.opening_hours[day_name] = ["closed", "closed"]
         session.add(new_vendor)
         session.commit()
 

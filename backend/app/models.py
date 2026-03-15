@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Dict
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import date as Date, time as Time, datetime
 from random import random
@@ -47,6 +47,12 @@ class Vendor(SQLModel, table=True):
     city: str
     post_code: str
     phone_number: str
+    # The first index in the list is opening hour and the second index in the list is closing hour
+    # The key in the dict is the day name in lower case ("monday", "tuesday", "wednesday, etc.")
+    # If the opening hour and closing hour are set to "closed", then vendor is closed
+    # If either opening hour and closing hour are set to "allday", then this means vendor is open 24hrs that day
+    # Uses 24hr time stored at "1200", "2359", "0000"
+    opening_hours : Dict[str, [str]]
     photo: Optional[str] = Field(default=None)
     total_revenue: float = Field(default=0.0) 
     carbon_saved: float = Field(default=0.0)
@@ -54,15 +60,6 @@ class Vendor(SQLModel, table=True):
     user: Optional[User] = Relationship(back_populates="vendor_profile")
     validated: bool = Field(default=False)
 
-class OpenHours(SQLModel, table=True):
-    vendor_id: int = Field(primary_key=True, foreign_key="vendor.vendor.id")
-    day: int = Field(primary_key=True, ge=0, le=6) #Monday = 0, Tuesday = 1 .. Sunday = 6
-    # If there is not a field for a day, assume the vendor is closed that day
-    # If the opening hour and closing hour are set to "closed", then vendor is closed
-    # If either opening hour and closing hour are set to "allday", then this means vendor is open 24hrs that day
-    # Uses 24hr time stored at "1200", "2359", "0000"
-    openingHour : str
-    closingHour : str
 
 class Customer(SQLModel, table=True):
     customer_id: Optional[int] = Field(default=None, primary_key=True)

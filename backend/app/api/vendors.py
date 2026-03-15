@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlmodel import Session, select, func, case, and_
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
@@ -81,22 +81,12 @@ def update_vendor_profile(
     
     if data.vendor.opening_hours != None:
         DAY_NAMES = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
-        DAY_NAMES_TO_INT = {"monday" : 0, "tuesday" : 1, "wednesday" : 2, "thursday" : 3, "friday" : 4, "saturday" : 5, "sunday": 6}
+
+        # If a day not included, then assume it is not to be changed
         for day_name in DAY_NAMES:
             if data.vendor.opening_hours[day_name]:
                 if check_opening_hours(data.vendor.opening_hours[day_name]):
-                    if (openHour := session.exec(select(OpenHours)
-                                                .where(OpenHours.day == DAY_NAMES_TO_INT[day_name], 
-                                                        OpenHours.vendor_id == vendor_id)).first()):
-                        openHour.openingHour = data.vendor.opening_hours[day_name][0]
-                        openHour.closingHour = data.vendor.opening_hours[day_name][1]
-                    else:
-                        openHour = OpenHours(vendor_id = vendor_id, 
-                                            day = DAY_NAMES_TO_INT[day_name], 
-                                            openingHour = data.vendor.opening_hours[day_name][0],
-                                            closingHour = data.vendor.opening_hours[day_name][1])
-                    session.add(openHour)
-                    # Commits later in the try statement
+                    current_user.vendor_profile.opening_hours[day_name] = data.vendor.opening_hours[day_name]
                 else:
                     raise HTTPException(status_code = 403, detail = ("Incorrect opening times for " + day_name))
                     
@@ -117,26 +107,26 @@ def check_opening_hours(
     possible_hours : List[str],
     ):
     if possible_hours:
-                if len(possible_hours) == 2:
-                    newOpeningHour = possible_hours[0]
-                    newClosingHour = possible_hours[1]
-                    # Checks if either the opening and closing hour are the same and that they are both equal to either "allday" or "closed"
-                    # or checks if both the hours are numeric
-                    if (newOpeningHour == newClosingHour
-                        and (newOpeningHour == "closed" or newOpeningHour == "allday")): 
-                            return True
-                    
-                    # Checks if not closed or all day, that both the times are within the 24hr clock system
-                    elif (newOpeningHour.isnumeric() and newClosingHour.isnumeric()):
-                        if (int(newOpeningHour) < int (newClosingHour)
-                            and len(newOpeningHour) == 4 and newClosingHour == 4
-                            and int(newOpeningHour[0:2]) >= 0 and int(newOpeningHour[0:2]) < 24
-                            and int(newClosingHour[0:2]) >= 0 and int(newClosingHour[0:2]) < 24
-                            and int(newOpeningHour[2:4]) >= 0 and int(newOpeningHour[2:4]) < 60
-                            and int(newClosingHour[2:4]) >= 0 and int(newClosingHour[2:4]) < 60
-                            ): 
-                                return True
-    
+        if len(possible_hours) == 2:
+            newOpeningHour = possible_hours[0]
+            newClosingHour = possible_hours[1]
+            # Checks if either the opening and closing hour are the same and that they are both equal to either "allday" or "closed"
+            # or checks if both the hours are numeric
+            if (newOpeningHour == newClosingHour
+                and (newOpeningHour == "closed" or newOpeningHour == "allday")): 
+                    return True
+            
+            # Checks if not closed or all day, that both the times are within the 24hr clock system
+            elif (newOpeningHour.isnumeric() and newClosingHour.isnumeric()):
+                if (int(newOpeningHour) < int (newClosingHour)
+                    and len(newOpeningHour) == 4 and newClosingHour == 4
+                    and int(newOpeningHour[0:2]) >= 0 and int(newOpeningHour[0:2]) < 24
+                    and int(newClosingHour[0:2]) >= 0 and int(newClosingHour[0:2]) < 24
+                    and int(newOpeningHour[2:4]) >= 0 and int(newOpeningHour[2:4]) < 60
+                    and int(newClosingHour[2:4]) >= 0 and int(newClosingHour[2:4]) < 60
+                    ): 
+                        return True
+
 
 # get a list of bundles for the corresponding vendor
 # for customer view at store page 
@@ -315,7 +305,7 @@ def get_vendor_public_profile(
         raise HTTPException(status_code=404, detail="Vendor not found")
     return vendor
 
-@router.get("/{vendor_id}/opening_hours", response_model = OpeningHoursRead, tags=["Vendors"], summary = "Get the opening hours for a vendor")
+@router.get("/{vendor_id}/opening_hours", response_model = Dict[str, List[str]], tags=["Vendors"], summary = "Get the opening hours for a vendor")
 def get_vendor_opening_hours(
     vendor_id: int,
     session: Session = Depends(get_session),
@@ -330,34 +320,11 @@ def get_vendor_opening_hours(
     vendor = session.get(Vendor, vendor_id)
     if not vendor:
         raise HTTPException(status_code=404, detail="Vendor not found")
-    
-    statement = (select(OpenHours)
-                 .where(OpenHours.vendor_id == vendor_id)
-                 )
-    openTimes = session.exec(statement)
-    
-    openingHoursReturnObject = OpeningHoursRead()
-    for dayOpenTimes in openTimes:
-        match dayOpenTimes.day:
-            case 0:
-                openingHoursReturnObject.monday = [dayOpenTimes.openingHour, dayOpenTimes.closingHour]
-            case 1:
-                openingHoursReturnObject.tuesday = [dayOpenTimes.openingHour, dayOpenTimes.closingHour]
-            case 2:
-                openingHoursReturnObject.wednesday = [dayOpenTimes.openingHour, dayOpenTimes.closingHour]
-            case 3:
-                openingHoursReturnObject.thursday = [dayOpenTimes.openingHour, dayOpenTimes.closingHour]
-            case 4:
-                openingHoursReturnObject.friday = [dayOpenTimes.openingHour, dayOpenTimes.closingHour]
-            case 5:
-                openingHoursReturnObject.saturday = [dayOpenTimes.openingHour, dayOpenTimes.closingHour]
-            case 6:
-                openingHoursReturnObject.sunday = [dayOpenTimes.openingHour, dayOpenTimes.closingHour]
 
-    return openingHoursReturnObject
+    return vendor.opening_hours
 
 @router.get("/{vendor_id}/is_open", response_model = bool, tags=["Vendors"], summary = "Check if a vendor is open")
-def get_vendor_opening_hours(
+def check_vendor_is_open(
     vendor_id: int,
     session: Session = Depends(get_session),
     current_user = Depends(get_current_user)
@@ -368,22 +335,15 @@ def get_vendor_opening_hours(
     if not vendor:
         raise HTTPException(status_code=404, detail="Vendor not found")
     
-    statement = (select(OpenHours)
-                 .where(OpenHours.vendor_id == vendor_id)
-                 )
-    openTimes = session.exec(statement)
+    current_day = datetime.now().strftime("%A").lower()
+    current_time = datetime.now().time()
+    is_open = False
+    if vendor.opening_hours[current_day]:
+        if vendor.opening_hours[current_day][0] == "allday":
+            is_open = True
+        if vendor.opening_hours[current_day][0] != "closed":
+            if (time.fromisoformat(vendor.opening_hours[current_day][0][0:2] + ":" + vendor.opening_hours[current_day][0][2:4] + ":00") <= current_time
+                and current_time < time.fromisoformat(vendor.opening_hours[current_day][1][0:2] + ":" + vendor.opening_hours[current_day][1][2:4] + ":00")):
+                is_open = True
     
-    currentDayNum = datetime.now().weekday()
-    currentTime = datetime.now().time()
-    isOpen = False
-    for dayOpenTimes in openTimes:
-        if dayOpenTimes.day == currentDayNum:
-            if dayOpenTimes.openingHour == "allday":
-                isOpen = True
-            else:
-                if dayOpenTimes.openingHour != "closed":
-                    if (time.fromisoformat(dayOpenTimes.openingHour[0:2] + ":" + dayOpenTimes.openingHour[2:4] + ":00") <= currentTime
-                        and currentTime < time.fromisoformat(dayOpenTimes.closingHour[0:2] + ":" + dayOpenTimes.closingHour[2:4] + ":00")):
-                        isOpen = True
-    
-    return isOpen
+    return is_open

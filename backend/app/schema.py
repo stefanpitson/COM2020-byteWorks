@@ -22,7 +22,7 @@ class VendorRead(BaseModel):
     city: str
     post_code: str
     phone_number: str
-    # removed opening_hours and seperated into new end point.
+    opening_hours: Dict[str, List[str]]
     total_revenue: float
     carbon_saved: float
     food_saved: float
