@@ -22,8 +22,6 @@ router = APIRouter(prefix="/forecast", tags=["Forecasting"])
 # changed to post for now as modifies the db
 @router.post("/naive", response_model=ForecastWeekData)
 def naive_forecast(
-    # default to tomorrow 
-    start_date: date = Query(None, description="First day of the target week"),
     current_user = Depends(get_current_user),
     session: Session = Depends(get_session) 
 ):
@@ -31,8 +29,7 @@ def naive_forecast(
     """
     endpoint for the naive baseline
     this endpoint requires the current user and session as parameters
-    start date is optional and defaults to tomorrow -> providing a 7 day forecast starting tomorrow
-    although it is unlikely, target dates cannot be more than 7 days in the future or no forecasts will have been generated
+    the start date defaults to tomorrow -> providing a 7 day forecast starting tomorrow 
     the forecasting function is attempted to be called with exception handling integrated
     """
 
@@ -41,18 +38,8 @@ def naive_forecast(
         raise HTTPException(status_code=400, detail="User has no vendor profile associated")
         
     vendor_id = current_user.vendor_profile.vendor_id
-    if not start_date:
-        start_date = date.today() + timedelta(days=1)
 
-    if start_date > date.today()+timedelta(days=1):
-        raise HTTPException(
-            status_code=400,
-            detail= f"Seasonal naive forecast cannot predict more than 7 days in the future, requested start date: {start_date} is too far in the future."
-        )
-
-    # the date cannot be in the past
-    if start_date < date.today():
-        raise HTTPException(status_code=400, detail="Start date cannot be in the past")
+    start_date = date.today() + timedelta(days=1) # the default start date is set to tomrrow for baseline forcasts as they can only predict a week into the future
 
     try:
         # pass logic to dedicated function
@@ -75,8 +62,6 @@ def naive_forecast(
 # endpoint for moving average baseline
 @router.post("/moving-average", response_model=ForecastWeekData)
 def moving_average_forecast(
-    # default to tomorrow 
-    start_date: date = Query(None, description="First day of the target week"),
     current_user = Depends(get_current_user),
     session: Session = Depends(get_session) 
 ):
@@ -84,8 +69,7 @@ def moving_average_forecast(
     """
     endpoint for the naive-moving average baseline
     this endpoint requires the current user and session as parameters
-    start date is optional and defaults to tomorrow -> providing a 7 day forecast starting tomorrow
-    although it is unlikely, target dates cannot be more than 7 days in the future or no forecasts will have been generated
+    the start date defaults to tomorrow -> providing a 7 day forecast starting tomorrow 
     the forecasting function is attempted to be called with exception handling integrated
     """
     
@@ -95,19 +79,7 @@ def moving_average_forecast(
     
     vendor_id = current_user.vendor_profile.vendor_id
 
-    if not start_date:
-        start_date = date.today() + timedelta(days=1)
-
-    # devs can change this to predict longer in the future inside the function generate_moving_average_forecast in dir backend.app.forecasting.baseline_approaches.moving_average.moving_average_forecast.py
-    if start_date > date.today()+timedelta(days=1):
-        raise HTTPException(
-            status_code=400,
-            detail= f"moving average forecast cannot predict more than 7 days in the future, requested start date: {start_date} is too far in the future."
-        )
-    
-    # start date cant be in the past
-    if start_date < date.today():
-        raise HTTPException(status_code=400, detail="Start date cannot be in the past")
+    start_date = date.today() + timedelta(days=1) # the default start date is set to tomrrow for baseline forcasts as they can only predict a week into the future
 
     try:
         forecast_response = get_moving_average_forecast_chart(session=session, vendor_id=vendor_id, start_date=start_date)
