@@ -103,10 +103,18 @@ export default function VendorReports() {
                                     </div>
                                     <div className="text-sm text-gray-400 font-mono">ID: #{report.report_id}</div>
                                 </div>
+
                                 
                                 <div className="bg-gray-50 p-4 rounded-md border border-gray-100 mb-6">
-                                    <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Customer Wrote:</p>
-                                    <p className="text-gray-800 italic whitespace-pre-wrap">"{report.complaint}"</p>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-sm font-bold text-gray-600 uppercase tracking-wider">
+                                            Customer Wrote:
+                                        </span>
+                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                            {report.date_made}
+                                        </span>
+                                    </div>
+                                    <p className="text-gray-800 italic">"{report.complaint}"</p>
                                 </div>
 
                                 {!report.responded && replyingToId !== report.report_id && (
@@ -154,8 +162,16 @@ export default function VendorReports() {
 
                                 {report.responded && report.response && (
                                     <div className="mt-2 border border-gray-300 p-4 rounded-md">
-                                        <h4 className="text-xs font-bold text-[hsl(var(--primary))] uppercase tracking-wider mb-2">You Replied:</h4>
-                                        <p className="text-gray-900 whitespace-pre-wrap">{report.response}</p>
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="text-sm font-bold text-green-600 uppercase tracking-wider">
+                                                You Replied:
+                                            </span>
+                                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                                {report.date_responded}
+                                            </span>
+                                        </div>
+
+                                        <p className="text-gray-900">{report.response}</p>
                                     </div>
                                 )}
                             </div>

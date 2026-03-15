@@ -215,6 +215,7 @@ export default function CustomerReports() {
                                                 >
                                                     <td className="p-3 text-sm font-medium text-gray-900 whitespace-nowrap">
                                                         {getVendorName(report.vendor_id)}
+                                                        <div className="text-xs text-gray-400 font-normal">{report.date_made}</div>
                                                     </td>
                                                     <td className="p-3 text-sm text-gray-700">
                                                         {report.title}
@@ -232,7 +233,12 @@ export default function CustomerReports() {
                                                         }`}
                                                     >
                                                         {report.responded && report.response ? (
-                                                            <span className="italic">"{report.response}"</span>
+                                                            <div>
+                                                                <span className="italic">"{report.response}"</span>
+                                                                {report.date_responded && (
+                                                                    <div className="text-[10px] text-gray-400 mt-1">Replied on: {report.date_responded}</div>
+                                                                )}
+                                                            </div>
                                                         ) : (
                                                             <span className="text-gray-400">-</span>
                                                         )}

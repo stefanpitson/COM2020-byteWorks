@@ -98,5 +98,7 @@ export interface Report {
   responded: boolean;
   customer_id: number;
   vendor_id: number;
+  date_made: string; 
+  date_responded: string | null;
 }
 
