@@ -305,6 +305,7 @@ def finalise_reservation(
 
     try:
         increment_streak(session,customer)
+        customer_verify_and_give_badges(customer, session)  # check if the customer has earned any badges with this reservation and award them if so
         session.add(reservation)
         session.add(customer)
         session.add(vendor)
@@ -360,10 +361,12 @@ def increment_streak(session: Session, customer):
 # This handles the logic for awarding badges to users. Called whenever a reservation is completed
 def customer_verify_and_give_badges(customer: Customer, session: Session):
 
+    # gets all badges that are for customers
     statement = select(Badge).where(Badge.user_role == "customer")
     badges = session.exec(statement).all()
 
     try:
+        # for each badge, get the customer's value of the metric that the badge tracks. If the value meets the threshold for the badge, award the badge to the customer if they don't already have it.
         for badge in badges:
             if badge.metric == "carbon_saved": #if the badge is for carbon saved, get the customer's carbon saved value
                 value = customer.carbon_saved
@@ -393,6 +396,7 @@ def customer_verify_and_give_badges(customer: Customer, session: Session):
             else:
                 continue
 
+            # if the customer's value for the badge's metric meets the threshold for the badge, and they don't already have the badge, award it to them by adding it to their badges relationship
             if value >= badge.threshold:
                 if badge not in customer.badges:
                     customer.user.badges.append(badge)
@@ -400,6 +404,7 @@ def customer_verify_and_give_badges(customer: Customer, session: Session):
 
         session.commit()
 
+    # if anything fails, roll back the session and raise an HTTP exception with the error message
     except Exception as e:
         session.rollback()
         raise HTTPException(status_code=500, detail=str(e))
