@@ -243,3 +243,13 @@ class BadgeRead(BaseModel):
 class BadgeList(BaseModel):
     total_count: int
     badges: List[BadgeRead]
+
+class LeaderboardEntry(BaseModel):
+    customer_id: int
+    rank: int
+    food_saved: float
+    is_you: bool
+
+class LeaderboardList(BaseModel):
+    total_count: int
+    entries: List[LeaderboardEntry]

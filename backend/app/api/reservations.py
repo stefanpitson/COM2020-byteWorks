@@ -287,14 +287,25 @@ def finalise_reservation(
     statement = select(Vendor).where(Vendor.vendor_id == current_user.vendor_profile.vendor_id)
     vendor = session.exec(statement).first()
 
+    # Get the money saved from the template to be added to the customer total money saved
+    statement = select(Template.cost).where(Template.template_id == Bundle.template_id,
+                                            Bundle.bundle_id == reservation.bundle_id)
+    money_paid = session.exec(statement).first()
+    statement = select(Template.estimated_value).where(Template.template_id == Bundle.template_id,
+                                            Bundle.bundle_id == reservation.bundle_id)
+    estimated_value = session.exec(statement).first()
+    money_saved = estimated_value - money_paid
+
     # add the carbon saved and food saved to the customer and vendor profiles
     customer.carbon_saved += carbon_saved
     vendor.carbon_saved += carbon_saved
     customer.food_saved += food_saved
     vendor.food_saved += food_saved
+    customer.money_saved += money_saved
 
     try:
         increment_streak(session,customer)
+        customer_verify_and_give_badges(customer, session)  # check if the customer has earned any badges with this reservation and award them if so
         session.add(reservation)
         session.add(customer)
         session.add(vendor)
@@ -350,15 +361,17 @@ def increment_streak(session: Session, customer):
 # This handles the logic for awarding badges to users. Called whenever a reservation is completed
 def customer_verify_and_give_badges(customer: Customer, session: Session):
 
+    # gets all badges that are for customers
     statement = select(Badge).where(Badge.user_role == "customer")
     badges = session.exec(statement).all()
 
     try:
+        # for each badge, get the customer's value of the metric that the badge tracks. If the value meets the threshold for the badge, award the badge to the customer if they don't already have it.
         for badge in badges:
             if badge.metric == "carbon_saved": #if the badge is for carbon saved, get the customer's carbon saved value
                 value = customer.carbon_saved
             
-            elif badge.metric == "food_saved": #if for food saved, get the customer's food saved value
+            elif badge.metric == "food_saved": #if for food saved, get the customer's food saved (in kg) value
                 value = customer.food_saved
             
             elif badge.metric == "streak_count": #if for streak count, get the customer's current streak count
@@ -376,10 +389,14 @@ def customer_verify_and_give_badges(customer: Customer, session: Session):
                     .where(Reservation.status == "collected")
                 )
                 value = (session.exec(statement).first()+1) or 0
+            
+            elif badge.metric == "money_saved": #if for money saved, get the money saved attribute from customer
+                value = customer.money_saved
 
             else:
                 continue
 
+            # if the customer's value for the badge's metric meets the threshold for the badge, and they don't already have the badge, award it to them by adding it to their badges relationship
             if value >= badge.threshold:
                 if badge not in customer.badges:
                     customer.user.badges.append(badge)
@@ -387,6 +404,7 @@ def customer_verify_and_give_badges(customer: Customer, session: Session):
 
         session.commit()
 
+    # if anything fails, roll back the session and raise an HTTP exception with the error message
     except Exception as e:
         session.rollback()
         raise HTTPException(status_code=500, detail=str(e))
