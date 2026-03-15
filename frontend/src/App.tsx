@@ -16,6 +16,7 @@ import VendorReservations from "./pages/vendors/VendorReservations";
 import TemplateDetails from "./pages/vendors/templateDetails";
 import CustomerCredit from "./pages/customers/CustomerCredit";
 import CustomerReports from "./pages/customers/CustomerReports";
+import VendorReports from "./pages/vendors/VendorReports"
 
 export default function App() {
   return (
@@ -46,7 +47,7 @@ export default function App() {
             <Route path="/vendor/analytics" element={<VendorAnalytics />} />
             <Route path="/vendor/reservations" element={<VendorReservations />} />
             <Route path="/vendor/template" element={<TemplateDetails />} />
-            {/*Route path="/vendor/reports" element={<VendorReports />} />*/}
+            <Route path="/vendor/reports" element={<VendorReports />} />
           </Route>
         </Route>
       </Routes>
