@@ -8,7 +8,7 @@ import re # for regex
 
 router = APIRouter()
 
-@router.post("/create", tags=["Reports"], summary="create a report as a customer")
+@router.post("/create", tags=["Reports"], summary="Create a report as a customer.")
 def create_report(
     data: ReportCreate,
     session: Session = Depends(get_session),
@@ -17,15 +17,15 @@ def create_report(
     
     # checks 
     if current_user.role != "customer":
-        raise HTTPException(status_code= 401, detail="must be a customer to create a report")
+        raise HTTPException(status_code= 401, detail="Must be a customer to create a report.")
     
     title_regex = r"^(?=.{1,64}$)(.*?[a-zA-Z0-9]){5}.*$"
     if not re.search(title_regex,data.title):
-        raise HTTPException(status_code=46, detail="title of an invalid length")
+        raise HTTPException(status_code=422, detail="Title of an invalid length.")
     
     complaint_regex = r'^(?=.{1,1024}$)(.*?[a-zA-Z0-9]){32}.*$'
     if not re.search(complaint_regex, data.complaint):
-        raise HTTPException(status_code=46, detail="complaint of an invalid length")
+        raise HTTPException(status_code=422, detail="Complaint of an invalid length.")
     
     
     # create new report 
@@ -45,7 +45,7 @@ def create_report(
 
 
 
-@router.get("/list", response_model=ReportList, tags=["Reports"], summary=" return a list of relevant report, can be used for vendors or customer")
+@router.get("/list", response_model=ReportList, tags=["Reports"], summary="Return a list of relevant report, can be used for vendors or customer.")
 def get_list(
     session: Session = Depends(get_session),
     current_user  = Depends(get_current_user)
@@ -67,7 +67,7 @@ def get_list(
         reports = session.exec(statement).all()
         return {"total_count":len(reports), "reports":reports}
 
-@router.post("/{report_id}/reply", tags=["Reports"], summary="vendor leaves a response to a report")
+@router.post("/{report_id}/reply", tags=["Reports"], summary="Vendor leaves a response to a report.")
 def respond(
     report_id:int,
     data: ReportRespond,
@@ -79,17 +79,17 @@ def respond(
     report = session.exec(statement).first()
 
     if current_user.role != "vendor":
-        raise HTTPException(status_code=401, detail="you are not a vendor")
+        raise HTTPException(status_code=401, detail="You are not a vendor.")
 
     if report.vendor_id != current_user.vendor_profile.vendor_id:
-        raise HTTPException(status_code=401, detail="you are not the correct vendor for this report")
+        raise HTTPException(status_code=401, detail="You are not the correct vendor for this report.")
     
     if report.responded == True:
-        raise HTTPException(status_code=409, detail=" response already given")
+        raise HTTPException(status_code=409, detail="Response already given.")
     
     response_regex = r'^(?=.{1,1024}$)(.*?[a-zA-Z0-9]){10}.*$'
     if not re.search(response_regex, data.response):
-        raise HTTPException(status_code=46, detail="complaint of an invalid length")
+        raise HTTPException(status_code=422, detail="Complaint of an invalid length.")
     
     report.response = data.response
     report.responded = True
@@ -102,7 +102,7 @@ def respond(
         raise HTTPException(status_code=500, detail=str(e))
     return{"message": "Response added successfully", "report_id":report_id}
 
-@router.get("/{report_id}", response_model=ReportRead, tags=["Reports"], summary="read a report for both cust & vend")
+@router.get("/{report_id}", response_model=ReportRead, tags=["Reports"], summary="Read a report for both customer & vendor.")
 def read_report(
     report_id:int,
     session: Session = Depends(get_session),
@@ -115,10 +115,10 @@ def read_report(
 
     # checks
     if current_user.role == "customer" and report.customer_id != current_user.customer_profile.customer_id:
-        raise HTTPException(status_code=401, detail="you are not the correct customer for this report")
+        raise HTTPException(status_code=401, detail="You are not the correct customer for this report.")
     
     if current_user.role == "vendor" and report.vendor_id != current_user.vendor_profile.vendor_id:
-        raise HTTPException(status_code=401, detail="you are not the correct vendor for this report")
+        raise HTTPException(status_code=401, detail="You are not the correct vendor for this report.")
     
     #note admin can read all 
 
