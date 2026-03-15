@@ -22,7 +22,7 @@ def train_lin_regression(df: pd.DataFrame, model_dir: str = "app/forecasting/lin
     r2_res = r2_score(y_res_test, y_res_pred) # generate r2 and MAE scores to print
     mae_res = mean_absolute_error(y_res_test, y_res_pred)
 
-    print(f"Reservation model – R²: {r2_res:.3f}, MAE: {mae_res:.2f}")
+    print(f"Reservation model – squared: {r2_res:.3f}, MAE: {mae_res:.2f}")
     
     # ridge model specifically for no shows (ns)
     model_ns = Ridge(alpha=1.0)
@@ -32,7 +32,16 @@ def train_lin_regression(df: pd.DataFrame, model_dir: str = "app/forecasting/lin
     r2_ns = r2_score(y_ns_test, y_ns_pred) # show the correlation -> how much variance there is 1.0 is best
     mae_ns = mean_absolute_error(y_ns_test, y_ns_pred) # error between predicted vs actual lower is best
 
-    print(f"No‑show model – R²: {r2_ns:.3f}, MAE: {mae_ns:.2f}")
+    # we make a dict and save these values for a confidence calulation later on
+    metrics = {
+        'reserved_r2': r2_res,
+        'reserved_mae': mae_res,
+        'no_show_r2': r2_ns,
+        'no_show_mae': mae_ns,
+    }
+    joblib.dump(metrics, f"{model_dir}/metrics.pkl") # save the metrics
+
+    print(f"No‑show model – R-squared: {r2_ns:.3f}, MAE: {mae_ns:.2f}")
     
     # save models and feature names so they can be loaded for inference
     joblib.dump(model_res, f"{model_dir}/ridge_reserved.pkl")

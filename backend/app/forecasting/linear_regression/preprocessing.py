@@ -1,6 +1,5 @@
-from sqlmodel import Session, select, func, between
+from sqlmodel import Session, select, func
 from app.models import Forecast_Input
-from app.core.database import engine
 from datetime import date, timedelta, time
 from typing import Optional
 import pandas as pd

@@ -1,9 +1,10 @@
 from sqlmodel import Session, select, func
 from app.models import Forecast_Input, Forecast_Output, Template
 from app.core.database import engine
-from datetime import date, timedelta, time
+from datetime import date, timedelta
 from typing import Optional, List
 from app.schema import ForecastDatapoint, ForecastWeekData
+from app.forecasting.baseline_approaches.seasonal_naive.seasonal_naive_forecast import update_or_create
 import json
 
 
@@ -28,84 +29,16 @@ def moving_avg_confidence_score(num_days: int, expected_max: int, avg: Optional[
 
     else:
         cv = std / avg #covar
-        v = max(0.0, 1.0 - cv)
+        v = max(0.0, 1.0 - float(cv))
 
     if num_days < 3: # threshold for minimum num days allowed
         v *= (num_days / 3)
 
     # weighting for both q and v -> amount of data is more important
-    confidence = (q * 0.7) + (v * 0.3)
+    confidence = (q * 0.7) + (v * 0.3) # to be conservative
     return round(confidence, 3)
 
 
-
-def update_or_create(
-    session: Session,
-    vendor_id: int,
-    template_id: int,
-    target_date: date,
-    slot_start: time,
-    slot_end: time,
-    model_type: str,
-    reservation_prediction: int,
-    no_show_prediction: int,
-    recommendation: str,
-    rationale: str,
-    confidence: float
-) -> Forecast_Output:
-
-    """
-    The function takes in all parameters of a potential output forecast
-    checks if the forecast already exists
-    if the forecast does exist update it
-    if the forecast does not exist then create it 
-    return the new or updated forecast
-    """
-    # we only need to check the below fields to ensure uniqueness (or in this case verify a duplcate)
-    stmnt = select(Forecast_Output).where(
-        Forecast_Output.vendor_id == vendor_id,
-        Forecast_Output.template_id == template_id,
-        Forecast_Output.date == target_date,
-        Forecast_Output.slot_start == slot_start,
-        Forecast_Output.slot_end == slot_end,
-        Forecast_Output.model_type == model_type,
-    )
-
-    # execute the session
-    existing = session.exec(stmnt).first()
-
-    # assume None at forst -> this is what will be returned
-    forecast = None
-
-    #if there does exist a session
-    if existing:
-        # update the remaining fields
-        existing.reservation_prediction = reservation_prediction
-        existing.no_show_prediction = no_show_prediction
-        existing.recommendation = recommendation
-        existing.rationale = rationale
-        existing.confidence = confidence
-        forecast = existing
-
-    else:
-        # otherwise we create the specified output forecast from scratch with the parameters 
-        forecast = Forecast_Output(
-            vendor_id=vendor_id,
-            template_id=template_id,
-            date=target_date,
-            slot_start=slot_start,
-            slot_end=slot_end,
-            model_type=model_type,
-            reservation_prediction=reservation_prediction,
-            no_show_prediction=no_show_prediction,
-            recommendation=recommendation,
-            rationale=rationale,
-            confidence=confidence
-        )
-
-    # return the forecast
-    session.add(forecast)
-    return forecast
 
 
 
@@ -151,7 +84,7 @@ def generate_moving_average_forecast(
                 func.count().label('num_days')  # count the number of occurences -> we can know e.g. only 2/14 days contain entries
             ).where(
                 Forecast_Input.vendor_id == vendor_id,
-                Forecast_Input.date.between(start_history, end_history), # filter between the gistory dates
+                Forecast_Input.date.between(start_history, end_history), # filter between the history dates
                 func.extract('dow', Forecast_Input.date) == db_weekday # dow - day of week -> ensure we use the correct day of week
             ).group_by( # 3 stage grouping
                 Forecast_Input.template_id,
@@ -161,7 +94,7 @@ def generate_moving_average_forecast(
             ).join(Template, Forecast_Input.template_id == Template.template_id) # join on template so we can use title
         )
 
-        # get results by executing stateement
+        # get results by executing statement
         averages_result = session.exec(statement=statement).all()
 
         for res in averages_result:
@@ -175,9 +108,9 @@ def generate_moving_average_forecast(
             avg_no_shows = res.avg_no_shows if res.avg_no_shows is not None else 0.0
 
             # make string recommendation and rationale
-            recommendation = f"Post {int(avg_reserved)} {title} bundles ready to sell on {target_day.strftime('%A')} between {res.slot_start} and {res.slot_end}"
+            recommendation = f"Post {int(avg_reserved)} {title} bundles between {res.slot_start} and {res.slot_end} on {target_day.strftime('%A')} "
 
-            rationale = f"Over the last {context_window} days, on average {avg_reserved} {title} bundles have been reserved"
+            rationale = f"Over the last {context_window} days, on average {avg_reserved:.2f} {title} bundles have been reserved"
 
 
             days_in_range = (end_history - start_history).days + 1
@@ -209,17 +142,8 @@ def generate_moving_average_forecast(
 # main function that the endpoint will call
 def get_moving_average_forecast_chart(session: Session, vendor_id: int, start_date: date = date.today()+timedelta(days=1)) -> ForecastWeekData:
     """
-    class ForecastDatapoint(BaseModel):
-    bundle_name: str        
-    predicted_sales: int
-    no_show: int
-    chance_of_no_show: float
-    day: str
-    start_time: str
-    end_time: str
-    confidence: float
-    recommendation: str
-    rationale: str
+    This function calls the heelper generate_moving_average_forecast to create all ouput forecast entities that will be needed
+    we go through the outputs needed list and systematically generate the forecast datapoints which are appended to make the final ForecastWeekData class
     """
 
     # gather outputs from the helper function
@@ -271,7 +195,7 @@ def get_moving_average_forecast_chart(session: Session, vendor_id: int, start_da
 
 
 if __name__ == "__main__":
-
+    #python -m app.forecasting.baseline_approaches.moving_average.moving_average_forecast
     with Session(engine) as session:
         result = get_moving_average_forecast_chart(session, 1)
         print(json.dumps(result, indent=2, default=str))

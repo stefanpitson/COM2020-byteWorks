@@ -1,4 +1,4 @@
-from sqlmodel import Session, select, func
+from sqlmodel import Session, select
 from datetime import date, timedelta, time
 from collections import defaultdict
 from app.models import Forecast_Input, Bundle, Reservation, Template

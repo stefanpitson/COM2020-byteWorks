@@ -3,9 +3,8 @@ from datetime import datetime, timedelta, date, time
 from sqlmodel import Session, select
 from app.core.database import engine
 from app.core.security import get_password_hash
-from app.models import (
-    User, Vendor, Customer, Template, Bundle, Reservation
-)
+from app.models import User, Vendor, Customer, Template, Bundle, Reservation
+
 
 
 # make a vendor name and templates here to be used later on
@@ -58,7 +57,7 @@ NO_SHOW_RATE = (0.05, 0.2)
 
 def seed(weeks_of_history: int = 6):
     """
-    we seed the database (specified in the .emv file) witn weeks_of_history weeks of data 
+    we seed the database (specified in the .env file) witn weeks_of_history weeks of data 
     ranges are defined externally -> an arbitrary amount of histroy may be created
     Only 1 vendor
     """
