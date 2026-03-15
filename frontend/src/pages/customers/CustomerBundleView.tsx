@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getTemplateById, getTemplateBundleCount } from "../../api/templates";
 import { getVendorById } from "../../api/vendors";
-import { resolveImageUrl } from "../../utils/imageUrl";
 import type { Template, Vendor } from "../../types";
 import { resolveImageUrl } from "../../utils/imageUrl";
 

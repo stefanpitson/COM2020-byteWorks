@@ -175,10 +175,10 @@ def seed_database():
         # More bundles posted on busy days (Fri/Sat), fewer on Mon/Tue
         day_multipliers = {
             0: 2,  # Monday
-            1: 2,  
-            2: 3,  
+            1: 2, 
+            2: 3,  # wednesday
             3: 4,  
-            4: 6,  
+            4: 6,  # friday
             5: 4,  
             6: 3   # Sunday
         }
@@ -186,6 +186,7 @@ def seed_database():
         bundles_created = []
         reservation_code = 1000
         
+        # month of seeded data
         for week in range(4):
             for day in range(7):
                 bundle_date = today - timedelta(days=(28 - (week * 7 + day)))
@@ -195,14 +196,14 @@ def seed_database():
                 for i in range(bundle_count):
                     
                     if day_of_week == 4:  # Friday
-                        if i < bundle_count * 0.6:  
+                        if i < bundle_count * 0.6:  # 60 percent of the time
                             template = template2
-                        elif i < bundle_count * 0.8:
+                        elif i < bundle_count * 0.8: # 20 percent of the time
                             template = template1  
                         else:
-                            template = template3  
+                            template = template3  # 20 percent of the time
                     
-                    elif day_of_week == 6: 
+                    elif day_of_week == 6: # saturday
                         if i < bundle_count * 0.5:
                             template = template1  
                         elif i < bundle_count * 0.7:
@@ -210,7 +211,7 @@ def seed_database():
                         else:
                             template = template5 
                     
-                    elif day_of_week in [2, 3]:
+                    elif day_of_week in [2, 3]: # wednesday, thursday
                         if i < bundle_count * 0.4:
                             template = template3  
                         elif i < bundle_count * 0.7:
@@ -218,7 +219,7 @@ def seed_database():
                         else:
                             template = template1
                     
-                    # OTHER DAYS
+                    # monday tuesday, sunday
                     else:
                         if i % 3 == 0:
                             template = template2  
