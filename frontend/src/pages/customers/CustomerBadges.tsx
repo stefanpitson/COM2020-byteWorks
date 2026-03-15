@@ -145,14 +145,6 @@ export default function CustomerBadges() {
                 </div>
               );
             })}
-
-            <div className="bg-white/40 backdrop-blur-sm rounded-3xl p-6 border-2 border-dashed border-[hsl(var(--text-main)/0.2)] flex flex-col items-center text-center opacity-70">
-              <div className="w-24 h-24 rounded-full bg-[hsl(var(--text-main)/0.1)] flex items-center justify-center text-3xl mb-5 text-[hsl(var(--text-main))]">
-                🔒
-              </div>
-              <h3 className="text-lg font-bold text-[hsl(var(--text-main))] mb-2">Mystery Badge</h3>
-              <p className="text-sm text-[hsl(var(--text-main))] opacity-80">Keep rescuing bundles to uncover more badges!</p>
-            </div>
           </div>
         )}
 
