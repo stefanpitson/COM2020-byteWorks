@@ -287,11 +287,21 @@ def finalise_reservation(
     statement = select(Vendor).where(Vendor.vendor_id == current_user.vendor_profile.vendor_id)
     vendor = session.exec(statement).first()
 
+    # Get the money saved from the template to be added to the customer total money saved
+    statement = select(Template.cost).where(Template.template_id == Bundle.template_id,
+                                            Bundle.bundle_id == reservation.bundle_id)
+    money_paid = session.exec(statement).first()
+    statement = select(Template.estimated_value).where(Template.template_id == Bundle.template_id,
+                                            Bundle.bundle_id == reservation.bundle_id)
+    estimated_value = session.exec(statement).first()
+    money_saved = estimated_value - money_paid
+
     # add the carbon saved and food saved to the customer and vendor profiles
     customer.carbon_saved += carbon_saved
     vendor.carbon_saved += carbon_saved
     customer.food_saved += food_saved
     vendor.food_saved += food_saved
+    customer.money_saved += money_saved
 
     try:
         increment_streak(session,customer)
@@ -358,7 +368,7 @@ def customer_verify_and_give_badges(customer: Customer, session: Session):
             if badge.metric == "carbon_saved": #if the badge is for carbon saved, get the customer's carbon saved value
                 value = customer.carbon_saved
             
-            elif badge.metric == "food_saved": #if for food saved, get the customer's food saved value
+            elif badge.metric == "food_saved": #if for food saved, get the customer's food saved (in kg) value
                 value = customer.food_saved
             
             elif badge.metric == "streak_count": #if for streak count, get the customer's current streak count
@@ -376,6 +386,9 @@ def customer_verify_and_give_badges(customer: Customer, session: Session):
                     .where(Reservation.status == "collected")
                 )
                 value = (session.exec(statement).first()+1) or 0
+            
+            elif badge.metric == "money_saved": #if for money saved, get the money saved attribute from customer
+                value = customer.money_saved
 
             else:
                 continue
