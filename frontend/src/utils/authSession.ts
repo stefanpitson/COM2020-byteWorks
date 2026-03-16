@@ -25,5 +25,6 @@ export function clearAuthSession() {
 export function getRedirectPath(role: string): string {
   if (role === "customer") return "/customer/home";
   if (role === "vendor") return "/vendor/dashboard";
+  if (role === "admin") return "/admin"
   return "/";
 }

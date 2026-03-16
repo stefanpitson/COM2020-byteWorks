@@ -15,6 +15,7 @@ import CustomerReservations from "./pages/customers/CustomerReservations";
 import VendorReservations from "./pages/vendors/VendorReservations";
 import TemplateDetails from "./pages/vendors/templateDetails";
 import CustomerCredit from "./pages/customers/CustomerCredit";
+import AdminDashboard from "./pages/AdminDashboard"
 
 export default function App() {
   return (
@@ -46,6 +47,10 @@ export default function App() {
             <Route path="/vendor/template" element={<TemplateDetails />} />
           </Route>
         </Route>
+
+        <Route element={<ProtectedRoute allowedRole="admin" />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+        </Route> 
       </Routes>
     </BrowserRouter>
   );
