@@ -1,7 +1,7 @@
 from sqlmodel import Session, SQLModel, select
-from app.core.database import engine
+from app.core.database import engine, seed_allergens
 from app.core.security import get_password_hash
-from app.models import User, Vendor, Customer, Template, Bundle, Reservation, Streak
+from app.models import User, Vendor, Customer, Template, Bundle, Reservation, Streak, Allergen
 from datetime import datetime, timedelta, time as dt_time
 import random
 import copy
@@ -15,12 +15,18 @@ def seed_database():
 
     SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
+    seed_allergens()
 
     vendors_runtime = copy.deepcopy(vendors)  # so as to keep the original dictionary
     customer_names = ["alice", "bob", "charlie", "david", "eve", "frank", "grace", "hannah", "irene", "jack"]
     customer_list = []
 
     with Session(engine) as session:
+        allergen_lookup = {
+            allergen.title: allergen
+            for allergen in session.exec(select(Allergen)).all()
+        }
+
         for i in range(len(customer_names)):
             user = User(
                 email=f"{customer_names[i]}@gmail.com",
@@ -36,7 +42,7 @@ def seed_database():
                 name=customer_names[i],
                 post_code="EX4 6TJ",
                 carbon_saved=0,
-                store_credit=100,
+                store_credit=800,
             )
             customer_list.append(customer)
             session.add(customer)
@@ -66,7 +72,7 @@ def seed_database():
                 city="Exeter",
                 post_code=info["postcode"],
                 phone_number= f"01392 {random.randint(200000, 499999)}",
-                opening_hours=f"{open_hour:02}:00-{close_hour}:00",
+                opening_hours=f"{open_hour:02}:00-{close_hour}:00",# class of days
                 photo=f"/static/seed-data/logo_images/{vendor.lower().replace(' ','')}.png",
                 validated=True,
                 carbon_saved=0,
@@ -98,6 +104,12 @@ def seed_database():
                     vendor=vendor_account.vendor_id,
                     photo=f"/static/seed-data/template_images/{template['name'].lower().replace(' ','')}.jpg",
                 )
+
+                template_register.allergens = [
+                    allergen_lookup[title]
+                    for title in template['allergens']
+                    if title in allergen_lookup
+                ]
                 session.add(template_register)
                 session.commit()
                 session.refresh(template_register)
@@ -117,7 +129,6 @@ def seed_database():
 
                 distribution = distribution - popularity
                 popularity_list.append(popularity)
-            
             bundles_created = []
             
             today = datetime.now().date()
@@ -131,7 +142,7 @@ def seed_database():
                 bundle_hour = random.randint(open_hour, close_hour - 1)
 
                 for week in range(6): 
-                    if num_bundle > 1: # add small variance if bigger than 1
+                    if num_bundle > 1: # add small variance if bigger than 1, rudimentary variance
                         num_bundle = num_bundle + random.randint(-1,1)
 
                     bundle_date = today - timedelta(days=(42 - (week * 7 + day)))
@@ -167,7 +178,23 @@ def seed_database():
                         bundles_created.append(bundle)
 
                         if gets_reserved:
-                            customer = random.choice(customer_list)
+                            template_obj = template_list[i]
+                            eligible_customers = [
+                                c for c in customer_list if c.store_credit >= template_obj.cost
+                            ]
+                            if not eligible_customers:
+                                continue
+                            customer = random.choice(eligible_customers)
+
+                            # Simulate real reservation wallet behaviour.
+                            customer.store_credit -= template_obj.cost
+                            if status == "cancelled":
+                                # Cancellation should release the bundle and restore wallet credit.
+                                customer.store_credit += template_obj.cost
+                                bundle.purchased_by = None
+                            else:
+                                bundle.purchased_by = customer.customer_id
+
                             # reservation time is same day as bundle, with up to two hour difference
                             reservation_hour = min(bundle_hour + random.randint(0, 2), close_hour - 1)
                             reservation_dt = datetime(
@@ -185,8 +212,7 @@ def seed_database():
                             reservation_code += 1
 
                             if status == "collected":
-                                template_obj = template_list[i]
-                                # calculating analytics
+                                # calculating analytics manually
                                 carbon_saved = template_obj.carbon_saved or 0.0
                                 vendor_account.total_revenue += template_obj.cost
                                 vendor_account.food_saved += template_obj.weight
@@ -215,7 +241,14 @@ def seed_database():
 
                     # use the same reservation-rate pattern as historical seeded data
                     if j < num_today * 0.8:
-                        customer = random.choice(customer_list)
+                        template_obj = template_list[i]
+                        eligible_customers = [
+                            c for c in customer_list if c.store_credit >= template_obj.cost
+                        ]
+                        if not eligible_customers:
+                            continue
+                        customer = random.choice(eligible_customers)
+
                         reservation_hour = min(bundle_hour + random.randint(0, 1), close_hour - 1)
                         reservation_dt = datetime(
                             today.year, today.month, today.day,
@@ -236,6 +269,15 @@ def seed_database():
                             today_status = "cancelled"
                             bundle.picked_up = False
 
+                        # Simulate real reservation wallet behaviour.
+                        customer.store_credit -= template_obj.cost
+                        if today_status == "cancelled":
+                            # Cancellation should release the bundle and restore wallet credit.
+                            customer.store_credit += template_obj.cost
+                            bundle.purchased_by = None
+                        else:
+                            bundle.purchased_by = customer.customer_id
+
                         reservation = Reservation(
                             bundle_id=bundle.bundle_id,
                             customer_id=customer.customer_id,
@@ -245,6 +287,13 @@ def seed_database():
                         )
                         session.add(reservation)
                         reservation_code += 1
+
+                        if today_status == "collected":
+                            carbon_saved = template_obj.carbon_saved or 0.0
+                            vendor_account.total_revenue += template_obj.cost
+                            vendor_account.food_saved += template_obj.weight
+                            vendor_account.carbon_saved += carbon_saved
+                            customer.carbon_saved += carbon_saved
 
         # set streaks for each customer based on their historical collected reservations, must be done manually
         for customer in customer_list:
