@@ -18,6 +18,7 @@ const ChevronDownIcon = ({ className }: { className?: string }) => (
 
 export default function CustomerReports() {
     const [activeTab, setActiveTab] = useState<"submit" | "history">("submit");
+    const [expandedReportId, setExpandedReportId] = useState<number | null>(null);
 
     const [message, setMessage] = useState("");
     const [subject, setSubject] = useState("");
@@ -207,7 +208,11 @@ export default function CustomerReports() {
                                         </thead>
                                         <tbody className="divide-y divide-gray-200">
                                             {myReports.map((report) => (
-                                                <tr key={report.report_id} className="hover:bg-gray-50 transition-colors">
+                                                <tr 
+                                                    key={report.report_id} 
+                                                    className="hover:bg-gray-50 transition-colors cursor-pointer"
+                                                    onClick={() => setExpandedReportId(expandedReportId === report.report_id ? null : report.report_id)}
+                                                >
                                                     <td className="p-3 text-sm font-medium text-gray-900 whitespace-nowrap">
                                                         {getVendorName(report.vendor_id)}
                                                     </td>
@@ -219,9 +224,15 @@ export default function CustomerReports() {
                                                             {report.responded ? "Replied" : "Pending"}
                                                         </span>
                                                     </td>
-                                                    <td className="p-3 text-sm text-gray-600 max-w-xs truncate">
+                                                    <td 
+                                                        className={`p-3 text-sm text-gray-600 transition-all ${
+                                                            expandedReportId === report.report_id
+                                                                ? "whitespace-pre-wrap"
+                                                                : "max-w-xs truncate"
+                                                        }`}
+                                                    >
                                                         {report.responded && report.response ? (
-                                                            <span className="italic" title={report.response}>"{report.response}"</span>
+                                                            <span className="italic">"{report.response}"</span>
                                                         ) : (
                                                             <span className="text-gray-400">-</span>
                                                         )}
