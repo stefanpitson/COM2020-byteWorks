@@ -80,18 +80,6 @@ export const registerVendor = async (
   return response.data;
 };
 
-export const uploadImage = async (
-  image: FormData
-) => {
-  const response = await api.post("/vendors/upload-image", image, {
-    headers: {
-      "Content-Type": "multipart/form-data", 
-    },
-  });
-
-  return response.data;
-}
-
 export interface PasswordCheckResponse {
   valid: boolean;
 }
