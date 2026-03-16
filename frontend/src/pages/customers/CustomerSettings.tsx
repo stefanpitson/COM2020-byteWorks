@@ -105,7 +105,9 @@ export default function CustomerSettings() {
     const newErrors: {[key:string] : string} = {};
     const payload: CustomerUpdatePayload = {user: {}, customer: {}};
 
-    if (name.trim() !== customer?.name) {
+    if (!name.trim()) {
+      newErrors.name = "Name is required";
+    } else if (name.trim() !== customer?.name) {
       if (name.length > 32) {
         newErrors.name = "Name cannot exceed 32 characters"; 
       } else {
@@ -114,7 +116,9 @@ export default function CustomerSettings() {
     }
 
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (email.trim() !== user?.email) {
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (email.trim() !== user?.email) {
       if (email.length > 256) {
         newErrors.email = "Email cannot exceed 256 characters";
       } else if (!emailRegex.test(email)) {
@@ -159,7 +163,9 @@ export default function CustomerSettings() {
   
       
     const postCodeRegex = /^[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2}$/;
-    if (postCode.trim() !== customer?.post_code) {
+    if (!postCode.trim()) {
+      newErrors.postCode = "Post Code is required";
+    } else if (postCode.trim() !== customer?.post_code) {
       if (!postCodeRegex.test(postCode)) {
         newErrors.postCode = "Invalid Post Code format."
       } else{
