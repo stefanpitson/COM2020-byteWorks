@@ -24,7 +24,7 @@ def create_report(
         raise HTTPException(status_code=422, detail="Title of an invalid length.")
     
     complaint_regex = r'^(?=.{1,1024}$)(.*?[a-zA-Z0-9]){32}.*$'
-    if not re.search(complaint_regex, data.complaint):
+    if not re.search(complaint_regex, data.complaint, flags=re.DOTALL):
         raise HTTPException(status_code=422, detail="Complaint of an invalid length.")
     
     
@@ -88,7 +88,7 @@ def respond(
         raise HTTPException(status_code=409, detail="Response already given.")
     
     response_regex = r'^(?=.{1,1024}$)(.*?[a-zA-Z0-9]){10}.*$'
-    if not re.search(response_regex, data.response):
+    if not re.search(response_regex, data.response, flags=re.DOTALL):
         raise HTTPException(status_code=422, detail="Complaint of an invalid length.")
     
     report.response = data.response
