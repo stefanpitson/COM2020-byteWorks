@@ -92,10 +92,14 @@ export const uploadImage = async (
   return response.data;
 }
 
+export interface PasswordCheckResponse {
+  valid: boolean;
+}
+
 export const passwordCheck = async (
   password: string
 ) => {
-  const response = await api.post<boolean>("/auth/password-check", { password });
+  const response = await api.post<PasswordCheckResponse>("/auth/password-check", { password });
 
   return response.data;
 }

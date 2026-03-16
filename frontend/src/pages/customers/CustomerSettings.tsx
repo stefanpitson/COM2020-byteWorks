@@ -53,7 +53,7 @@ const SettingsRow = ({ label, value, onChange, type = "text", placeholder, error
           </button>
         )}
       </div>
-      {error && <span className="text-[10px] text-red-500 font-bold mt-1 animate-in fade-in slide-in-from-top-1">{error}</span>}
+      {error && <span className="text-[10px] text-red-500 font-bold mt-1 animate-in fade-in slide-in-from-top-1 whitespace-pre-line">{error}</span>}
     </div>
   );
 };
@@ -143,12 +143,15 @@ export default function CustomerSettings() {
     if (oldPassword.trim()){
       if (!newPassword.trim()) {
           newErrors.newPassword = "New password is required"
-      } else if (await passwordCheck(oldPassword.trim()) === false) {
+      } else {
+        const response = await passwordCheck(oldPassword.trim()) 
+        if (!response.valid) {
           newErrors.oldPassword = "Incorrect password"
+        }
       }
     } 
 
-    if (!newErrors.newPassword && !newErrors.oldPassword) {
+    if (!newErrors.newPassword && !newErrors.oldPassword && oldPassword.trim() && newPassword.trim()) {
         payload.user.old_password = oldPassword.trim();
         payload.user.new_password = newPassword.trim(); 
       } 
@@ -160,7 +163,7 @@ export default function CustomerSettings() {
       if (!postCodeRegex.test(postCode)) {
         newErrors.postCode = "Invalid Post Code format."
       } else{
-        payload.customer.post_code = postCode.trim()
+        payload.customer.post_code = postCode.toUpperCase().replace(/\s+/g, "");
       }
     }
 
@@ -187,9 +190,20 @@ export default function CustomerSettings() {
       
       // Refresh page data or trigger a refresh
       window.location.reload(); 
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Update failed", err);
       setLoading(false)
+
+      const axiosError = err as { response?: { data?: { detail?: string } } };
+      const detail = axiosError.response?.data?.detail;
+
+      if (detail === "Email already registered") {
+        setErrors(prev => ({ ...prev, email: "This email is already registered to another account" }));
+      } else if (detail) {
+        alert(`Update failed: ${detail}`);
+      } else {
+        alert("An unexpected error occurred during the update.");
+      }
     }
   };
 
@@ -203,6 +217,7 @@ export default function CustomerSettings() {
       }
       setOldPassword("");
       setNewPassword("");
+      setErrors({})
   }
 
   if (loading) return (
@@ -299,7 +314,14 @@ export default function CustomerSettings() {
 
         {/* Section: Location */}
         <SettingsSection title="Location">
-          <SettingsRow label="Post Code" value={postCode} onChange={setPostCode} error={errors.postCode}/>
+          <SettingsRow 
+            label="Post Code" 
+            value={postCode} 
+            onChange={(e) => {
+                const normalized = e.toUpperCase().replace(/\s+/g, "");
+                setPostCode(normalized);
+              }} 
+            error={errors.postCode}/>
         </SettingsSection>
 
       </div>
