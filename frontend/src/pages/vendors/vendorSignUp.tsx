@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { registerVendor, loginUser, uploadImage} from "../../api/auth";
+import { registerVendor, loginUser } from "../../api/auth";
+import { uploadImage } from "../../api/vendors";
 import { saveAuthSession } from "../../utils/authSession";
 import EyeIcon from "../../assets/icons/eye.svg?react";
 import EyeOffIcon from "../../assets/icons/eye-off.svg?react";
