@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
 from datetime import date, time
+import re
 
 # schemas contains what the frontend will send and expect in return 
 
@@ -254,6 +255,14 @@ class ReportList(BaseModel):
     reports: List [ReportRead]
 
     
+class CreditTopUpDetails(BaseModel):
+    credit_top_up : float
+    first_line_address : str
+    postcode : str
+    name_on_card : str
+    card_number : str
+    expiry_date : date
+    cvv : str
 
 class ForecastDatapoint(BaseModel):
     bundle_name: str        
