@@ -3,7 +3,7 @@ from sqlmodel import Session, select
 from app.core.database import get_session, engine
 from app.core.security import get_password_hash
 from app.models import Vendor, User
-from app.schema import AdminVendorList
+from app.schema import AdminVendorList, AllUsers
 from app.api.deps import get_current_user
 
 
@@ -11,21 +11,24 @@ router = APIRouter()
 
 # user functions
 
-@router.delete("/users/{user_id}", tags=["Admin"], summary="delete a user account")
+@router.delete("/users/{user_id}", tags=["Admin"], summary="Delete a user account")
 def delete_user(
     user_id: int,
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
     ):
 
+    if user_id == current_user.user_id:
+        raise HTTPException(status_code=400, detail = "Cannot delete your own admin account.")
+
     if current_user.role != "admin":
-        raise HTTPException(status_code=401, detail="must be an admin to delete accounts")
+        raise HTTPException(status_code=401, detail="Must be an admin to delete accounts.")
     
     statement = select(User).where(User.user_id == user_id)
     user = session.exec(statement).first()
 
     if not user: 
-        raise HTTPException(status_code=404, detail="user not found")
+        raise HTTPException(status_code=404, detail="User not found.")
 
     try:
         if user.role == "vendor":
@@ -103,3 +106,24 @@ if __name__ == "__main__":
     # create an admin account 
    create_admin()
     
+
+@router.get("/users", response_model=AllUsers, tags=["Admin"], summary="Get all users for the admin view")
+def get_all_users(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+    ):
+
+    if current_user.role != "admin":
+        raise HTTPException(status_code=401, detail="Must be an admin to view all accounts.")
+    
+    users = session.exec(select(User)).all()
+
+    trunked = [
+        {
+        "user_id": user.user_id,
+        "email": user.email,
+        "role": user.role
+        } for user in users
+    ]
+
+    return { "total_count":len(trunked), "users":trunked }
