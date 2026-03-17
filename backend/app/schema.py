@@ -29,6 +29,10 @@ class VendorRead(BaseModel):
     food_saved: float
     photo: Optional[str]
 
+class AdminVendorList(BaseModel):
+    total_count: int
+    vendors: List[VendorRead]
+
 # ___AUTH SCHEMAS___  
 
 #login
@@ -281,3 +285,7 @@ class ForecastDatapoint(BaseModel):
 class ForecastWeekData(BaseModel):
     week_date: str
     datapoints: List[ForecastDatapoint]
+
+class DeleteBundles(BaseModel):
+    template_id: int
+    amount: int
