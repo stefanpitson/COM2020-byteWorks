@@ -465,3 +465,46 @@ Jack 	- not in attendance
 
 ### Discussion
 Implementation for pick up notifications was discussed, with how the current entries in the database can be used, or adding attributes to the entities. In the end, deciding to use current attributes in the end. 
+
+# Meeting 18 17/03/26
+### Attendance 
+All but Alex 
+
+## Overview 
+discussed what needs to be done in the codebase:
+- the admin page (joe & stefan)
+- final changes to forecasting and analytics (andrew & arden)
+- leaderboards and badges (Alex & Alfie)
+- final seeding for the DB
+
+due to time constraints we have had to abandon changes to opening times, and also notifications for those opening times when someone has a reservation with them. 
+
+Magnus showed the user feedback form we will use
+
+we also discussed how we will divide the documentation: 
+ZIP root/
+  0_admin/
+    submission.txt 
+    team_members.txt
+  1_report/
+    cw2_final_report.pdf - Alfie, Joe, Magnus, Alex
+  2_handover_pack/ - Stefan
+    handover_index.pdf
+    deployment_and_operations.pdf
+    maintenance_and_troubleshooting.pdf
+    data_management.pdf
+  3_process/
+    scrumboard_export.pdf - Joe
+    meeting_minutes.pdf - Joe
+    risk_register_final.pdf - Jack
+  4_ethics_and_licensing/
+    ethical_and_legal_considerations_final.pdf - Arden, Andrew
+    licence_decision_final.pdf - Done
+    software_data_inventory_final.xlsx - Jack
+  5_technical/
+    source_code_snapshot.zip
+    testing_evidence.pdf - Magnus
+    security_checklist.pdf - Andrew
+  6_presentation/
+    cw2_final_slides.pdf - Alfie
+
