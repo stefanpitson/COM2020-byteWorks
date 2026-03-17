@@ -1,5 +1,5 @@
 from sqlmodel import Session, select, func
-from app.models import Forecast_Input, Forecast_Output, Template
+from app.models import Forecast_Input, Forecast_Output, Template, Vendor
 from app.core.database import engine
 from datetime import date, timedelta, time
 from app.forecasting.database_creation.previous_weather import get_future_weather
@@ -349,7 +349,9 @@ if __name__ == "__main__":
 
     with Session(engine) as session:
 
-        get_linear_regression_forecast_chart(session, vendor_id=1)
+        vendor_ids = session.exec(select(Vendor.vendor_id))
+        for id in vendor_ids:
+            get_linear_regression_forecast_chart(session, vendor_id=id)
         
         
 

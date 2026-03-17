@@ -224,5 +224,7 @@ def get_future_weather(session: Session, vendor_id: int, date_t: date) -> float:
 
 if __name__ == "__main__":
     with  Session(engine) as session:
-        result = update_weather_for_vendor(session, vendor_id=1, days_back=60)
-        print(result)
+        vendor_ids = session.exec(select(Vendor.vendor_id))
+        for id in vendor_ids:
+            update_weather_for_vendor(session, vendor_id=id, days_back=45)
+            
