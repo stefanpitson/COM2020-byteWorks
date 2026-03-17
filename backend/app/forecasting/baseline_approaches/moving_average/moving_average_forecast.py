@@ -1,5 +1,5 @@
 from sqlmodel import Session, select, func
-from app.models import Forecast_Input, Forecast_Output, Template
+from app.models import Forecast_Input, Forecast_Output, Template, Vendor
 from app.core.database import engine
 from datetime import date, timedelta
 from typing import Optional, List
@@ -197,5 +197,7 @@ def get_moving_average_forecast_chart(session: Session, vendor_id: int, start_da
 if __name__ == "__main__":
     #python -m app.forecasting.baseline_approaches.moving_average.moving_average_forecast
     with Session(engine) as session:
-        result = get_moving_average_forecast_chart(session, 1)
-        print(json.dumps(result, indent=2, default=str))
+        vendor_ids = session.exec(select(Vendor.vendor_id))
+        for id in vendor_ids:
+            get_moving_average_forecast_chart(session, id)
+         

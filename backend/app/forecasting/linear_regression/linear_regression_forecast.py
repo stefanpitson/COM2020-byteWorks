@@ -348,7 +348,6 @@ if __name__ == "__main__":
     #python -m app.forecasting.linear_regression.linear_regression_forecast
 
     with Session(engine) as session:
-
         vendor_ids = session.exec(select(Vendor.vendor_id))
         for id in vendor_ids:
             get_linear_regression_forecast_chart(session, vendor_id=id)

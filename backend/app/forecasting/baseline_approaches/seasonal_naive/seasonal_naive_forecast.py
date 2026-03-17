@@ -1,5 +1,5 @@
 from sqlmodel import Session, select
-from app.models import Forecast_Input, Forecast_Output, Template
+from app.models import Forecast_Input, Forecast_Output, Template, Vendor
 from app.core.database import engine
 from datetime import date, timedelta, datetime, time
 from app.forecasting.baseline_approaches.seasonal_naive.evaluate_seasonal_naive import get_naive_confidence_for_bundle_day
@@ -257,11 +257,12 @@ def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date
 if __name__ == "__main__":
     today = date.today()
     target = today + timedelta(days=1)
-
     print(f"Generating forecasts for week starting {target}")
     with Session(engine) as session:
-        result = get_naive_forecast_chart(session, 1, target)
-        print(json.dumps(result, indent=2, default=str))
+        vendor_ids = session.exec(select(Vendor.vendor_id))
+        for id in vendor_ids:
+            get_naive_forecast_chart(session, id, target)
+     
 
 
 # to run inside backend
@@ -269,4 +270,12 @@ if __name__ == "__main__":
 # python -m app.forecasting.database_creation.seed_test_data
 # python -m app.forecasting.database_creation.generate_input_forecasts
 # python -m app.forecasting.database_creation.previous_weather
+
+# for seasonal naive
 # python -m app.forecasting.baseline_approaches.seasonal_naive.seasonal_naive_forecast
+
+# for moving average
+# python -m app.forecasting.baseline_approaches.moving_average.moving_average_forecast
+
+# for linear regression
+# python -m app.forecasting.linear_regression.linear_regression_forecast

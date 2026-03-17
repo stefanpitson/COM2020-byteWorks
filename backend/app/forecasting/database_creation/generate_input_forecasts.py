@@ -48,7 +48,7 @@ def sync_forecast_inputs(session: Session, vendor_id: int, days_back: int = 30):
         
 
     # For each group, get the template to compute discount
-    template_cache = {}  # cache template_id sinve will be needed to calculate dicount
+    template_cache = {}  # cache template_id since will be needed to calculate dicount
     for key, agg in groups.items():
         rec_date, slot_start, slot_end, template_id = key  
 
