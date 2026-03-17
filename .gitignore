@@ -1,3 +1,7 @@
 backend/__pycache__/main.cpython-314.pyc
+backend/__pycache__/main.cpython-314.pyc
+backend/.cache.sqlite
+.env
 backend/__pycache__/*
 frontend/package-lock.json
+**/__pycache__/
