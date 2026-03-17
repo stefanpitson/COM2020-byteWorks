@@ -165,8 +165,26 @@ def get_future_weather(session: Session, vendor_id: int, date_t: date) -> float:
             "daily": "precipitation_sum",
             "timezone": "Europe/London"
         }    
+
+        try:
+            responses = _openmeteo.weather_api(url, params=params)
+            if not responses:
+                return -1.0
+            daily = responses[0].Daily()
+            # For archive API, the time array is reliable
+            time_array = pd.to_datetime(daily.Time(), unit='s', utc=True).date
+            indices = [i for i, d in enumerate(time_array) if d == date_t]
+            if not indices:
+                return -1.0
+            idx = indices[0]
+            precip = float(daily.Variables(0).ValuesAsNumpy()[idx])
+            return precip
+        except Exception as e:
+            print(f"Failed weather report for {date_t}: {e}")
+            return -1.0
         
-    else:
+    else: # if we are predicting the forecast
+
         days_ahead = (date_t - today).days
         if days_ahead > 16:
             print(f"Requested date {date_t} is more than 16 days ahead")
@@ -177,35 +195,26 @@ def get_future_weather(session: Session, vendor_id: int, date_t: date) -> float:
         params = {
             "latitude": latitude,
             "longitude": longitude,
-            "forecast_days": days_ahead,
+            "forecast_days": days_ahead + 1,
             "daily": "precipitation_sum",
             "timezone": "Europe/London"
         }
 
-    try: # attempt to call the api -> in all failed cases we retunrn -1.0
-
-        response = _openmeteo.weather_api(url, params=params)
-        if not response:
+        try:
+            responses = _openmeteo.weather_api(url, params=params)
+            if not responses:
+                return -1.0
+            daily = responses[0].Daily()
+           
+            precip_array = daily.Variables(0).ValuesAsNumpy()
+          
+            precip = float(precip_array[days_ahead]) # extract precipitation
+            return precip
+        
+        # if the api call failed
+        except Exception as e:
+            print(f"Failed weather report for {date_t}: {e}")
             return -1.0
-        
-        daily = response[0].Daily()
-   
-        time_array = pd.to_datetime(daily.Time(), unit='s', utc=True).date
- 
-        # extrcat the correct date
-        indices = [i for i, d in enumerate(time_array) if d == date_t]
-        if not indices:
-            return -1.0
-        
-        idx = indices[0]
-
-        precip = float(daily.Variables(0).ValuesAsNumpy()[idx])
-        return precip
-        
-    # if the call failed
-    except Exception as e:
-        print(f"Failed weather report for {date_t}: {e}")
-        return -1.0
 
 
 
@@ -214,5 +223,6 @@ def get_future_weather(session: Session, vendor_id: int, date_t: date) -> float:
 
 
 if __name__ == "__main__":
-    result = update_weather_for_vendor(vendor_id=1, days_back=60)
-    print(result)
+    with  Session(engine) as session:
+        result = update_weather_for_vendor(session, vendor_id=1, days_back=60)
+        print(result)

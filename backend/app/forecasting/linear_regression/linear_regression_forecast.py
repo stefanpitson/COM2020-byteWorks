@@ -13,11 +13,12 @@ import os
 
 
 
-def compute_std_var(session: Session, vendor_id: int, template_id: int, field: str, slot_start: time, slot_end: time, weeks_back: int = 4) -> Tuple[int, float]:
+def compute_std_var(session: Session, vendor_id: int, template_id: int, field: str, slot_start: time, slot_end: time, weeks_back: int = 6) -> Tuple[int, float]:
     """
     This function is a helper to be called for calculating the credibility of a particular prediction based on previous performance
     This is template vendor, time slot and field specific
     a tuple containing (count, standard deviation) is returned
+    weeks_back: must be the same as in get_rolling_avg_field to ensure consistency
     """
 
     if not hasattr(Forecast_Input, field):
@@ -54,13 +55,13 @@ def compute_std_var(session: Session, vendor_id: int, template_id: int, field: s
 
 
 
-def get_active_slots(session: Session, vendor_id: int, days_back: int = 30) -> list[Tuple[int, time, time, int]]:
+def get_active_slots(session: Session, vendor_id: int, weeks_back: int = 6) -> list[Tuple[int, time, time, int]]:
     """
     for a given vendor we will compute all unique (template id, slot start, slot end, day of week) instances
     this is to determine the domain for which to generate the traing data - else we would be forcing the model to make predictions for extrememly unlikely scenarios
     """
     # start date generated as days_back days back from today
-    start_date = date.today()-timedelta(days=days_back)
+    start_date = date.today()-timedelta(weeks=weeks_back)
 
     # create the statement to select all uniqie and releveant statements
     statement = select(Forecast_Input.template_id,
@@ -93,9 +94,9 @@ def precompute_rolling_averages(session, vendor_id, slots, cutoff_date):
     rolling_cache = {}
     for tmpl, s_start, s_end, dow in slots:
         avg_res = get_rolling_avg_field(session, vendor_id, s_start, s_end, # reuse helper functions
-                                        'bundles_reserved', date_ow=cutoff_date, weeks_back=4)
+                                        'bundles_reserved', date_ow=cutoff_date)
         avg_ns = get_rolling_avg_field(session, vendor_id, s_start, s_end,
-                                       'no_shows', date_ow=cutoff_date, weeks_back=4)
+                                       'no_shows', date_ow=cutoff_date)
         rolling_cache[(tmpl, s_start, s_end, dow)] = (avg_res, avg_ns) # for each unique vendor-time slot instance we assign the key tuple: average reserved, average no showa
     return rolling_cache
 
@@ -169,7 +170,7 @@ def predict_for_slot(session: Session, vendor_id: int, vendor_stats, rolling_cac
 
 
 
-def generate_linear_regression_forecast(session: Session, vendor_id: int, start_date: date, days_ahead: int = 7, model_dir: str = "app/forecasting/linear_regression/models") -> List[Forecast_Output]:
+def generate_linear_regression_forecast(session: Session, vendor_id: int, start_date: date = date.today()+timedelta(days=1), days_ahead: int = 7, model_dir: str = "app/forecasting/linear_regression/models") -> List[Forecast_Output]:
     
     """
     start_date: generate output forecasts from this date 
@@ -219,12 +220,17 @@ def generate_linear_regression_forecast(session: Session, vendor_id: int, start_
     # gather forecast outputs once made to be returned
     forecast_outputs = []
     for days in range(days_ahead):
+        print("inside loop")
 
         target = start_date + timedelta(days=days)
       
         relevant_slots = [(t, s, e) for (t, s, e, d) in active_slots if d == target.weekday()]
 
+        print(f"relevant slots: {relevant_slots}")
+
         for tmpl, s_start, s_end in relevant_slots:
+
+            print("inside relevant slots loop")
 
             title = title_map.get(tmpl, "Unknown") # set the title to unknow in case it is not able to be retrieved properly
 
@@ -238,19 +244,25 @@ def generate_linear_regression_forecast(session: Session, vendor_id: int, start_
             # use the helper function to compuet the std and total bundles for this particular template and vendor for default 4 weeks back
             count_res, std_res = compute_std_var(session, vendor_id, tmpl, 'bundles_reserved', s_start, s_end)
             #count_ns, std_ns = compute_std_var(session, vendor_id, tmpl, 'no_shows', s_start, s_end)  # incase we want to use the no show count and std
+            
 
             base_conf = 1 / (1 + metrics.get('reserved_mae', 2)) 
           
             count_factor = min(1.0, count_res / 10)
 
+            print(f"count_res={count_res}, count_factor={count_factor}")
+
+
             avg_res = rolling_cache.get((tmpl, s_start, s_end, target.weekday()), (0.0, 0.0))[0]
             if avg_res > 0:
                 cv = std_res / avg_res            
-                var_factor = max(0.0, 1.0 - min(cv, 2.0) / 2.0)   
+                var_factor = max(0.1, 1.0 - min(cv, 2.0) / 2.0)   
             else:
-                var_factor = 0.5 if std_res == 0 else 0.0 
+                var_factor = 0.5 if std_res == 0 else 0.2 # baseline 0.2 confidence if there is no data 
 
-            confidence = base_conf * count_factor * var_factor
+            confidence = max((base_conf * count_factor * var_factor), 0.2)
+
+            print(f"confidence: {confidence} ")
 
             # use the helper function again to create the forecast output entity
             forecast = update_or_create(
@@ -277,7 +289,7 @@ def generate_linear_regression_forecast(session: Session, vendor_id: int, start_
 
 def get_linear_regression_forecast_chart(session: Session, vendor_id: int, start_date: date = date.today()+timedelta(days=1), days_ahead: int = 7) -> ForecastWeekData:
     """
-    This function calls the heelper generate_moving_average_forecast to create all ouput forecast entities that will be needed
+    This function calls the helper generate_moving_average_forecast to create all ouput forecast entities that will be needed
     we go through the outputs needed list and systematically generate the forecast datapoints which are appended to make the final ForecastWeekData class
     """
 
@@ -337,9 +349,12 @@ if __name__ == "__main__":
 
     with Session(engine) as session:
 
-        a_s = get_active_slots(session, vendor_id=1)
+        get_linear_regression_forecast_chart(session, vendor_id=1)
+        
+        
 
-        for a in a_s:
-            print("first")
-            print(a)
+       
+            
+
+        
 

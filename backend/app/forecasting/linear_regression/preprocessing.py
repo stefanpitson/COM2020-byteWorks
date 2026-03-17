@@ -46,11 +46,12 @@ def get_vendors_performance(session: Session, up_to: Optional[date], weeks_histo
 
 
 
-def get_rolling_avg_field(session: Session, vendor_id: int, slot_start: time, slot_end: time, field: str, date_ow: Optional[date] = None, weeks_back = 4) -> float:
+def get_rolling_avg_field(session: Session, vendor_id: int, slot_start: time, slot_end: time, field: str, date_ow: Optional[date] = None, weeks_back = 6) -> float:
     """
     for a given vendor we compute the average of a particular field for weeks_back weeks in the past
     this is likely to be used for e.g. avg no_shows and avg bundles_reserved
     the function is slot and day of week specifific so uses similar functionality to get moving average functions
+    weeks_back: must be the same as in compute_std_var to ensure consistency
     """
 
     if date_ow is None:
