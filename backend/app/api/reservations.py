@@ -398,9 +398,9 @@ def customer_verify_and_give_badges(customer: Customer, session: Session):
 
             # if the customer's value for the badge's metric meets the threshold for the badge, and they don't already have the badge, award it to them by adding it to their badges relationship
             if value >= badge.threshold:
-                if badge not in customer.badges:
+                if badge not in customer.user.badges:
                     customer.user.badges.append(badge)
-                    session.add(customer)
+                    session.add(customer.user)
 
         session.commit()
 

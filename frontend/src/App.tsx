@@ -31,7 +31,7 @@ export default function App() {
         {/* Applies the navbar */}
         <Route element={<MainLayout />}>
 
-          <Route path="/customer/badges" element={<CustomerBadges />} />
+          
           {/* Only Customers allowed */}
           <Route element={<ProtectedRoute allowedRole="customer" />}>
             <Route path="/customer/home" element={<CustomerHome />} />
@@ -40,6 +40,7 @@ export default function App() {
             <Route path="/vendor/:vendorId" element={<CustomerVendorView />} />
             <Route path="/bundle/:templateId" element={<CustomerBundleView />} />
             <Route path="/customer/reservations" element={<CustomerReservations />} />
+            <Route path="/customer/badges" element={<CustomerBadges />} />
           </Route>
 
           {/* Only Vendors allowed */}

@@ -192,8 +192,21 @@ export default function CustomerHome() {
                   </div>
                 </div>
               </div>
+
+              <div className="mb-10 flex justify-center">
+                <button 
+                  onClick={() => navigate("/customer/badges")}
+                  className="bg-[hsl(var(--primary))] text-white font-extrabold py-3.5 px-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-lg hover:-translate-y-1 hover:bg-[hsl(var(--primary-dark))] transition-all duration-300 flex items-center gap-3"
+                >
+                  <span className="text-xl drop-shadow-sm">🏆</span> 
+                  View Badges & Leaderboard
+                  <span className="text-white/70 ml-1 font-bold">&rarr;</span>
+                </button>
+              </div>
             </>
           )}
+
+            
     
             <h1 className="text-3xl md:text-4xl font-extrabold text-[hsl(var(--text-main))] mb-6 leading-tight">
                 Save food, <span className="text-[hsl(var(--accent))] underline decoration-4 decoration-[hsl(var(--accent)/0.3)]">save money.</span>
