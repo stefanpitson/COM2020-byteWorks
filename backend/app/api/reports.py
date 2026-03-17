@@ -90,7 +90,7 @@ def respond(
     
     response_regex = r'^(?=.{1,1024}$)(.*?[a-zA-Z0-9]){10}.*$'
     if not re.search(response_regex, data.response):
-        raise HTTPException(status_code=46, detail="complaint of an invalid length")
+        raise HTTPException(status_code=406, detail="complaint of an invalid length")
     
     report.response = data.response
     report.responded = True
