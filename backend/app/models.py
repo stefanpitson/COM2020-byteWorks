@@ -65,7 +65,7 @@ class Customer(SQLModel, table=True):
     carbon_saved: float = Field(default=0.0)
     rating: Optional[int] = Field(default=None)
 
-    user: Optional[User] = Relationship(back_populates="customer_profile")
+    user: Optional[User] = Relationship(back_populates="customer_profile") 
 
 class Streak(SQLModel, table=True):
     streak_id: Optional[int] =Field(default=None, primary_key=True)
@@ -146,6 +146,8 @@ class Report(SQLModel, table=True):
     complaint: str
     responded: bool = Field(default=False)
     response: Optional[str]
+    date_made: Date = Field(default_factory=lambda:datetime.now().date())
+    date_responded: Optional[Date] = Field(default=None)
 
 class Forecast_Input(SQLModel, table=True):
     record_id: Optional[int] = Field(default=None, primary_key=True)

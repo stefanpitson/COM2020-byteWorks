@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
 from datetime import date, time
+import re
 
 # schemas contains what the frontend will send and expect in return 
 
@@ -236,6 +237,38 @@ class StreakRead(BaseModel):
     last: date
     ended:bool
 
+class ReportCreate(BaseModel):
+    vendor_id: int
+    title: str
+    complaint:str
+
+class ReportRead(BaseModel):
+    report_id: int
+    vendor_id:int
+    customer_id:int
+    title:str
+    complaint:str
+    responded: bool
+    response: str | None 
+    date_made: date
+    date_responded: date | None
+
+class ReportRespond(BaseModel):
+    response:str
+
+class ReportList(BaseModel):
+    total_count: int
+    reports: List [ReportRead]
+
+    
+class CreditTopUpDetails(BaseModel):
+    credit_top_up : float
+    first_line_address : str
+    postcode : str
+    name_on_card : str
+    card_number : str
+    expiry_date : date
+    cvv : str
 
 class ForecastDatapoint(BaseModel):
     bundle_name: str        

@@ -90,3 +90,15 @@ export interface ForecastWeekData {
   datapoints: ForecastDataPoint[];
 }
 
+export interface Report {
+  report_id: number;
+  title: string;
+  complaint: string;
+  response: string | null;
+  responded: boolean;
+  customer_id: number;
+  vendor_id: number;
+  date_made: string; 
+  date_responded: string | null;
+}
+

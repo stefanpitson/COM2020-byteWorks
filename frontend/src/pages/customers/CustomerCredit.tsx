@@ -189,6 +189,14 @@ export default function CustomerCredit() {
         }
     };
 
+    if (loading) {
+        return (
+        <div className="min-h-screen flex items-center justify-center">
+            <div className="animate-spin w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full" />
+        </div>
+        );
+    }
+
     if (success) {
         return (
         <div className="min-h-screen bg-pattern flex items-center justify-center p-4">
