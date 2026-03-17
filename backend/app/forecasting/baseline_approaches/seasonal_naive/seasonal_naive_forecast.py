@@ -236,7 +236,7 @@ def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date
             bundle_name = title,                 
             predicted_sales = bundles_reserved,
             chance_of_no_show = chance_of_no_show,
-            day = predicted_date.isoformat(), # changed date may be to be changed back
+            date = predicted_date.isoformat(), # changed date may be to be changed back
             start_time = record.slot_start.isoformat(),
             end_time = record.slot_end.isoformat(),
             no_show = no_shows,
