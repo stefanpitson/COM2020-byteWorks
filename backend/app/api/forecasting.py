@@ -17,7 +17,7 @@ from sqlalchemy.exc import SQLAlchemyError
 logger = logging.getLogger(__name__)
 
 # more descriptive router with forecasting prefix added
-router = APIRouter(prefix="/forecast", tags=["Forecasting"])
+router = APIRouter()
 
 # changed to post for now as modifies the db
 @router.post("/naive", response_model=ForecastWeekData)
