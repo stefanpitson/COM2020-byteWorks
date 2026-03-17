@@ -8,6 +8,7 @@ import type { NameType, ValueType, Payload } from "recharts/types/component/Defa
 import { getVendorAnalytics } from "../../api/analytics";
 import type { Vendor, ForecastWeekData, ForecastDataPoint} from "../../types";
 import { getVendorProfile } from "../../api/vendors";
+import { getVendorForecasts } from "../../api/forecasts";
 
 
 interface CustomTooltipProps {
@@ -84,7 +85,8 @@ export default function VendorAnalytics() {
   const navigate = useNavigate();
   const [data, setData] = useState<ForecastWeekData | null>(null);
   const [loading, setLoading] = useState(true);
-    const [vendor, setVendor] = useState<Vendor>();
+  const [vendor, setVendor] = useState<Vendor>();
+  const [model, setModel] = useState<string>("naive")
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -99,7 +101,7 @@ export default function VendorAnalytics() {
             return;
         }
 
-        const result = await getVendorAnalytics();
+        const result = await getVendorForecasts(model);
         setData(result);
       } catch (error) {
         console.error("Failed to load analytics", error);
@@ -108,7 +110,7 @@ export default function VendorAnalytics() {
       }
     };
     fetchAnalytics();
-  }, []);
+  }, [model]);
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-pattern">
@@ -152,9 +154,20 @@ export default function VendorAnalytics() {
 
         {/* Bar charts */}
         <div className="space-y-10">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between gap-4">
             <h2 className="text-2xl font-bold text-gray-800">Weekly Breakdown</h2>
             <div className="h-px bg-gray-200 flex-1"></div>
+            <button 
+              onClick={() => {
+                if (model === "naive") {
+                  setModel("moving average") 
+                } else{
+                  setModel("naive");
+                } 
+              }}
+              className="l-4 shrink-0 flex items-center gap-2 bg-gray-500 text-white px-4 py-2 rounded-xl hover:bg-black transition-colors"
+              >{model}
+            </button>
           </div>
 
             <div className="bg-white p-6 md:p-10 rounded-3xl shadow-sm border border-gray-100">

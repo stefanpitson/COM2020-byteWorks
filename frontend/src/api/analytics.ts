@@ -3,6 +3,6 @@ import api from "./axiosConfig";
 
 
 export async function getVendorAnalytics(): Promise<ForecastWeekData> {
-  const response = await api.post<ForecastWeekData>("/forecast/naive", {});
+  const response = await api.post<ForecastWeekData>("/forecast/naive");
   return response.data;
 }
