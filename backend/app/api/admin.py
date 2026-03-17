@@ -30,7 +30,7 @@ def delete_user(
     try:
         if user.role == "vendor":
             statement = select(Vendor).where(Vendor.vendor_id == user.vendor_profile.vendor_id)
-            vendor = session.exec(statement)
+            vendor = session.exec(statement).first()
             session.delete(vendor)
         # we dont need to delete customer profiles
         session.delete(user)
