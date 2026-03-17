@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Session, select, func
+from sqlmodel import Session, select 
 from app.core.database import get_session, engine
 from app.core.security import get_password_hash
-from app.models import Template, Allergen, Bundle, Reservation, Customer, Vendor, Streak, User
-from app.schema import VendorList
+from app.models import Vendor, User
+from app.schema import AdminVendorList
 from app.api.deps import get_current_user
 
 
@@ -42,11 +42,11 @@ def delete_user(
 
 # vendor functions 
 
-@router.get("/vendors", tags=["Admin","Vendors"], summary="Get list of vendors to be verified")
+@router.get("/vendors", response_model=AdminVendorList, tags=["Admin","Vendors"], summary="Get list of vendors to be verified")
 def get_vendors(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
-    )-> VendorList:
+    ):
 
     if current_user.role != "admin":
         raise HTTPException(status_code=401, detail="must be an admin to view uncertified vendors")
@@ -83,7 +83,7 @@ def validate_vendor(
         session.commit()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+    return { "message": f"Vendor {vendor_id} validated"}
 # delete vendor bundles and templates -- do this in bundles / templates 
 
 # viewing all the reports uses the same endpoints as normal 

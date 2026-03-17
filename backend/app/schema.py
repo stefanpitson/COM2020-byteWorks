@@ -28,7 +28,7 @@ class VendorRead(BaseModel):
     food_saved: float
     photo: Optional[str]
 
-class VendorList(BaseModel):
+class AdminVendorList(BaseModel):
     total_count: int
     vendors: List[VendorRead]
 
