@@ -20,7 +20,7 @@ def create_reservation(
     statement = (select(Bundle).where(Bundle.template_id == template_id, 
                                      Bundle.date == datetime.now().date(), 
                                      Bundle.purchased_by == None))
-    
+
     # Picks the first of any suitable bundles that meet criteria
     bundle = session.exec(statement).first()
 

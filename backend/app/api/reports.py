@@ -4,6 +4,7 @@ from app.core.database import get_session
 from app.api.deps import get_current_user
 from app.models import Report
 from app.schema import ReportCreate, ReportRead, ReportRespond, ReportList
+from datetime import datetime
 import re # for regex
 
 router = APIRouter()
@@ -93,6 +94,7 @@ def respond(
     
     report.response = data.response
     report.responded = True
+    report.date_responded = datetime.now().date()
 
     try:
         session.add(report)

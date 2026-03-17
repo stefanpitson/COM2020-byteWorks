@@ -246,6 +246,8 @@ class ReportRead(BaseModel):
     complaint:str
     responded: bool
     response: str | None 
+    date_made: date
+    date_responded: date | None
 
 class ReportRespond(BaseModel):
     response:str
