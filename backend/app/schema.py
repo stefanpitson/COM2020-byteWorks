@@ -247,7 +247,7 @@ class ForecastDatapoint(BaseModel):
     predicted_sales: int
     no_show: int
     chance_of_no_show: float
-    day: str
+    date: str
     start_time: str
     end_time: str
     confidence: float
