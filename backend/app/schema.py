@@ -244,16 +244,17 @@ class CreditTopUpDetails(BaseModel):
 
 class ForecastDatapoint(BaseModel):
     bundle_name: str        
-    predicted_sales: int
-    no_show: int
-    chance_of_no_show: float
-    date: str
-    start_time: str
-    end_time: str
-    confidence: float
-    recommendation: str
-    rationale: str
+    predicted_sales: int # aggregated
+    predicted_no_show: int # aggregated
+    chance_of_no_show: float # averaged
+    confidence: float # averaged
+    recommendation: List[str] # contains timeslot details
+    rationale: List[str]
 
 class ForecastWeekData(BaseModel):
     week_date: str
+    day_datapoints: List[ForecastDayData]
+
+class ForecastDayData(BaseModel):
+    date: str
     datapoints: List[ForecastDatapoint]

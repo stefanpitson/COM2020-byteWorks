@@ -4,7 +4,7 @@ from app.core.database import engine
 from datetime import date, timedelta, datetime, time
 from app.forecasting.baseline_approaches.seasonal_naive.evaluate_seasonal_naive import get_naive_confidence_for_bundle_day
 from typing import Optional, List
-from app.schema import ForecastDatapoint, ForecastWeekData
+from app.schema import ForecastDatapoint, ForecastWeekData, ForecastDayData
 import json
 
 
@@ -155,7 +155,7 @@ def generate_naive_forecast(vendor_id: int, target_date: Optional[date] = None) 
 
 
 # main function that the endpoint will call
-def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date: Optional[date] = None) -> dict:
+def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date: Optional[date] = None) -> ForecastWeekData:
     """
     for a vendor create the output forecast entities using the seasonal naive model
     for a particular week starting on tartget_start_date
@@ -184,15 +184,16 @@ def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date
 
     # execute the statement
     results = session.exec(stmt).all()
-    datapoints: List[ForecastDatapoint] = []  # empty custom datapoint defined in schema.py
+
+    day_map = {} # map in the form of day: 
 
     # loop through the results 
     for record, title in results:
         if not record.slot_start or not record.slot_end:
             continue
 
-        predicted_date = record.date + timedelta(days=7)
-        day_name = predicted_date.strftime("%A")        
+        predicted_date = record.date + timedelta(days=7)   
+        day_str = predicted_date.isoformat()    
         day_abbr = predicted_date.strftime("%a")
         
         # Ensure values are not None
@@ -200,11 +201,8 @@ def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date
         no_shows = record.no_shows or 0
         
         # calculate no show chance as no_show / no_show+predicted
-        total_reserved_and_no_show = bundles_reserved + no_shows
-        chance_of_no_show = (
-            round(no_shows / total_reserved_and_no_show, 3)
-            if total_reserved_and_no_show > 0 else 0.0
-        ) 
+        total = bundles_reserved + no_shows
+        chance = round(no_shows / total, 3) if total > 0 else 0.0
 
         # create recomedation string before - specific to naive model
         recommendation = (
@@ -230,38 +228,68 @@ def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date
             confidence=get_naive_confidence_for_bundle_day(vendor_id=vendor_id, template_id=record.template_id, target_date=predicted_date)
             )
 
+        if day_str not in day_map:
+            day_map[day_str] = {} # no data exists for this day
 
-        # build data to be sent to frontend
-        datapoints.append(ForecastDatapoint(
-            bundle_name = title,                 
-            predicted_sales = bundles_reserved,
-            chance_of_no_show = chance_of_no_show,
-            date = predicted_date.isoformat(), # changed date may be to be changed back
-            start_time = record.slot_start.isoformat(),
-            end_time = record.slot_end.isoformat(),
-            no_show = no_shows,
-            confidence = current_forecast.confidence,
-            recommendation = recommendation,
-            rationale = rationale)
-        )
+        day_bundles = day_map[day_str]
+        if title not in day_bundles:
+            # new aggregated datapoint for this bundle
+            day_bundles[title] = {
+                "bundle_name": title,
+                "predicted_sales": 0,
+                "predicted_no_show": 0,
+                "chance_sum": 0.0,
+                "confidence_sum": 0.0,
+                "count": 0,
+                "recommendations": [],
+                "rationales": []
+            }
+
+
+        agg = day_bundles[title]
+        agg["predicted_sales"] += bundles_reserved
+        agg["predicted_no_show"] += no_shows
+        agg["chance_sum"] += chance
+        agg["confidence_sum"] += current_forecast.confidence
+        agg["count"] += 1
+        agg["recommendations"].append(recommendation)
+        agg["rationales"].append(rationale)
+
+    # we create day datapoints which contain unique datapoints in nested loop
+    day_datapoints: List[ForecastDayData] = []
+    for day_str in sorted(day_map.keys()):
+        bundles: List[ForecastDatapoint] = []
+        for agg in day_map[day_str].values():
+            # Compute averages and build the forecast data point 
+            avg_chance = agg["chance_sum"] / agg["count"]
+            avg_confidence = agg["confidence_sum"] / agg["count"]
+            dp = ForecastDatapoint(
+                bundle_name=agg["bundle_name"],
+                predicted_sales=agg["predicted_sales"],
+                predicted_no_show=agg["predicted_no_show"],
+                chance_of_no_show=round(avg_chance, 3),
+                confidence=round(avg_confidence, 3),
+                recommendation=agg["recommendations"],   # list of strings
+                rationale=agg["rationales"]               # list of strings
+            )
+            bundles.append(dp) # add the datapoints to the list
+        day_datapoints.append(ForecastDayData(date=day_str, datapoints=bundles))
 
     session.commit()
-
-    weekData = ForecastWeekData(
-        week_date = target_start_date.isoformat(),
-        datapoints = datapoints
-    )
-
-    return weekData
+    return ForecastWeekData(week_date=target_start_date.isoformat(), day_datapoints=day_datapoints) # ensure we add the data for the start of the week and all day data points
 
 if __name__ == "__main__":
     today = date.today()
     target = today + timedelta(days=1)
-    print(f"Generating forecasts for week starting {target}")
     with Session(engine) as session:
-        vendor_ids = session.exec(select(Vendor.vendor_id))
-        for id in vendor_ids:
-            get_naive_forecast_chart(session, id, target)
+        vendor_ids = session.exec(select(Vendor.vendor_id)).all()
+        for vid in vendor_ids:
+            result = get_naive_forecast_chart(session, vid, target)
+            week_json = json.dumps(result.model_dump(), indent=2, default=str)
+            for day in result.day_datapoints:
+                print(f"\n Day: {day.date}")
+                day_json = json.dumps(day.model_dump(), indent=2, default=str)
+                print(day_json)
      
 
 
