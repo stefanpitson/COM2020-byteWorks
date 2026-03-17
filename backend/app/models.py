@@ -125,7 +125,7 @@ class Bundle(SQLModel, table=True):
 
 class Reservation(SQLModel, table=True):
     reservation_id:Optional[int] = Field(default=None, primary_key=True)
-    bundle_id: Optional[int] = Field(default=None, foreign_key="bundle.bundle_id")
+    bundle_id: Optional[int] = Field(default=None, foreign_key="bundle.bundle_id", ondelete="SET NULL")
     customer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id",  ondelete="SET NULL") 
     time_created: datetime = Field(default_factory=datetime.now)
 
