@@ -7,7 +7,7 @@ import {
 import type { NameType, ValueType, Payload } from "recharts/types/component/DefaultTooltipContent";
 import { getVendorAnalytics } from "../../api/analytics";
 import type { Vendor, ForecastWeekData, ForecastDataPoint} from "../../types";
-import { getVendorProfile } from "../../api/vendors";
+import { getVendorProfile, getAllVendors } from '../../api/vendors';
 import { getVendorForecasts } from "../../api/forecasts";
 
 
@@ -87,6 +87,14 @@ export default function VendorAnalytics() {
   const [loading, setLoading] = useState(true);
   const [vendor, setVendor] = useState<Vendor>();
   const [model, setModel] = useState<string>("naive")
+  const [graphPage, setGraphPage] = useState<number>(0)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const models = [
+    { id: "naive", label: "Naive" },
+    { id: "moving average", label: "Moving Average" },
+    { id: "linear regression", label: "Linear Regression" }
+  ];
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -103,6 +111,7 @@ export default function VendorAnalytics() {
 
         const result = await getVendorForecasts(model);
         setData(result);
+        setGraphPage(0);
       } catch (error) {
         console.error("Failed to load analytics", error);
       } finally {
@@ -111,6 +120,13 @@ export default function VendorAnalytics() {
     };
     fetchAnalytics();
   }, [model]);
+
+  const dayOfWeek = (inDate?: string) => {
+    const dateObject = new Date(inDate || "");
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayName = daysOfWeek[dateObject.getDay()]
+    return dayName;
+  }
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-pattern">
@@ -157,50 +173,102 @@ export default function VendorAnalytics() {
           <div className="flex items-center justify-between gap-4">
             <h2 className="text-2xl font-bold text-gray-800">Weekly Breakdown</h2>
             <div className="h-px bg-gray-200 flex-1"></div>
-            <button 
-              onClick={() => {
-                if (model === "naive") {
-                  setModel("moving average") 
-                } else{
-                  setModel("naive");
-                } 
-              }}
-              className="l-4 shrink-0 flex items-center gap-2 bg-gray-500 text-white px-4 py-2 rounded-xl hover:bg-black transition-colors"
-              >{model}
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center gap-4 bg-gray-200 px-6 py-2.5 rounded-xl font-bold min-w-[180px] justify-between"
+              >
+                <span className="capitalize">{model}</span>
+                <svg 
+                  className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {isDropdownOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-10" 
+                    onClick={() => setIsDropdownOpen(false)}
+                  ></div>
+                  <div className="absolute right-0 mt-0 w-full bg-gray-50 rounded-2xl shadow-xl border border-gray-100 z-20 overflow-hidden">
+                    {models.map((m) => (
+                      <button
+                        key={m.id}
+                        onClick={() => {
+                          setModel(m.id);
+                          setIsDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-6 py-3 text-sm font-bold transition-colors hover:bg-gray-50
+                          ${model === m.id ? 'bg-gray-200' : ''}
+                        `}
+                      >
+                        {m.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
             <div className="bg-white p-6 md:p-10 rounded-3xl shadow-sm border border-gray-100">
-              <h3 className="text-lg font-bold text-gray-700 mb-8 flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                Week of {data?.week_date}
-              </h3>
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-lg font-bold text-gray-700 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  Week starting {data?.week_date}
+                </h3>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => setGraphPage(prev => Math.max(0, prev - 1))}
+                    disabled={graphPage === 0}
+                    className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-gray-600 font-bold"
+                  >
+                    ←
+                  </button>
+                  <button 
+                    onClick={() => setGraphPage(prev => Math.min((data?.day_datapoints.length || 1) - 1, prev + 1))}
+                    disabled={graphPage === (data?.day_datapoints.length|| 1) -1 }
+                    className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-gray-600 font-bold"
+                  >
+                    →
+                  </button>
+                </div>
+              </div>
               
-              <div className="h-[350px] w-full">
-                {data?.datapoints.length === 0 ? (
+              <div className="h-[400px] w-full">
+                {data?.day_datapoints[graphPage]?.datapoints.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-gray-500 space-y-2"> 
-                  <p className="text-lg font-medium">No data points available for this week</p> 
-                  <p className="text-sm">New analytics will appear once transactions occur.</p>     
+                    <p className="text-lg font-medium">No data points available for {dayOfWeek(data?.day_datapoints[graphPage]?.date)}</p> 
+                    <p className="text-sm">New analytics will appear once transactions occur.</p>     
                   </div> 
                 ):(
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={data?.datapoints} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                    <XAxis 
-                      dataKey="bundle_name" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fill: '#9ca3af', fontSize: 12 }} 
-                      dy={10}
-                    />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} />
-                    <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f9fafb' }} />
-                    <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ paddingBottom: '20px' }} />
-                    
-                    <Bar name="Predicted Sold" dataKey="predicted_sales" fill="#22c55e" radius={[4, 4, 0, 0]} barSize={20} />
-                    <Bar name="Predicted No Shows" dataKey="no_show" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={20} />
-                  </BarChart>
-                </ResponsiveContainer>)
+                  <div className="h-full flex flex-col"> 
+                    <p className="text-lg font-medium mb-4">{dayOfWeek(data?.day_datapoints[graphPage]?.date)} - {data?.day_datapoints[graphPage]?.date}</p>
+                    <div className="flex-1">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={data?.day_datapoints[graphPage]?.datapoints} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                          <XAxis 
+                            dataKey="bundle_name" 
+                            axisLine={false} 
+                            tickLine={false} 
+                            tick={{ fill: '#9ca3af', fontSize: 12 }} 
+                            dy={10}
+                          />
+                          <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} />
+                          <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f9fafb' }} />
+                          <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ paddingBottom: '20px' }} />
+                          
+                          <Bar name="Predicted Sold" dataKey="predicted_sales" fill="#22c55e" radius={[4, 4, 0, 0]} barSize={20} />
+                          <Bar name="Predicted No Shows" dataKey="predicted_no_show" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={20} />
+                        </BarChart>
+                      </ResponsiveContainer> 
+                    </div>
+                  </div>
+                  )
               }
               </div>
             </div>

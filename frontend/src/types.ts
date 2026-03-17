@@ -75,18 +75,20 @@ export interface Streak {
 export interface ForecastDataPoint {
   bundle_name: string;
   predicted_sales: number;
-  no_show: number;
+  predicted_no_show: number;
   chance_of_no_show: number;
-  day: string;
-  start_time: string;
-  end_time: string;
   confidence: number;
   recommendation: string;
   rationale: string;
 }
 
+export interface ForecastDayData {
+  date: string; 
+  datapoints: ForecastDataPoint[];
+}
+
 export interface ForecastWeekData {
   week_date: string; 
-  datapoints: ForecastDataPoint[];
+  day_datapoints: ForecastDayData[];
 }
 
