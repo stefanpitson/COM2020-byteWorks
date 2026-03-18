@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getOwnedBadges, getUnownedBadges, getLeaderboard } from "../../api/customers";
 import type { Badge, LeaderboardEntry } from "../../types";
