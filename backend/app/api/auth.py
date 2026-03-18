@@ -52,7 +52,7 @@ def register_customer(
     new_user = User(
         email=data.user.email,
         password_hash=hashed_pw,
-        role=data.user.role
+        role="customer"
     )
     
     try:
@@ -92,7 +92,7 @@ def register_vendor(
     new_user = User(
         email=data.user.email,
         password_hash=hashed_pw,
-        role=data.user.role
+        role="vendor"
     )
     
     try:

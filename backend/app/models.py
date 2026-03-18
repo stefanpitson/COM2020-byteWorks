@@ -7,13 +7,13 @@ from random import random
 
 
 class User_Badge(SQLModel, table=True):
-    user_id: Optional[int] = Field(default=None, primary_key=True, foreign_key="user.user_id")
+    user_id: Optional[int] = Field(default=None, primary_key=True, foreign_key="user.user_id", ondelete="CASCADE")
     badge_id: Optional[int] = Field(default=None, primary_key=True, foreign_key="badge.badge_id")
 
 class User(SQLModel, table=True):
     user_id: Optional[int] = Field(default=None, primary_key=True)
     password_hash:str
-    email:str
+    email:str = Field(unique=True)
     role: str
 
     vendor_profile: Optional["Vendor"] = Relationship(
@@ -61,7 +61,7 @@ class Vendor(SQLModel, table=True):
 
 class Customer(SQLModel, table=True):
     customer_id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: Optional[int] = Field(foreign_key="user.user_id")
+    user_id: Optional[int] = Field(foreign_key="user.user_id", ondelete="CASCADE")
     name:str
     post_code:str
     store_credit: float = Field(default=100.0)
@@ -70,11 +70,11 @@ class Customer(SQLModel, table=True):
     money_saved: float = Field(default=0.0)
     rating: Optional[int] = Field(default=None)
 
-    user: Optional[User] = Relationship(back_populates="customer_profile")
+    user: Optional[User] = Relationship(back_populates="customer_profile") 
 
 class Streak(SQLModel, table=True):
     streak_id: Optional[int] =Field(default=None, primary_key=True)
-    customer_id: Optional[int] =Field(foreign_key="customer.customer_id")
+    customer_id: Optional[int] =Field(foreign_key="customer.customer_id", ondelete="CASCADE")
     count: int = Field(default=0)
     started: Date
     last: Date
@@ -82,7 +82,7 @@ class Streak(SQLModel, table=True):
 
 class Allergen_Template(SQLModel,table=True): # linking table, has to come before the other entities 
     allergen_id: Optional[int] = Field(default=None, primary_key=True, foreign_key="allergen.allergen_id")
-    template_id: Optional[int] = Field(default = None, primary_key=True, foreign_key="template.template_id")
+    template_id: Optional[int] = Field(default = None, primary_key=True, foreign_key="template.template_id", ondelete="CASCADE")
 
 class Template(SQLModel, table=True):
     template_id: Optional[int] = Field(default=None, primary_key=True)
@@ -99,7 +99,7 @@ class Template(SQLModel, table=True):
     is_vegan: bool = Field(default=False)
     is_vegetarian: bool = Field(default=False)
 
-    vendor: Optional[int] = Field(default=None,foreign_key="vendor.vendor_id")
+    vendor: Optional[int] = Field(default=None,foreign_key="vendor.vendor_id", ondelete="CASCADE")
 
     photo: Optional[str] = Field(default=None)
 
@@ -120,18 +120,18 @@ class Allergen(SQLModel, table=True):
 
 class Bundle(SQLModel, table=True):
     bundle_id: Optional[int] = Field(default=None, primary_key=True)
-    template_id: Optional[int] = Field( default=None, foreign_key="template.template_id")
+    template_id: Optional[int] = Field( default=None, foreign_key="template.template_id", ondelete="SET NULL")
     picked_up: bool = Field(default= False)
     date: Date = Field(default_factory=lambda: datetime.now().date()) # basically tells the db to use this function to populate it
     time: Time = Field(default_factory=lambda: datetime.now().time())
 
-    purchased_by: Optional[int] = Field(default=None, foreign_key="customer.customer_id")
+    purchased_by: Optional[int] = Field(default=None, foreign_key="customer.customer_id", ondelete="SET NULL")
 
 
 class Reservation(SQLModel, table=True):
     reservation_id:Optional[int] = Field(default=None, primary_key=True)
     bundle_id: Optional[int] = Field(default=None, foreign_key="bundle.bundle_id")
-    customer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id") 
+    customer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id",  ondelete="SET NULL") 
     time_created: datetime = Field(default_factory=datetime.now)
 
     # status either:
@@ -145,32 +145,41 @@ class Reservation(SQLModel, table=True):
 
 class Report(SQLModel, table=True):
     report_id: Optional[int] = Field(default=None, primary_key=True)
-    customer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id")
-    vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id")
+    customer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id",  ondelete="SET NULL")
+    vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id",  ondelete="SET NULL")
     title: str
     complaint: str
     responded: bool = Field(default=False)
     response: Optional[str]
+    date_made: Date = Field(default_factory=lambda:datetime.now().date())
+    date_responded: Optional[Date] = Field(default=None)
 
 class Forecast_Input(SQLModel, table=True):
     record_id: Optional[int] = Field(default=None, primary_key=True)
-    vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id")
-    template_id: Optional[int] = Field(default=None, foreign_key="template.template_id")
+    vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id", ondelete="CASCADE")
+    template_id: Optional[int] = Field(default=None, foreign_key="template.template_id", ondelete="CASCADE")
 
     #time the bundles were posted, this should be able to grab from bundles table, but 
     # could have issues if there aren't any
     date: Date = Field(default_factory=lambda:datetime.now().date()) # basically tells the db to use this function to populate it
-    precipitation: float = Field(default_factory=lambda:random()) # may want to change this 
-    bundles_posted: int 
-    bundles_reserved: int 
-    no_shows: int 
+    slot_start: Time # this is the start of the 2 HOUR SLOT representing time POSTED
+    slot_end: Time # this is the end of the 2 HOUR SLOT representing time POSTED
+    discount: float = Field(default = 0.0) # number 0 - 1 indicating the level of discount from original price e.g. 0.3 = 30% discount
+    precipitation: float = Field(default = -1.0)
+    bundles_posted: int = Field(default = 0)
+    bundles_reserved: int = Field(default = 0)
+    no_shows: int = Field(default = 0)
 
 class Forecast_Output(SQLModel, table=True):
     output_id: Optional[int] = Field(default=None, primary_key=True)
-    vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id")
-    template_id: Optional[int] = Field(default=None, foreign_key="template.template_id")
-    date: Date = Field(default_factory=lambda:datetime.now().date())
-    reservation_prediction: int 
+    vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id", ondelete="CASCADE")
+    template_id: Optional[int] = Field(default=None, foreign_key="template.template_id", ondelete="CASCADE")
+    date: Date = Field(default_factory=lambda:datetime.now().date()) # predcited day to sell
+    slot_start: Time # this is the start of the 2 HOUR SLOT representing time predicted sale time
+    slot_end: Time # this is the end of the 2 HOUR SLOT representing time predicted sale time
+    model_type: str = Field(default = "seasonal_naive") # to show what model made the predicition since many different models could make the same forecast
+    reservation_prediction: int # how many of these bundles will be sell
     no_show_prediction: int 
+    recommendation: str
     rationale:str 
     confidence:float 
