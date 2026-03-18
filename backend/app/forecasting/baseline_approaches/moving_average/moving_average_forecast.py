@@ -3,7 +3,7 @@ from app.models import Forecast_Input, Forecast_Output, Template, Vendor
 from app.core.database import engine
 from datetime import date, timedelta
 from typing import Optional, List
-from app.schema import ForecastDatapoint, ForecastWeekData
+from app.schema import ForecastDatapoint, ForecastWeekData, ForecastDayData
 from app.forecasting.baseline_approaches.seasonal_naive.seasonal_naive_forecast import update_or_create
 import json
 
@@ -115,7 +115,7 @@ def generate_moving_average_forecast(
 
             days_in_range = (end_history - start_history).days + 1
             expected_max = (days_in_range + 6) // 7
-            confidence = moving_avg_confidence_score(num_days=int(res.num_days), expected_max=expected_max, avg=avg_reserved, std= res.std_reserved)
+            confidence = round(moving_avg_confidence_score(num_days=int(res.num_days), expected_max=expected_max, avg=avg_reserved, std= res.std_reserved), 3)
 
             # use the helper function to update the output forecast or make it if it doesnt already exist
             forecast = update_or_create(
@@ -142,7 +142,7 @@ def generate_moving_average_forecast(
 # main function that the endpoint will call
 def get_moving_average_forecast_chart(session: Session, vendor_id: int, start_date: date = date.today()+timedelta(days=1)) -> ForecastWeekData:
     """
-    This function calls the heelper generate_moving_average_forecast to create all ouput forecast entities that will be needed
+    This function calls the helper generate_moving_average_forecast to create all output forecast entities that will be needed
     we go through the outputs needed list and systematically generate the forecast datapoints which are appended to make the final ForecastWeekData class
     """
 
@@ -151,7 +151,7 @@ def get_moving_average_forecast_chart(session: Session, vendor_id: int, start_da
 
     # if there were no outputs produced - meaning the vendor does not have enough data return []
     if not outputs_needed:
-        return ForecastWeekData(week_date=start_date.isoformat(), datapoints=[])
+        return ForecastWeekData(week_date=start_date.isoformat(), day_datapoints=[])
 
     # logic for making a dictionary mapping template id -> template title
     template_ids = list({o.template_id for o in outputs_needed if o.template_id})
@@ -160,35 +160,73 @@ def get_moving_average_forecast_chart(session: Session, vendor_id: int, start_da
     
     title_map = {row.template_id: row.title for row in title_rows}
 
-    datapoints = []
+    day_datapoints: List[ForecastDayData]  = [] # for adding all day datapoints in the loop to be processed before return
+
+    map_total: dict[tuple[str, str], int] = {} # must hold all relevant date, name unique tuples so we can determine how to correctly average averaged fields like confidence
+
     # go through the forecast outputs
     for output in outputs_needed:
-
-        title = title_map.get(output.template_id, "Unknown") # use the dictionary to find the exact title from the template id
-        
+        date_d = output.date.isoformat()
         # calculate no show chance as no_show / no_show+predicted
         total = output.reservation_prediction + output.no_show_prediction
-        chance_of_no_show = round(output.no_show_prediction / total, 3) if total > 0 else 0.0
+        chance_of_no_show = max((round(output.no_show_prediction / total, 3) if total > 0 else 0.0), 0.05)
 
-        # create the custome data point
-        datapoint = ForecastDatapoint(
-            bundle_name=title,
-            predicted_sales=output.reservation_prediction,
-            no_show=output.no_show_prediction,
-            chance_of_no_show=chance_of_no_show,
-            day=output.date.strftime('%A'),
-            start_time=output.slot_start.isoformat(), # ensures a string eg "12:00:00" is recieved
-            end_time=output.slot_end.isoformat(),
-            confidence=output.confidence,
-            recommendation=output.recommendation,
-            rationale=output.rationale
-        )
-        datapoints.append(datapoint)
+        title = title_map.get(output.template_id, "Unknown") # use the dictionary to find the exact title from the template id
+
+        index_day = next((i for i, day in enumerate(day_datapoints) if day.date == date_d), None)
+
+        if index_day is not None: # if the day data point already exists
+            day_to_add: List[ForecastDatapoint] = day_datapoints[index_day].datapoints
+            index_point = next((i for i, point in enumerate(day_to_add) if point.bundle_name == title), None)
+            if index_point is not None: #  there are duplicates - already exists
+                agg_point: ForecastDatapoint = day_to_add[index_point]
+                # must update it
+                agg_point.chance_of_no_show += chance_of_no_show
+                agg_point.confidence += output.confidence
+                agg_point.predicted_sales += output.reservation_prediction
+                agg_point.predicted_no_show += output.no_show_prediction
+                agg_point.recommendation.append(output.recommendation)
+                agg_point.rationale.append(output.rationale)
+
+            else: # the day is the same but the bundle name does not already exist
+                p = ForecastDatapoint(bundle_name = title,
+                chance_of_no_show = chance_of_no_show,
+                confidence = output.confidence,
+                predicted_sales = output.reservation_prediction,
+                predicted_no_show = output.no_show_prediction,
+                recommendation= [output.recommendation],
+                rationale = [output.rationale])
+
+                day_datapoints[index_day].datapoints.append(p) # add the new datapoint to the appropriate date
+
+        else: # the day datapoint does not yet exist we need to make a new day datapoint
+            new_day = ForecastDayData(
+                date=output.date.isoformat(),
+                datapoints= [ForecastDatapoint(bundle_name = title,
+                chance_of_no_show = chance_of_no_show,
+                confidence = output.confidence,
+                predicted_sales = output.reservation_prediction,
+                predicted_no_show = output.no_show_prediction,
+                recommendation= [output.recommendation],
+                rationale = [output.rationale])]
+            )
+            day_datapoints.append(new_day)
+
+        # add to the totals 
+        map_total[(date_d, title)] = map_total.get((date_d, title), 0) + 1
+     
+
+
+    # at this point we should have all datapoints added and inside the day datapoints list BUT averages have not yet been averaged
+    for day_da in day_datapoints:
+        for p in day_da.datapoints:
+            p.chance_of_no_show = round(p.chance_of_no_show / map_total.get((day_da.date, p.bundle_name), 1), 3)
+            p.confidence = round(p.confidence / map_total.get((day_da.date, p.bundle_name), 1), 3)
 
     session.commit()
 
     # return the weekdatapoints object
-    return ForecastWeekData(week_date=start_date.isoformat(), datapoints=datapoints)
+    return ForecastWeekData(week_date=start_date.isoformat(), day_datapoints=day_datapoints)
 
     
 
@@ -199,5 +237,10 @@ if __name__ == "__main__":
     with Session(engine) as session:
         vendor_ids = session.exec(select(Vendor.vendor_id))
         for id in vendor_ids:
-            get_moving_average_forecast_chart(session, id)
+            result = get_moving_average_forecast_chart(session, id)
+            week_json = json.dumps(result.model_dump(), indent=2, default=str)
+            for day in result.day_datapoints:
+                print(f"\n Day: {day.date}")
+                day_json = json.dumps(day.model_dump(), indent=2, default=str)
+                print(day_json)
          

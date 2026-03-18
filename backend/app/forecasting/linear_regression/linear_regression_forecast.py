@@ -4,11 +4,12 @@ from app.core.database import engine
 from datetime import date, timedelta, time
 from app.forecasting.database_creation.previous_weather import get_future_weather
 from typing import Optional, List, Tuple
-from app.schema import ForecastDatapoint, ForecastWeekData
+from app.schema import ForecastDatapoint, ForecastWeekData, ForecastDayData
 import pandas as pd
 from app.forecasting.linear_regression.preprocessing import get_vendors_performance, get_rolling_avg_field
 from app.forecasting.baseline_approaches.seasonal_naive.seasonal_naive_forecast import update_or_create
 import joblib
+import json
 import os
 
 
@@ -220,17 +221,12 @@ def generate_linear_regression_forecast(session: Session, vendor_id: int, start_
     # gather forecast outputs once made to be returned
     forecast_outputs = []
     for days in range(days_ahead):
-        print("inside loop")
 
         target = start_date + timedelta(days=days)
       
         relevant_slots = [(t, s, e) for (t, s, e, d) in active_slots if d == target.weekday()]
 
-        print(f"relevant slots: {relevant_slots}")
-
         for tmpl, s_start, s_end in relevant_slots:
-
-            print("inside relevant slots loop")
 
             title = title_map.get(tmpl, "Unknown") # set the title to unknow in case it is not able to be retrieved properly
 
@@ -241,17 +237,12 @@ def generate_linear_regression_forecast(session: Session, vendor_id: int, start_
             recommendation = f"Post {int(pred_res)} {title} bundles between {s_start} and {s_end} on {target.strftime('%A')} "
             rationale = "Based on historical data and our most advanced model."
 
-            # use the helper function to compuet the std and total bundles for this particular template and vendor for default 4 weeks back
+            # use the helper function to compute the std and total bundles for this particular template and vendor for default 4 weeks back
             count_res, std_res = compute_std_var(session, vendor_id, tmpl, 'bundles_reserved', s_start, s_end)
-            #count_ns, std_ns = compute_std_var(session, vendor_id, tmpl, 'no_shows', s_start, s_end)  # incase we want to use the no show count and std
-            
 
             base_conf = 1 / (1 + metrics.get('reserved_mae', 2)) 
           
             count_factor = min(1.0, count_res / 10)
-
-            print(f"count_res={count_res}, count_factor={count_factor}")
-
 
             avg_res = rolling_cache.get((tmpl, s_start, s_end, target.weekday()), (0.0, 0.0))[0]
             if avg_res > 0:
@@ -260,9 +251,7 @@ def generate_linear_regression_forecast(session: Session, vendor_id: int, start_
             else:
                 var_factor = 0.5 if std_res == 0 else 0.2 # baseline 0.2 confidence if there is no data 
 
-            confidence = max((base_conf * count_factor * var_factor), 0.2)
-
-            print(f"confidence: {confidence} ")
+            confidence = round((max(base_conf, 0.5) + count_factor + var_factor)/3.0, 3) # main confidence calculation 
 
             # use the helper function again to create the forecast output entity
             forecast = update_or_create(
@@ -289,7 +278,7 @@ def generate_linear_regression_forecast(session: Session, vendor_id: int, start_
 
 def get_linear_regression_forecast_chart(session: Session, vendor_id: int, start_date: date = date.today()+timedelta(days=1), days_ahead: int = 7) -> ForecastWeekData:
     """
-    This function calls the helper generate_moving_average_forecast to create all ouput forecast entities that will be needed
+    This function calls the helper generate_linear_regression_forecast to create all output forecast entities that will be needed
     we go through the outputs needed list and systematically generate the forecast datapoints which are appended to make the final ForecastWeekData class
     """
 
@@ -298,7 +287,7 @@ def get_linear_regression_forecast_chart(session: Session, vendor_id: int, start
 
     # if there were no outputs produced - meaning the vendor does not have enough data return []
     if not outputs_needed:
-        return ForecastWeekData(week_date=start_date.isoformat(), datapoints=[])
+        return ForecastWeekData(week_date=start_date.isoformat(), day_datapoints = [])
 
     # logic for making a dictionary mapping template id -> template title
     template_ids = list({o.template_id for o in outputs_needed if o.template_id})
@@ -307,35 +296,73 @@ def get_linear_regression_forecast_chart(session: Session, vendor_id: int, start
     
     title_map = {row.template_id: row.title for row in title_rows}
 
-    datapoints = []
+    day_datapoints: List[ForecastDayData]  = [] # for adding all day datapoints in the loop to be processed before return
+
+    map_total: dict[tuple[str, str], int] = {} # must hold all relevant date, name unique tuples so we can determine how to correctly average averaged fields like confidence
+    
     # go through the forecast outputs
     for output in outputs_needed:
-
+        date_d = output.date.isoformat()
         title = title_map.get(output.template_id, "Unknown") # use the dictionary to find the exact title from the template id
         
         # calculate no show chance as no_show / no_show+predicted
         total = output.reservation_prediction + output.no_show_prediction
-        chance_of_no_show = round(output.no_show_prediction / total, 3) if total > 0 else 0.0
+        chance_of_no_show = max((round(output.no_show_prediction / total, 3) if total > 0 else 0.0), 0.05)
 
-        # create the custome data point
-        datapoint = ForecastDatapoint(
-            bundle_name=title,
-            predicted_sales=output.reservation_prediction,
-            no_show=output.no_show_prediction,
-            chance_of_no_show=chance_of_no_show,
-            day=output.date.strftime('%A'),
-            start_time=output.slot_start.isoformat(), # ensures a string eg "12:00:00" is recieved
-            end_time=output.slot_end.isoformat(),
-            confidence=output.confidence,
-            recommendation=output.recommendation,
-            rationale=output.rationale
-        )
-        datapoints.append(datapoint)
+        index_day = next((i for i, day in enumerate(day_datapoints) if day.date == date_d), None)
+
+        if index_day is not None: # if the day data point already exists
+            day_to_add: List[ForecastDatapoint] = day_datapoints[index_day].datapoints
+            index_point = next((i for i, point in enumerate(day_to_add) if point.bundle_name == title), None)
+            if index_point is not None: #  there are duplicates - already exists
+                agg_point: ForecastDatapoint = day_to_add[index_point]
+                # must update it
+                agg_point.chance_of_no_show += chance_of_no_show
+                agg_point.confidence += output.confidence
+                agg_point.predicted_sales += output.reservation_prediction
+                agg_point.predicted_no_show += output.no_show_prediction
+                agg_point.recommendation.append(output.recommendation)
+                agg_point.rationale.append(output.rationale)
+
+            else: # the day is the same but the bundle name does not already exist
+                p = ForecastDatapoint(bundle_name = title,
+                chance_of_no_show = chance_of_no_show,
+                confidence = output.confidence,
+                predicted_sales = output.reservation_prediction,
+                predicted_no_show = output.no_show_prediction,
+                recommendation= [output.recommendation],
+                rationale = [output.rationale])
+
+                day_datapoints[index_day].datapoints.append(p) # add the new datapoint to the appropriate date
+
+        else: # the day datapoint does not yet exist we need to make a new day datapoint
+            new_day = ForecastDayData(
+                date=output.date.isoformat(),
+                datapoints= [ForecastDatapoint(bundle_name = title,
+                chance_of_no_show = chance_of_no_show,
+                confidence = output.confidence,
+                predicted_sales = output.reservation_prediction,
+                predicted_no_show = output.no_show_prediction,
+                recommendation= [output.recommendation],
+                rationale = [output.rationale])]
+            )
+            day_datapoints.append(new_day)
+
+        # add to the totals 
+        map_total[(date_d, title)] = map_total.get((date_d, title), 0) + 1
+     
+
+
+    # at this point we should have all datapoints added and inside the day datapoints list BUT averages have not yet been averaged
+    for day_da in day_datapoints:
+        for p in day_da.datapoints:
+            p.chance_of_no_show = round(p.chance_of_no_show / map_total.get((day_da.date, p.bundle_name), 1), 3)
+            p.confidence = round(p.confidence / map_total.get((day_da.date, p.bundle_name), 1), 3)
 
     session.commit()
 
     # return the weekdatapoints object
-    return ForecastWeekData(week_date=start_date.isoformat(), datapoints=datapoints)
+    return ForecastWeekData(week_date=start_date.isoformat(), day_datapoints=day_datapoints)
 
     
 
@@ -350,7 +377,12 @@ if __name__ == "__main__":
     with Session(engine) as session:
         vendor_ids = session.exec(select(Vendor.vendor_id))
         for id in vendor_ids:
-            get_linear_regression_forecast_chart(session, vendor_id=id)
+            result = get_linear_regression_forecast_chart(session, vendor_id=id)
+            week_json = json.dumps(result.model_dump(), indent=2, default=str)
+            for day in result.day_datapoints:
+                print(f"\n Day: {day.date}")
+                day_json = json.dumps(day.model_dump(), indent=2, default=str)
+                print(day_json)
         
         
 

@@ -109,11 +109,11 @@ def extract_features_for_record(session: Session, record: Forecast_Input, vendor
         'is_weekend': 1 if record.date.weekday() >= 5 else 0, # 1 for weekend or 0 for weekday
         'avg_reserved_last_4w': get_rolling_avg_field( # use the helper fucntiond defined above
             session, record.vendor_id, record.slot_start, record.slot_end,
-            'bundles_reserved', date_ow=cutoff, weeks_back=4
+            'bundles_reserved', date_ow=cutoff, weeks_back=6
         ),
         'avg_no_shows_last_4w': get_rolling_avg_field( # use the helper fucntiond defined above
             session, record.vendor_id, record.slot_start, record.slot_end,
-            'no_shows', date_ow=cutoff, weeks_back=4
+            'no_shows', date_ow=cutoff, weeks_back=6
         ),
     }
 
@@ -137,7 +137,7 @@ def create_train_data(session: Session) -> pd.DataFrame:
 
     # for all the cutoff dates populate the cache to give us cutoff_date: vendor performance
     for cd in cutoff_dates:
-        vendor_stats_cache[cd] = get_vendors_performance(session, up_to=cd, weeks_history=4)
+        vendor_stats_cache[cd] = get_vendors_performance(session, up_to=cd, weeks_history=6)
     
     # for all the records we go through and add the ground truth labels to the dict leaving us with a list of dicts containing the training data 
     rows = []

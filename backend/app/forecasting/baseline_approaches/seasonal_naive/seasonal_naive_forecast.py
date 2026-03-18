@@ -185,7 +185,7 @@ def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date
     # execute the statement
     results = session.exec(stmt).all()
 
-    day_map = {} # map in the form of day: 
+    day_map = {} # map in the form of day: dict[title:day forecast]
 
     # loop through the results 
     for record, title in results:
@@ -267,7 +267,7 @@ def get_naive_forecast_chart(session: Session, vendor_id: int, target_start_date
                 bundle_name=agg["bundle_name"],
                 predicted_sales=agg["predicted_sales"],
                 predicted_no_show=agg["predicted_no_show"],
-                chance_of_no_show=round(avg_chance, 3),
+                chance_of_no_show=max(round(avg_chance, 3), 0.05),
                 confidence=round(avg_confidence, 3),
                 recommendation=agg["recommendations"],   # list of strings
                 rationale=agg["rationales"]               # list of strings

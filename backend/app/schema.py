@@ -248,8 +248,8 @@ class ForecastDatapoint(BaseModel):
     predicted_no_show: int # aggregated
     chance_of_no_show: float # averaged
     confidence: float # averaged
-    recommendation: List[str] # contains timeslot details
-    rationale: List[str]
+    recommendation: List[str] # contains timeslot details - aggregated
+    rationale: List[str] #aggregated
 
 class ForecastWeekData(BaseModel):
     week_date: str
