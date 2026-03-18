@@ -5,6 +5,7 @@ from app.core.database import get_session
 from app.models import Customer, User, Vendor
 from app.core.security import get_password_hash, verify_password, create_access_token
 from app.schema import LoginResponse, LoginRequest, CustomerSignupRequest, VendorSignupRequest
+from ukpostcodeutils import validation
 
 router = APIRouter()
 
@@ -47,6 +48,10 @@ def register_customer(
         raise HTTPException(status_code=400, detail="Email already registered")
 
     hashed_pw = get_password_hash(data.user.password)
+
+    parsed_postcode = (data.vendor.post_code).upper().replace(" ","")
+    if not validation.is_valid_postcode(parsed_postcode):
+        raise HTTPException(status_code=400, detail="Postcode is not valid")
     
     # user creation happens in 2 steps, fist create a user
     new_user = User(
@@ -64,7 +69,7 @@ def register_customer(
         new_customer = Customer(
             user_id = new_user.user_id,
             name = data.customer.name,
-            post_code = data.customer.post_code,
+            post_code = parsed_postcode,
         )
 
         session.add(new_customer)
@@ -87,6 +92,10 @@ def register_vendor(
         raise HTTPException(status_code=400, detail="Email already registered")
 
     hashed_pw = get_password_hash(data.user.password)
+
+    parsed_postcode = (data.vendor.post_code).upper().replace(" ","")
+    if not validation.is_valid_postcode(parsed_postcode):
+        raise HTTPException(status_code=400, detail="Postcode is not valid")
     
     # user creation happens in 2 steps, fist create a user
     new_user = User(
@@ -107,7 +116,7 @@ def register_vendor(
             street = data.vendor.street,
             phone_number = data.vendor.phone_number,
             opening_hours = data.vendor.opening_hours,
-            post_code = data.vendor.post_code,
+            post_code = parsed_postcode,
         )
 
         session.add(new_vendor)
