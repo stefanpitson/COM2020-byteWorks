@@ -5,12 +5,13 @@ from app.models import User, Streak
 from app.schema import CustomerRead, CustomerUpdate, StreakRead, CreditTopUpDetails
 from app.api.deps import get_current_user
 from app.core.security import verify_password, get_password_hash
-from ukpostcodeutils import validation
 from typing import Optional
 from datetime import datetime
 import re
+from ukpostcodeio.client import UKPostCodeIO
 
 router = APIRouter()
+postcodeAPI = UKPostCodeIO()
 
 @router.get("/profile", response_model= CustomerRead, tags=["Customers"], summary="Get the Customer Profile for the User logged in")
 def get_customer_profile(
@@ -62,8 +63,8 @@ def update_customer_profile(
     
     if data.customer.post_code != None:
         parsed_postcode = (data.customer.post_code).upper().replace(" ","")
-        if not validation.is_valid_postcode(parsed_postcode):
-                    raise HTTPException(status_code=400, detail="Postcode is not valid")
+        if not postcodeAPI.validate_postcode(parsed_postcode):
+            raise HTTPException(status_code=400, detail="Postcode is not valid")
         current_user.customer_profile.post_code = data.customer.post_code
     try:
         session.add(current_user)
@@ -144,7 +145,7 @@ def add_credit_customer(
     # Postcode and Address validation - ensures the postcode is a real postcode and that 
     # the first line address is not empty
     parsed_postcode = (card_details.postcode).upper().replace(" ","")
-    if not validation.is_valid_postcode(parsed_postcode):
+    if not postcodeAPI.validate_postcode(parsed_postcode):
         raise HTTPException(status_code=404, detail="Postcode is not valid")
     if card_details.first_line_address == "":
         raise HTTPException(status_code=404, detail="First line address is empty")

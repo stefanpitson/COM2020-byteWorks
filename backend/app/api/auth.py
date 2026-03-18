@@ -5,9 +5,10 @@ from app.core.database import get_session
 from app.models import Customer, User, Vendor
 from app.core.security import get_password_hash, verify_password, create_access_token
 from app.schema import LoginResponse, LoginRequest, CustomerSignupRequest, VendorSignupRequest
-from ukpostcodeutils import validation
+from ukpostcodeio.client import UKPostCodeIO
 
 router = APIRouter()
+postcodeAPI = UKPostCodeIO()
 
 # this module handles the login and registering for users
 
@@ -49,8 +50,8 @@ def register_customer(
 
     hashed_pw = get_password_hash(data.user.password)
 
-    parsed_postcode = (data.vendor.post_code).upper().replace(" ","")
-    if not validation.is_valid_postcode(parsed_postcode):
+    parsed_postcode = (data.customer.post_code).upper().replace(" ","")
+    if not postcodeAPI.validate_postcode(parsed_postcode):
         raise HTTPException(status_code=400, detail="Postcode is not valid")
     
     # user creation happens in 2 steps, fist create a user
@@ -94,7 +95,7 @@ def register_vendor(
     hashed_pw = get_password_hash(data.user.password)
 
     parsed_postcode = (data.vendor.post_code).upper().replace(" ","")
-    if not validation.is_valid_postcode(parsed_postcode):
+    if not postcodeAPI.validate_postcode(parsed_postcode):
         raise HTTPException(status_code=400, detail="Postcode is not valid")
     
     # user creation happens in 2 steps, fist create a user
