@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import api from "../api/axiosConfig";
 import { getReportList } from "../api/reports";
-import type { Vendor, Report } from "../types";
+import type { Vendor, Report, User } from "../types";
 
 const CheckCircleIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 text-green-500">
@@ -29,9 +29,9 @@ export default function AdminDashboard() {
     
     const [unverifiedVendors, setUnverifiedVendors] = useState<Vendor[]>([]);
     const [allReports, setAllReports] = useState<Report[]>([]);
+    const [allUsers, setAllUsers] = useState<User[]>([]);
     const [expandedReportId, setExpandedReportId] = useState<number | null>(null);
 
-    const [userIdToDelete, setUserIdToDelete] = useState("");
     const [templateIdToDelete, setTemplateIdToDelete] = useState("");
     const [bundleTemplateId, setBundleTemplateId] = useState("");
     const [bundleAmount, setBundleAmount] = useState("");
@@ -64,11 +64,24 @@ export default function AdminDashboard() {
         }
     };
 
+    const fetchUsers = async () => {
+        try {
+            setLoading(true);
+            const res = await api.get<{total_count: number; users: User[]}>("/admin/users");
+            setAllUsers(res.data.users || []);
+        } catch {
+            setErrorMsg("Failed to fetch users.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         setErrorMsg("");
         setSuccessMsg("");
         if (activeTab === "vendors") fetchVendors();
         if (activeTab === "reports") fetchReports();
+        if (activeTab === "users") fetchUsers();
     }, [activeTab]);
 
 
@@ -83,15 +96,13 @@ export default function AdminDashboard() {
         }
     };
 
-    const handleDeleteUser = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!userIdToDelete) return;
-        if (!window.confirm("Are you sure you want to delete this user? This cannot be undone.")) return;
+    const handleDeleteUser = async (userId: number) => {
+        if (!window.confirm(`Are you sure you want to delete User #${userId}? This cannot be undone.`)) return;
         
         try {
-            await api.delete(`/admin/users/${userIdToDelete}`);
-            setSuccessMsg(`User #${userIdToDelete} deleted.`);
-            setUserIdToDelete("");
+            await api.delete(`/admin/users/${userId}`);
+            setSuccessMsg(`User #${userId} deleted.`);
+            fetchUsers();
         } catch (err: any) {
             setErrorMsg(err.response?.data?.detail || "Failed to delete user.");
         }
@@ -338,27 +349,43 @@ export default function AdminDashboard() {
                     {/* Users Tab */}
                     {activeTab === "users" && (
                         <div>
-                            <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2 text-red-600">Account Deletion</h2>
-                            <p className="text-sm text-gray-500 mb-6">Enter a User ID to permanently delete their account. This removes their customer/vendor profile and all associated data.</p>
-                            
-                            <form onSubmit={handleDeleteUser} className="bg-red-50 border border-red-100 p-6 rounded-lg max-w-lg">
-                                <label className="block text-sm font-bold text-gray-700 mb-2">
-                                    Target User ID
-                                </label>
-                                <div className="flex gap-4">
-                                    <input 
-                                        type="number" 
-                                        required
-                                        placeholder="e.g. 104"
-                                        value={userIdToDelete}
-                                        onChange={(e) => setUserIdToDelete(e.target.value)}
-                                        className="flex-1 px-4 py-2 border border-gray-300 rounded shadow-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
-                                    />
-                                    <button type="submit" className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded font-bold shadow-sm flex items-center gap-2">
-                                        <TrashIcon /> Delete User
-                                    </button>
+                            <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2">User Management</h2>
+                            {loading ? (
+                                <div className="text-center py-10 text-gray-500">Loading users...</div>
+                            ) : allUsers.length === 0 ? (
+                                <div className="text-center py-10 text-gray-500 italic">No users found.</div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse table-fixed">
+                                        <thead>
+                                            <tr className="bg-gray-50 text-gray-600 text-sm border-b">
+                                                <th className="p-3 w-24">ID</th>
+                                                <th className="p-3 w-1/3">Email</th>
+                                                <th className="p-3 w-1/4">Role</th>
+                                                <th className="p-3 w-28 text-center">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-200">
+                                            {allUsers.map(u => (
+                                                <tr key={u.user_id} className="hover:bg-gray-50">
+                                                    <td className="p-3 font-medium text-gray-900">#{u.user_id}</td>
+                                                    <td className="p-3 truncate" title={u.email}>{u.email}</td>
+                                                    <td className="p-3 capitalize text-gray-600">{u.role}</td>
+                                                    <td className="p-3 text-center">
+                                                        <button 
+                                                            onClick={() => handleDeleteUser(u.user_id)}
+                                                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded font-medium shadow-sm flex items-center gap-1 justify-center w-full text-sm transition-colors"
+                                                            disabled={u.role === "admin"}
+                                                        >
+                                                            <TrashIcon /> {u.role === "admin" ? "Admin" : "Delete"}
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 </div>
-                            </form>
+                            )}
                         </div>
                     )}
 
