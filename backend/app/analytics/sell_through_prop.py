@@ -1,5 +1,6 @@
 from sqlmodel import Session, select
-from app.models import Template, Bundle, Reservation
+from app.models import Template, Bundle, Reservation, Vendor
+from app.core.database import engine
 from datetime import date, timedelta
 from typing import Dict, Tuple
 
@@ -41,18 +42,18 @@ def proportions_last_week(session: Session, vendor_id: int) -> Dict:
     total = no_shows + collected + expired
 
     if total == 0:
-        return {"collected": 0.0, "no_show": 0.0, "expired": 0.0, "week_start_date": start_date.isoformat()}
+        return {"collected": 0, "no_show": 0, "expired": 0, "week_start_date": start_date.isoformat()}
     
-    return {"collected": round(collected/total, 3),
-             "no_show": round(no_shows/total, 3),
-             "expired": round(expired/total, 3),
+    return {"collected": collected,
+             "no_show": no_shows,
+             "expired": expired,
              "week_start_date": start_date.isoformat()}
         
 
 
 
 
-def proportions_all_time(session: Session, vendor_id: int) -> Dict[str, float]:
+def proportions_all_time(session: Session, vendor_id: int) -> Dict[str, int]:
 
     """
     we select all relevant bundles and their reservation status with a join
@@ -82,8 +83,21 @@ def proportions_all_time(session: Session, vendor_id: int) -> Dict[str, float]:
     total = no_shows + collected + expired
 
     if total == 0:
-        return {"collected": 0.0, "no_show": 0.0, "expired": 0.0}
+        return {"collected": 0, "no_show": 0, "expired": 0}
     
-    return {"collected": round(collected/total, 3),
-             "no_show": round(no_shows/total, 3),
-             "expired": round(expired/total, 3)}
+    return {"collected": collected,
+             "no_show": no_shows,
+             "expired": expired}
+
+
+
+if __name__ == "__main__":
+
+# python -m app.analytics.sell_through_prop
+
+    with Session(engine) as session:
+        vendor_ids = session.exec(select(Vendor.vendor_id)).all()
+        for vid in vendor_ids:
+            week = proportions_last_week(session, vid)
+            all_time = proportions_all_time(session, vid)
+            print(f"week: {week}\n\n\nall time: {all_time}")
