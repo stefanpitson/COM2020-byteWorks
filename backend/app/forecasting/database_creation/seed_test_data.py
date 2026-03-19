@@ -137,61 +137,66 @@ def seed(weeks_of_history: int = 6):
 
                 # go through template records which have now been creates
                 for template in template_records:
-                    template_id = template["id"]
-                    popularity = template["popularity"]
 
-                    # random number of bundles posted in this batch based on predefined range
-                    posted = random.randint(*POSTED_RANGE)
+                    base_time = time(hour, minute)
+                    for offset in [0, 2]:                     # create two slots per day
+                        slot_time = time((hour + offset) % 24, minute)
 
-                    # set the reserved rate to calculate how many reservations
-                    base_rate = random.uniform(*BASE_RESERVATION_RATE)
-                    reservation_rate = min(base_rate * popularity * demand_factor, 0.95)
-                    reserved = int(posted * reservation_rate)
+                        template_id = template["id"]
+                        popularity = template["popularity"]
 
-                    # no-show rate is defined similarly
-                    no_show_rate = random.uniform(*NO_SHOW_RATE)
-                    no_shows = int(reserved * no_show_rate) if reserved > 0 else 0
+                        # random number of bundles posted in this batch based on predefined range
+                        posted = random.randint(*POSTED_RANGE)
 
-                    # Create bundles
-                    bundle_ids = []
-                    for _ in range(posted):
-                        bundle = Bundle(
-                            template_id=template_id,
-                            picked_up=False,
-                            date=slot_date,
-                            time=slot_time,
-                            purchased_by=None
-                        )
-                        session.add(bundle)
-                        session.flush()
-                        bundle_ids.append(bundle.bundle_id)
+                        # set the reserved rate to calculate how many reservations
+                        base_rate = random.uniform(*BASE_RESERVATION_RATE)
+                        reservation_rate = min(base_rate * popularity * demand_factor, 0.95)
+                        reserved = int(posted * reservation_rate)
 
+                        # no-show rate is defined similarly
+                        no_show_rate = random.uniform(*NO_SHOW_RATE)
+                        no_shows = int(reserved * no_show_rate) if reserved > 0 else 0
 
-                    # set reserved bundles and handle no‑shows
-                    if reserved > 0:
-                        reserved_bundle_ids = random.sample(bundle_ids, reserved)
-                        no_show_bundle_ids = random.sample(reserved_bundle_ids, no_shows) if no_shows > 0 else []
-
-                        for b_id in reserved_bundle_ids:
-                            cust_id = random.choice(customer_ids)
-                            # Update the bundle
-                            stmt = select(Bundle).where(Bundle.bundle_id == b_id)
-                            bundle = session.exec(stmt).one()
-                            bundle.purchased_by = cust_id
-
-                            status = 'no_show' if b_id in no_show_bundle_ids else 'collected'
-                            # create the reservation entity
-                            reservation = Reservation(
-                                bundle_id=b_id,
-                                customer_id=cust_id,
-                                time_created=datetime.now(),
-                                status=status,
-                                code=random.randint(1000, 9999) # accept small risk of collision just for seeded dataset. IRL collisions handled
+                        # Create bundles
+                        bundle_ids = []
+                        for _ in range(posted):
+                            bundle = Bundle(
+                                template_id=template_id,
+                                picked_up=False,
+                                date=slot_date,
+                                time=slot_time,
+                                purchased_by=None
                             )
-                            session.add(reservation)
+                            session.add(bundle)
+                            session.flush()
+                            bundle_ids.append(bundle.bundle_id)
 
-                            if status == 'collected':
-                                bundle.picked_up = True
+
+                        # set reserved bundles and handle no‑shows
+                        if reserved > 0:
+                            reserved_bundle_ids = random.sample(bundle_ids, reserved)
+                            no_show_bundle_ids = random.sample(reserved_bundle_ids, no_shows) if no_shows > 0 else []
+
+                            for b_id in reserved_bundle_ids:
+                                cust_id = random.choice(customer_ids)
+                                # Update the bundle
+                                stmt = select(Bundle).where(Bundle.bundle_id == b_id)
+                                bundle = session.exec(stmt).one()
+                                bundle.purchased_by = cust_id
+
+                                status = 'no_show' if b_id in no_show_bundle_ids else 'collected'
+                                # create the reservation entity
+                                reservation = Reservation(
+                                    bundle_id=b_id,
+                                    customer_id=cust_id,
+                                    time_created=datetime.now(),
+                                    status=status,
+                                    code=random.randint(1000, 9999) # accept small risk of collision just for seeded dataset. IRL collisions handled
+                                )
+                                session.add(reservation)
+
+                                if status == 'collected':
+                                    bundle.picked_up = True
 
         session.commit()
 
