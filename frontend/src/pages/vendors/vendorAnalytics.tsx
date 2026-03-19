@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, 
@@ -58,6 +58,7 @@ export default function VendorAnalytics() {
   const navigate = useNavigate();
   const [data, setData] = useState<ForecastWeekData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true)
   const [vendor, setVendor] = useState<Vendor>();
   const [model, setModel] = useState<string>("naive")
   const [graphPage, setGraphPage] = useState<number>(0)
@@ -71,15 +72,16 @@ export default function VendorAnalytics() {
   ];
 
   useEffect(() => {
-    const fetchAnalytics = async () => {
+    const fetchForecasts = async () => {
       try {
-
+        setDataLoading(true);
         const vendorData = await getVendorProfile();
         vendorData.carbon_saved = vendorData.carbon_saved ?? 0;
         setVendor(vendorData);
         
         if (!vendorData || vendorData.vendor_id === undefined) {
             console.error("Vendor profile or ID is missing");
+            setDataLoading(false);
             return;
         }
 
@@ -91,9 +93,10 @@ export default function VendorAnalytics() {
         console.error("Failed to load analytics", error);
       } finally {
         setLoading(false);
+        setDataLoading(false);
       }
     };
-    fetchAnalytics();
+    fetchForecasts();
   }, [model]);
 
   const dayOfWeek = (inDate?: string) => {
@@ -233,7 +236,12 @@ export default function VendorAnalytics() {
               </div>
               
               <div className="h-[400px] w-full mb-10">
-                {data?.day_datapoints[graphPage]?.datapoints.length === 0 ? (
+                {dataLoading ? (
+                  <div className="flex flex-col items-center justify-center h-full space-y-4">
+                    <div className="animate-spin w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full"></div>
+                    <p className="text-gray-500 font-bold animate-pulse">Calculating Forecasts...</p>
+                  </div>
+                ) : data?.day_datapoints[graphPage]?.datapoints.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-gray-500 space-y-2"> 
                     <p className="text-lg font-medium">No data points available for {dayOfWeek(data?.day_datapoints[graphPage]?.date)}</p> 
                     <p className="text-sm">New analytics will appear once transactions occur.</p>     
@@ -332,7 +340,7 @@ export default function VendorAnalytics() {
                             <p className="text-xs font-bold text-blue-400 uppercase tracking-widest">Our Recommendation</p>
                           </div>
                           <p className="text-m text-blue-900 leading-relaxed font-medium">
-                            {selectedDataPoint.recommendation}
+                            {selectedDataPoint.recommendation.join("\n")}
                           </p>
                         </div>
                       )}
@@ -340,7 +348,7 @@ export default function VendorAnalytics() {
                         <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
                           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Rationale</p>
                           <p className="text-sm text-gray-600 leading-relaxed italic">
-                            "{selectedDataPoint.rationale}"
+                            "{selectedDataPoint.rationale.join("\n")}"
                           </p>
                         </div>
                       )}

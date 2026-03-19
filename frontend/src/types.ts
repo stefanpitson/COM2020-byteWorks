@@ -78,8 +78,8 @@ export interface ForecastDataPoint {
   predicted_no_show: number;
   chance_of_no_show: number;
   confidence: number;
-  recommendation: string;
-  rationale: string;
+  recommendation: string[];
+  rationale: string[];
 }
 
 export interface ForecastDayData {
