@@ -17,6 +17,7 @@ import TemplateDetails from "./pages/vendors/templateDetails";
 import CustomerCredit from "./pages/customers/CustomerCredit";
 import CustomerReports from "./pages/customers/CustomerReports";
 import VendorReports from "./pages/vendors/VendorReports"
+import CustomerBadges from "./pages/customers/CustomerBadges";
 
 export default function App() {
   return (
@@ -29,6 +30,8 @@ export default function App() {
 
         {/* Applies the navbar */}
         <Route element={<MainLayout />}>
+
+          
           {/* Only Customers allowed */}
           <Route element={<ProtectedRoute allowedRole="customer" />}>
             <Route path="/customer/home" element={<CustomerHome />} />
@@ -38,6 +41,7 @@ export default function App() {
             <Route path="/customer/reservations" element={<CustomerReservations />} />
             <Route path="/customer/credit" element={<CustomerCredit />} />
             <Route path="/customer/reports" element={<CustomerReports />} />
+            <Route path="/customer/badges" element={<CustomerBadges />} />
           </Route>
 
           {/* Only Vendors allowed */}
