@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import logo from "../assets/logo.jpg"; 
+import logo from "../assets/logo.png"; 
 import { getCustomerProfile, getCustomerStreak } from "../api/customers"
 import type { Streak } from "../types"
 
@@ -106,17 +106,11 @@ export default function NavBar() {
     <nav className="fixed top-0 left-0 right-0 h-16 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm z-50 px-4 md:px-8 flex justify-between items-center transition-all">
       
       <Link to={homeLink} className="flex items-center gap-3 group">
-        <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md group-hover:shadow-lg transition-all border border-gray-100">
-           <img 
-             src={logo} 
-             alt="ByteWork Logo" 
-             className="w-full h-full object-cover"
-             onError={(e) => {
-               e.currentTarget.style.display = 'none';
-               e.currentTarget.parentElement?.classList.add('bg-[hsl(158,48%,46%)]'); // Fallback Green
-             }}
-           />
-        </div>
+        <img 
+          src={logo} 
+          alt="ByteWork Logo" 
+          className="h-14 w-auto object-contain"
+        />
         <span className="font-extrabold text-xl tracking-tight text-gray-800">
           Byte<span className="text-[hsl(158,48%,46%)]">Work</span>
         </span>

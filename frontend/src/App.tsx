@@ -16,6 +16,7 @@ import VendorReservations from "./pages/vendors/VendorReservations";
 import TemplateDetails from "./pages/vendors/templateDetails";
 import CustomerCredit from "./pages/customers/CustomerCredit";
 import CustomerSettings from "./pages/customers/CustomerSettings";
+import AdminDashboard from "./pages/AdminDashboard"
 import CustomerReports from "./pages/customers/CustomerReports";
 import VendorReports from "./pages/vendors/VendorReports"
 import CustomerBadges from "./pages/customers/CustomerBadges";
@@ -55,6 +56,10 @@ export default function App() {
             <Route path="/vendor/reports" element={<VendorReports />} />
           </Route>
         </Route>
+
+        <Route element={<ProtectedRoute allowedRole="admin" />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+        </Route> 
       </Routes>
     </BrowserRouter>
   );

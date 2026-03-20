@@ -219,6 +219,7 @@ def get_all_vendors(
         .outerjoin(Template,Template.vendor == Vendor.vendor_id)
         .outerjoin(Bundle, Bundle.template_id == Template.template_id)
         .outerjoin(Reservation, Bundle.bundle_id == Reservation.bundle_id)
+        .where(Vendor.validated == True)
         .group_by(
                 Vendor.vendor_id,
                 Vendor.name, # count the number of bundles per vendor
