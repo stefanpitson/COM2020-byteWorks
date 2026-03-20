@@ -9,8 +9,10 @@ from typing import Optional, List
 from datetime import datetime
 import re
 from ukpostcodeio.client import UKPostCodeIO
+from ukpostcodeio.client import UKPostCodeIO
 
 router = APIRouter()
+postcodeAPI = UKPostCodeIO()
 postcodeAPI = UKPostCodeIO()
 
 @router.get("/profile", response_model= CustomerRead, tags=["Customers"], summary="Get the Customer Profile for the User logged in")
@@ -63,6 +65,8 @@ def update_customer_profile(
     
     if data.customer.post_code != None:
         parsed_postcode = (data.customer.post_code).upper().replace(" ","")
+        if not postcodeAPI.validate_postcode(parsed_postcode):
+            raise HTTPException(status_code=400, detail="Postcode is not valid")
         if not postcodeAPI.validate_postcode(parsed_postcode):
             raise HTTPException(status_code=400, detail="Postcode is not valid")
         current_user.customer_profile.post_code = data.customer.post_code

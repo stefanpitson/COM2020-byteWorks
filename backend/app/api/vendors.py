@@ -19,6 +19,7 @@ from geopy.geocoders import Nominatim
 
 router = APIRouter()
 postcodeAPI = UKPostCodeIO()
+postcodeAPI = UKPostCodeIO()
 
 # Gets the vendor profile 
 @router.get("/profile", response_model= VendorRead, tags=["Vendors"], summary="Get the Vendor Profile for the User logged in")
@@ -74,6 +75,10 @@ def update_vendor_profile(
 
     if data.vendor.post_code != None:
         parsed_postcode = (data.vendor.post_code).upper().replace(" ","")
+        if not postcodeAPI.validate_postcode(parsed_postcode):
+            raise HTTPException(status_code=400, detail="Postcode is not valid")
+        current_user.vendor_profile.post_code = data.customer.post_code
+
         if not postcodeAPI.validate_postcode(parsed_postcode):
             raise HTTPException(status_code=400, detail="Postcode is not valid")
         current_user.vendor_profile.post_code = data.customer.post_code
@@ -270,6 +275,36 @@ def get_vendor_public_profile(
         raise HTTPException(status_code=404, detail="Vendor not found")
     return vendor
 
+
+@router.get("/{vendor_id}/distance", response_model=float, tags=["Vendors"], summary="Get distance from a postcode to a vendor's postcode")
+def get_dist_to_vendor(
+    vendor_id: int,
+    session: Session = Depends(get_session),
+    current_user = Depends(get_current_user),
+    useMiles : bool = False
+    ):
+
+    
+    if current_user.role != "customer":
+        raise HTTPException(status_code=403, detail="Not a customer account")
+        
+    if not current_user.customer_profile:
+        raise HTTPException(status_code=404, detail="Customer profile not found")
+
+
+    vendor = session.get(Vendor, vendor_id)
+    if not vendor:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+
+    postcodeConvertor = Nominatim(user_agent="postcode_distance")
+
+    userLoc = postcodeConvertor.geocode(current_user.customer_profile.post_code)
+    vendorLoc = postcodeConvertor.geocode(vendor.post_code)
+    
+    if useMiles:
+        return distance.distance((userLoc.latitude, userLoc.longitude), (vendorLoc.latitude, vendorLoc.longitude)).miles
+    else:
+        return distance.distance((userLoc.latitude, userLoc.longitude), (vendorLoc.latitude, vendorLoc.longitude)).km
 
 @router.get("/{vendor_id}/distance", response_model=float, tags=["Vendors"], summary="Get distance from a postcode to a vendor's postcode")
 def get_dist_to_vendor(
