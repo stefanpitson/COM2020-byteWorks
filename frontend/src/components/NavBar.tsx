@@ -87,6 +87,14 @@ export default function NavBar() {
     localStorage.clear();
     navigate("/login");
   }
+  
+  function handleSettings() {
+    if (role === "customer") {
+      navigate("/customer/settings")
+    } else if (role === "vendor") {
+      navigate("/vendor/settings")
+    }
+  }
 
   const today = new Date().toISOString().slice(0, 10);
   const hasStreak = streak && streak.count > 0;
@@ -159,7 +167,9 @@ export default function NavBar() {
             
             <ul className="text-sm text-gray-700">
               <li>
-                <button className="w-full text-left px-4 py-2.5 hover:bg-gray-50 hover:text-[hsl(158,48%,46%)] flex items-center transition-colors">
+                <button 
+                  onClick={handleSettings}
+                  className="w-full text-left px-4 py-2.5 hover:bg-gray-50 hover:text-[hsl(158,48%,46%)] flex items-center transition-colors">
                   <SettingsIcon />
                   Settings
                 </button>

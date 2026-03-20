@@ -13,6 +13,20 @@ export const getCustomerStreak = async () => {
   return response.data;
 }
 
+export interface CustomerUpdatePayload {
+  user: {
+    email?: string;
+    old_password?: string;
+    new_password?: string;
+  };
+  customer: {
+    name?: string;
+    post_code?: string;
+  };
+}
+
+export const updateCustomerProfile = async (data: CustomerUpdatePayload) => {
+  const response = await api.patch("/customers/profile", data);
 export const getOwnedBadges = async (): Promise<BadgeList> => {
   const response = await api.get<BadgeList>("/customers/badges/owned");
   return response.data;
