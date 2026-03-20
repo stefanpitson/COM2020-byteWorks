@@ -4,7 +4,7 @@ from app.core.database import get_session
 from app.api.deps import get_current_user
 from datetime import date, timedelta
 import logging
-from typing import Optional, Dict
+from typing import Optional, Dict, Tuple, List
 from sqlalchemy.exc import SQLAlchemyError
 from app.analytics.sell_through_prop import proportions_all_time, proportions_last_week
 from app.analytics.waste_proxy import waste_proxy
@@ -64,7 +64,7 @@ def get_waste_proxy(current_user = Depends(get_current_user), session: Session =
     vendor_id = current_user.vendor_profile.vendor_id # get the vendor id from current user
 
     try: # attempt to extract info from the function for the current vendor
-        waste = waste_proxy(session, vendor_id)
+        waste: Dict[str, float] = waste_proxy(session, vendor_id)
 
         return waste
     
@@ -96,7 +96,7 @@ def get_pricing_effectiveness(current_user = Depends(get_current_user), session:
 
     try:
         # call and return result of plots
-        plots = pricing_effectiveness(session, vendor_id, days_back=42)
+        plots: List[Tuple[float, float]] = pricing_effectiveness(session, vendor_id, days_back=42)
         return plots
     
     # use the logger to log the exceptions made
