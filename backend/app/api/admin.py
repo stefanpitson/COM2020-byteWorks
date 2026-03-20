@@ -93,6 +93,13 @@ def validate_vendor(
 
 def create_admin():
     with Session(engine) as session:
+        statement = select(User).where(User.email == "admin@byte.com")
+        existing = session.exec(statement).first()
+
+        if existing:
+            print("admin already exists")
+            return
+        
         admin = User(email = "admin@byte.com", password_hash= get_password_hash("adminPass"), role ="admin")
         try:
             session.add(admin)
