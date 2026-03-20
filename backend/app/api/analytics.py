@@ -7,6 +7,8 @@ import logging
 from typing import Optional, Dict
 from sqlalchemy.exc import SQLAlchemyError
 from app.analytics.sell_through_prop import proportions_all_time, proportions_last_week
+from app.analytics.waste_proxy import waste_proxy
+from app.analytics.pricing_effectiveness import pricing_effectiveness
 
 # log errors produced
 logger = logging.getLogger(__name__)
@@ -43,5 +45,65 @@ def get_sell_through_proportions(current_user = Depends(get_current_user), sessi
         raise HTTPException(status_code=500, detail="Data Base error")
     
     except Exception: # generic exception to catch all other exceptions
-        logger.exception("error in forecast generation")
+        logger.exception("error in analytic generation")
+        raise HTTPException(status_code=500, detail="internal server error")
+    
+
+
+@router.get("/waste_proxy")
+def get_waste_proxy(current_user = Depends(get_current_user), session: Session = Depends(get_session)):
+    """
+    endpoint to call the function waste_proxy
+    this function returns a dictionary in the form: {"total_waste_avoided": x, "average_bundle_weight": y}
+    """
+
+    # if the vendor does not exist or has been incorrectly received: 400 code: client send bad request
+    if not current_user.vendor_profile:
+        raise HTTPException(status_code=400, detail="User has no vendor profile associated")
+        
+    vendor_id = current_user.vendor_profile.vendor_id # get the vendor id from current user
+
+    try: # attempt to extract info from the function for the current vendor
+        waste = waste_proxy(session, vendor_id)
+
+        return waste
+    
+    # use the logger to log the exceptions made
+    except SQLAlchemyError:
+        logger.exception("error when loading database")
+        raise HTTPException(status_code=500, detail="Data Base error")
+    
+    except Exception: # generic exception to catch all other exceptions
+        logger.exception("error in analytic generation")
+        raise HTTPException(status_code=500, detail="internal server error")
+    
+
+
+@router.get("/pricing_effectiveness")
+def get_pricing_effectiveness(current_user = Depends(get_current_user), session: Session = Depends(get_session)):
+    """
+    endpoint that calls the function pricing_effectiveness
+    this return a list of tuples in the form [(discount, sell through)] 
+    intended to made into a scatter plot on the front end
+    the front end should display a not enough data message if [] is returned
+    """
+
+    # if the vendor does not exist or has been incorrectly received: 400 code: client send bad request
+    if not current_user.vendor_profile:
+        raise HTTPException(status_code=400, detail="User has no vendor profile associated")
+        
+    vendor_id = current_user.vendor_profile.vendor_id # get the vendor id from current user
+
+    try:
+        # call and return result of plots
+        plots = pricing_effectiveness(session, vendor_id)
+        return plots
+    
+    # use the logger to log the exceptions made
+    except SQLAlchemyError:
+        logger.exception("error when loading database")
+        raise HTTPException(status_code=500, detail="Data Base error")
+    
+    except Exception: # generic exception to catch all other exceptions
+        logger.exception("error in analytic generation")
         raise HTTPException(status_code=500, detail="internal server error")
