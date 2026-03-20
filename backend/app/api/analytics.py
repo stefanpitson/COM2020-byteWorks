@@ -9,6 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.analytics.sell_through_prop import proportions_all_time, proportions_last_week
 from app.analytics.waste_proxy import waste_proxy
 from app.analytics.pricing_effectiveness import pricing_effectiveness
+from app.schema import discount_coordinate, discount_coordinate_data
 
 # log errors produced
 logger = logging.getLogger(__name__)
@@ -79,11 +80,11 @@ def get_waste_proxy(current_user = Depends(get_current_user), session: Session =
     
 
 
-@router.get("/pricing_effectiveness")
+@router.get("/pricing_effectiveness", response_model=discount_coordinate_data)
 def get_pricing_effectiveness(current_user = Depends(get_current_user), session: Session = Depends(get_session)):
     """
     endpoint that calls the function pricing_effectiveness
-    this return a list of tuples in the form [(discount, sell through)] 
+    this return a list of custom classes to represent the datapoints
     intended to made into a scatter plot on the front end
     the front end should display a not enough data message if [] is returned
     """
@@ -96,7 +97,7 @@ def get_pricing_effectiveness(current_user = Depends(get_current_user), session:
 
     try:
         # call and return result of plots
-        plots: List[Tuple[float, float]] = pricing_effectiveness(session, vendor_id, days_back=42)
+        plots: discount_coordinate_data = pricing_effectiveness(session, vendor_id, days_back=42)
         return plots
     
     # use the logger to log the exceptions made

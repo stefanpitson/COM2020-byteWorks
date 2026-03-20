@@ -258,3 +258,13 @@ class ForecastWeekData(BaseModel):
 class ForecastDayData(BaseModel):
     date: str
     datapoints: List[ForecastDatapoint]
+
+
+# for analytics
+
+class discount_coordinate_data(BaseModel):
+    coordinates: List[discount_coordinate] # a list of the discount coordinates
+
+class discount_coordinate(BaseModel):
+    discount: float # between 0 and 1 
+    sell_through: float # between 0 and 1 - 1 meaning every bundle posted was sold

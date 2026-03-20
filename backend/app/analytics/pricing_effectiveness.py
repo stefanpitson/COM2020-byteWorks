@@ -2,15 +2,17 @@ from sqlmodel import Session, select
 from app.models import Forecast_Input, Vendor
 from app.core.database import engine
 from app.forecasting.database_creation.generate_input_forecasts import sync_forecast_inputs
-from typing import Tuple, List
+from typing import List
+from app.schema import discount_coordinate, discount_coordinate_data
 
 
 
-def pricing_effectiveness(session: Session, vendor_id: int, days_back = 42) -> List[Tuple[float, float]]:
+def pricing_effectiveness(session: Session, vendor_id: int, days_back = 42) -> discount_coordinate_data:
     """
     we want to return coordinates for a scatter plot with
     x axis: discount
     y axis: sold vs posted as a fraction
+    this is represented as custom classes defined in schema
     """
 
     sync_forecast_inputs(session, vendor_id, days_back)
@@ -22,13 +24,13 @@ def pricing_effectiveness(session: Session, vendor_id: int, days_back = 42) -> L
     result = session.exec(statement).all()
 
     if not result:
-        return []
+        return discount_coordinate_data(coordinates=[])
     
     acc = {} # discount: (sell through, total)
     
     for discount, posted, reserved, no_shows in result:
         if posted == 0:
-            sell_t = 0
+            continue
         else:
             sell_t = (reserved-no_shows)/posted
 
@@ -38,10 +40,16 @@ def pricing_effectiveness(session: Session, vendor_id: int, days_back = 42) -> L
         else:
             acc[discount] = [sell_t, 1]
 
-    coords: List[Tuple[float, float]] = [(round(discount, 2), round((sell_through/total), 2)) for discount, (sell_through, total) in acc.items()]
+            
+    coordinates: List[discount_coordinate] = []
 
-    return coords
+    for discount, (sell_through, total) in acc.items():
 
+        coordinate = discount_coordinate(discount=round(discount, 2), sell_through=round((sell_through/total), 2))
+
+        coordinates.append(coordinate)
+
+    return discount_coordinate_data(coordinates=coordinates)
 
 
 
