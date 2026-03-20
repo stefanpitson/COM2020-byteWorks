@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
 from datetime import date, time
+import re
 
 # schemas contains what the frontend will send and expect in return 
 
@@ -27,6 +28,10 @@ class VendorRead(BaseModel):
     carbon_saved: float
     food_saved: float
     photo: Optional[str]
+
+class AdminVendorList(BaseModel):
+    total_count: int
+    vendors: List[VendorRead]
 
 # ___AUTH SCHEMAS___  
 
@@ -239,6 +244,60 @@ class StreakRead(BaseModel):
     ended:bool
 
 
+class BadgeRead(BaseModel):
+    badge_id: int
+    title: str
+    description: str
+    metric: str
+    threshold: float
+
+class BadgeList(BaseModel):
+    total_count: int
+    badges: List[BadgeRead]
+
+class LeaderboardEntry(BaseModel):
+    customer_id: int
+    rank: int
+    name: str
+    food_saved: float
+    is_you: bool
+
+class LeaderboardList(BaseModel):
+    total_count: int
+    entries: List[LeaderboardEntry]
+class ReportCreate(BaseModel):
+    vendor_id: int
+    title: str
+    complaint:str
+
+class ReportRead(BaseModel):
+    report_id: int
+    vendor_id:int
+    customer_id:int
+    title:str
+    complaint:str
+    responded: bool
+    response: str | None 
+    date_made: date
+    date_responded: date | None
+
+class ReportRespond(BaseModel):
+    response:str
+
+class ReportList(BaseModel):
+    total_count: int
+    reports: List [ReportRead]
+
+    
+class CreditTopUpDetails(BaseModel):
+    credit_top_up : float
+    first_line_address : str
+    postcode : str
+    name_on_card : str
+    card_number : str
+    expiry_date : date
+    cvv : str
+
 class ForecastDatapoint(BaseModel):
     bundle_name: str        
     predicted_sales: int
@@ -254,3 +313,7 @@ class ForecastDatapoint(BaseModel):
 class ForecastWeekData(BaseModel):
     week_date: str
     datapoints: List[ForecastDatapoint]
+
+class DeleteBundles(BaseModel):
+    template_id: int
+    amount: int

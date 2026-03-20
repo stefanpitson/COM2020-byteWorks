@@ -166,7 +166,7 @@ Then either click the link given in terminal 2 or navigate to http://localhost:5
 If you need to reset the database at any point, simply navigate back into the psql shell, enter your password and run the following:
 
 `\c byteworks`  
-`DROP TABLE IF EXISTS vendor, customer, "user", template, bundle, reservation, streak CASCADE;`
+`DROP TABLE IF EXISTS vendor, customer, "user", template, bundle, reservation, streak, report CASCADE;`
 
 ## Testing
 

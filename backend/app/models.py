@@ -7,7 +7,7 @@ from random import random
 
 
 class User_Badge(SQLModel, table=True):
-    user_id: Optional[int] = Field(default=None, primary_key=True, foreign_key="user.user_id")
+    user_id: Optional[int] = Field(default=None, primary_key=True, foreign_key="user.user_id", ondelete="CASCADE")
     badge_id: Optional[int] = Field(default=None, primary_key=True, foreign_key="badge.badge_id")
 
 class User(SQLModel, table=True):
@@ -34,6 +34,9 @@ class Badge(SQLModel, table=True):
     description: str
     user_role:str = Field(default="user")
 
+    metric: str # the type of variable the badge is tracking (e.g: "carbon_saved", "streak_count", etc)
+    threshold: float # the value the metric has to reach for the badge to be awarded
+
     users: List["User"] = Relationship( # for the linking table
         back_populates="badges",         # having this means we dont have to write join statements
         link_model=User_Badge
@@ -58,18 +61,20 @@ class Vendor(SQLModel, table=True):
 
 class Customer(SQLModel, table=True):
     customer_id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: Optional[int] = Field(foreign_key="user.user_id")
+    user_id: Optional[int] = Field(foreign_key="user.user_id", ondelete="CASCADE")
     name:str
     post_code:str
     store_credit: float = Field(default=100.0)
     carbon_saved: float = Field(default=0.0)
+    food_saved: float = Field(default=0.0)
+    money_saved: float = Field(default=0.0)
     rating: Optional[int] = Field(default=None)
 
-    user: Optional[User] = Relationship(back_populates="customer_profile")
+    user: Optional[User] = Relationship(back_populates="customer_profile") 
 
 class Streak(SQLModel, table=True):
     streak_id: Optional[int] =Field(default=None, primary_key=True)
-    customer_id: Optional[int] =Field(foreign_key="customer.customer_id")
+    customer_id: Optional[int] =Field(foreign_key="customer.customer_id", ondelete="CASCADE")
     count: int = Field(default=0)
     started: Date
     last: Date
@@ -77,7 +82,7 @@ class Streak(SQLModel, table=True):
 
 class Allergen_Template(SQLModel,table=True): # linking table, has to come before the other entities 
     allergen_id: Optional[int] = Field(default=None, primary_key=True, foreign_key="allergen.allergen_id")
-    template_id: Optional[int] = Field(default = None, primary_key=True, foreign_key="template.template_id")
+    template_id: Optional[int] = Field(default = None, primary_key=True, foreign_key="template.template_id", ondelete="CASCADE")
 
 class Template(SQLModel, table=True):
     template_id: Optional[int] = Field(default=None, primary_key=True)
@@ -94,7 +99,7 @@ class Template(SQLModel, table=True):
     is_vegan: bool = Field(default=False)
     is_vegetarian: bool = Field(default=False)
 
-    vendor: Optional[int] = Field(default=None,foreign_key="vendor.vendor_id")
+    vendor: Optional[int] = Field(default=None,foreign_key="vendor.vendor_id", ondelete="CASCADE")
 
     photo: Optional[str] = Field(default=None)
 
@@ -115,18 +120,18 @@ class Allergen(SQLModel, table=True):
 
 class Bundle(SQLModel, table=True):
     bundle_id: Optional[int] = Field(default=None, primary_key=True)
-    template_id: Optional[int] = Field( default=None, foreign_key="template.template_id")
+    template_id: Optional[int] = Field( default=None, foreign_key="template.template_id", ondelete="SET NULL")
     picked_up: bool = Field(default= False)
     date: Date = Field(default_factory=lambda: datetime.now().date()) # basically tells the db to use this function to populate it
     time: Time = Field(default_factory=lambda: datetime.now().time())
 
-    purchased_by: Optional[int] = Field(default=None, foreign_key="customer.customer_id")
+    purchased_by: Optional[int] = Field(default=None, foreign_key="customer.customer_id", ondelete="SET NULL")
 
 
 class Reservation(SQLModel, table=True):
     reservation_id:Optional[int] = Field(default=None, primary_key=True)
     bundle_id: Optional[int] = Field(default=None, foreign_key="bundle.bundle_id")
-    customer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id") 
+    customer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id",  ondelete="SET NULL") 
     time_created: datetime = Field(default_factory=datetime.now)
 
     # status either:
@@ -140,17 +145,19 @@ class Reservation(SQLModel, table=True):
 
 class Report(SQLModel, table=True):
     report_id: Optional[int] = Field(default=None, primary_key=True)
-    customer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id")
-    vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id")
+    customer_id: Optional[int] = Field(default=None, foreign_key="customer.customer_id",  ondelete="SET NULL")
+    vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id",  ondelete="SET NULL")
     title: str
     complaint: str
     responded: bool = Field(default=False)
     response: Optional[str]
+    date_made: Date = Field(default_factory=lambda:datetime.now().date())
+    date_responded: Optional[Date] = Field(default=None)
 
 class Forecast_Input(SQLModel, table=True):
     record_id: Optional[int] = Field(default=None, primary_key=True)
-    vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id")
-    template_id: Optional[int] = Field(default=None, foreign_key="template.template_id")
+    vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id", ondelete="CASCADE")
+    template_id: Optional[int] = Field(default=None, foreign_key="template.template_id", ondelete="CASCADE")
 
     #time the bundles were posted, this should be able to grab from bundles table, but 
     # could have issues if there aren't any
@@ -165,8 +172,8 @@ class Forecast_Input(SQLModel, table=True):
 
 class Forecast_Output(SQLModel, table=True):
     output_id: Optional[int] = Field(default=None, primary_key=True)
-    vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id")
-    template_id: Optional[int] = Field(default=None, foreign_key="template.template_id")
+    vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id", ondelete="CASCADE")
+    template_id: Optional[int] = Field(default=None, foreign_key="template.template_id", ondelete="CASCADE")
     date: Date = Field(default_factory=lambda:datetime.now().date()) # predcited day to sell
     slot_start: Time # this is the start of the 2 HOUR SLOT representing time predicted sale time
     slot_end: Time # this is the end of the 2 HOUR SLOT representing time predicted sale time
