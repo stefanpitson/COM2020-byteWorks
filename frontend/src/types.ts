@@ -90,3 +90,40 @@ export interface ForecastWeekData {
   datapoints: ForecastDataPoint[];
 }
 
+export interface Report {
+  report_id: number;
+  title: string;
+  complaint: string;
+  response: string | null;
+  responded: boolean;
+  customer_id: number;
+  vendor_id: number;
+  date_made: string; 
+  date_responded: string | null;
+}
+
+export interface Badge {
+  badge_id: number;
+  title: string;
+  description: string;
+  metric: string;
+  threshold: number;
+}
+
+export interface BadgeList {
+  total_count: number;
+  badges: Badge[];
+}
+
+export interface LeaderboardEntry {
+  customer_id: number;
+  rank: number;
+  name: string;
+  food_saved: number;
+  is_you: boolean;
+}
+
+export interface LeaderboardList {
+  total_count: number;
+  entries: LeaderboardEntry[];
+}
