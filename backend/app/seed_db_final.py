@@ -1,14 +1,16 @@
 from sqlmodel import Session, SQLModel, select
 from app.core.database import engine, seed_allergens
 from app.core.security import get_password_hash
-from app.models import User, Vendor, Customer, Template, Bundle, Reservation, Streak, Allergen
+from app.models import User, Vendor, Customer, Template, Bundle, Reservation, Streak, Allergen, Report
 from datetime import datetime, timedelta, time as dt_time
 import random
 import copy
 import shutil
 from pathlib import Path
+from math import exp
 
 from uploads.vendors_data import vendors # vendor info
+from uploads.issue_reports_data import issue_data_pool
 from app.forecasting.database_creation.generate_input_forecasts import sync_forecast_inputs
 
 def seed_database():
@@ -18,8 +20,10 @@ def seed_database():
     seed_allergens()
 
     vendors_runtime = copy.deepcopy(vendors)  # so as to keep the original dictionary
-    customer_names = ["alice", "bob", "charlie", "david", "eve", "frank", "grace", "hannah", "irene", "jack"]
+    # customer_names = ["alice", "bob", "charlie", "david", "eve", "frank", "grace", "hannah", "irene", "jack"]
     customer_list = []
+    vendor_list = []
+    num_customers = 150
 
     with Session(engine) as session:
         allergen_lookup = {
@@ -27,10 +31,10 @@ def seed_database():
             for allergen in session.exec(select(Allergen)).all()
         }
 
-        for i in range(len(customer_names)):
+        for i in range(num_customers):
             user = User(
-                email=f"{customer_names[i]}@gmail.com",
-                password_hash=get_password_hash(f"{customer_names[i]}123"),
+                email=f"customer{i}@gmail.com",
+                password_hash=get_password_hash(f"customer{i}123"),
                 role="customer",
             )
             session.add(user)
@@ -39,7 +43,7 @@ def seed_database():
 
             customer = Customer(
                 user_id=user.user_id,
-                name=customer_names[i],
+                name=f"customer{i}",
                 post_code="EX4 6TJ",
                 carbon_saved=0,
                 store_credit=800,
@@ -77,11 +81,12 @@ def seed_database():
                 validated=True,
                 carbon_saved=0,
             )
+            
+            vendor_list.append(vendor_account)
 
             session.add(vendor_account)
             session.commit()
             session.refresh(vendor_account)
-
 
             # TEMPLATE CREATION
             template_list = [] 
@@ -222,7 +227,7 @@ def seed_database():
             # sync forecast inputs
             session.flush()
             sync_forecast_inputs(session, vendor_id=vendor_account.vendor_id, days_back=60)
-
+        
             # current bundles available today
             for i in range(len(template_list)):
                 num_today = max(1, int(round(popularity_list[i] * total_bundles_sold_per_week)))
@@ -346,6 +351,51 @@ def seed_database():
             if current_streak and current_streak.last + timedelta(days=7) < today:
                 current_streak.ended = True
                 session.add(current_streak)
+
+        # Create Issue Reports with bell curve distribution
+        num_reports = 150
+        mid_customers = num_customers // 2
+        base_customers = mid_customers ** 2
+        step_customers = num_reports / base_customers
+
+        num_vendors = len(vendor_list)
+        mid_vendors = (num_vendors - 1) / 2
+        sigma_vendors = max(1.0, num_vendors / 4)
+
+        vendor_weights = [exp(-((k - mid_vendors) ** 2) / (2 * sigma_vendors ** 2)) for k in range(num_vendors)]
+
+        for i in range(len(customer_list)):
+            val_customers = mid_customers + 1 - abs(mid_customers - i)
+            for j in range(round(val_customers * step_customers)):
+                vendor_idx = random.choices(range(num_vendors), weights=vendor_weights, k=1)[0]
+                category = random.choice(list(issue_data_pool.keys()))
+                data = issue_data_pool[category]
+
+                title = random.choice(data["titles"])
+                subject = random.choice(data["A_subjects"])
+                problem = random.choice(data["B_problems"])
+                feedback = random.choice(data["C_feedback"])
+                full_complaint = f"{subject} {problem}\n{feedback}"
+                responded = random.choice([True, False])
+                response = None
+
+                if (responded):
+                    response = random.choice(data["vendor_responses"])
+
+                seeded_report = Report(
+                    customer_id=customer_list[i].customer_id,
+                    vendor_id=vendor_list[vendor_idx].vendor_id,
+                    title=title,
+                    complaint=(
+                        full_complaint 
+                    ),
+                    responded=responded,
+                    response=response,
+                )
+                session.add(seeded_report)
+        session.flush()
+
+
 
         session.commit()
 
