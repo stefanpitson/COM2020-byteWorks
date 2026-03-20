@@ -96,7 +96,7 @@ def get_pricing_effectiveness(current_user = Depends(get_current_user), session:
 
     try:
         # call and return result of plots
-        plots = pricing_effectiveness(session, vendor_id)
+        plots = pricing_effectiveness(session, vendor_id, days_back=42)
         return plots
     
     # use the logger to log the exceptions made
