@@ -311,3 +311,12 @@ class ForecastWeekData(BaseModel):
 class DeleteBundles(BaseModel):
     template_id: int
     amount: int
+
+
+class AllUsers(BaseModel):
+    total_count: int
+    users: List[UserData]
+    class UserData(BaseModel):
+        user_id: int
+        email: str
+        role: str
