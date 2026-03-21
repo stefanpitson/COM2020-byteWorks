@@ -242,7 +242,23 @@ def test_get_streak_success(test_client, registered_customer, session, customer_
     assert streak_response_data == {'streak_id': 1, 'customer_id': 1, 'count': 10, 'started': started.isoformat(), 'last': last.isoformat(), 'ended': False}
     assert streak_response.status_code == 200
 
-def test_post_add_credit(test_client, customer_login_response):
+def test_post_add_credit_using_mastercard(test_client, customer_login_response):
+    token = customer_login_response["access_token"]
+    credit_response = test_client.post("/customers/addcredit",
+                     headers={"Authorization": "Bearer " + token},
+                     json={"credit_top_up": 15.0,
+                           "first_line_address": "15 Sidwell Street",
+                           "postcode": "EX4 6NN",
+                           "name_on_card": "Joe Andrews",
+                           "card_number": "5555555555554444",
+                           "expiry_date": "2026-10-31",
+                           "cvv": "123"})
+    credit_response_data = credit_response.json()
+    
+    assert credit_response_data == {'message': 'Credit added successfully'}
+    assert credit_response.status_code == 200
+
+def test_post_add_credit_using_visa(test_client, customer_login_response):
     token = customer_login_response["access_token"]
     credit_response = test_client.post("/customers/addcredit",
                      headers={"Authorization": "Bearer " + token},
@@ -254,4 +270,5 @@ def test_post_add_credit(test_client, customer_login_response):
                            "expiry_date": "2026-10-31",
                            "cvv": "123"})
     credit_response_data = credit_response.json()
-    print(credit_response_data)
+    assert credit_response_data == {'message': 'Credit added successfully'}
+    assert credit_response.status_code == 200
