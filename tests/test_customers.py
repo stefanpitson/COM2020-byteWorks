@@ -1,3 +1,7 @@
+from sqlmodel import select
+from app.models import User, Customer, Streak
+from datetime import datetime, timedelta
+
 def test_get_profile_success(test_client, registered_customer, customer_login_response):
     customer = registered_customer["customer_data"]
     token = customer_login_response["access_token"]
@@ -200,3 +204,54 @@ def test_patch_profile_same_post_code_fail(test_client, registered_customer, cus
     profile_response_data = profile_response.json()
     assert profile_response_data["message"] == "Customer updated successfully"
     assert profile_response.status_code == 200
+
+def test_get_streak_of_zero_success(test_client, customer_login_response):
+    token = customer_login_response["access_token"]
+    streak_response = test_client.get("/customers/streak",
+                                      headers={"Authorization": "Bearer " + token}
+                                      )
+    streak_response_data = streak_response.json()
+    assert streak_response_data == None
+    assert streak_response.status_code == 200
+
+def test_get_streak_success(test_client, registered_customer, session, customer_login_response):
+    email = registered_customer["customer_data"]["user"]["email"] # grab customers email
+    user = session.exec(select(User).where(User.email == email)).first() # grab user record
+    customer = session.exec(select(Customer).where(Customer.user_id == user.user_id)).first() # grab customer record
+
+    started = datetime.now().date() - timedelta(days=10)
+    last = datetime.now().date() - timedelta(days=1)
+
+    streak = Streak(
+        customer_id=customer.customer_id,
+        started=started,
+        last=last,
+        count=10,
+        ended=False,
+    )  # seeded customer with streak of 10
+    session.add(streak)
+    session.commit()
+    session.refresh(streak)
+
+    token = customer_login_response["access_token"]
+    streak_response = test_client.get("/customers/streak",
+                                      headers={"Authorization": "Bearer " + token}
+                                      )
+    
+    streak_response_data = streak_response.json()
+    assert streak_response_data == {'streak_id': 1, 'customer_id': 1, 'count': 10, 'started': started.isoformat(), 'last': last.isoformat(), 'ended': False}
+    assert streak_response.status_code == 200
+
+def test_post_add_credit(test_client, customer_login_response):
+    token = customer_login_response["access_token"]
+    credit_response = test_client.post("/customers/addcredit",
+                     headers={"Authorization": "Bearer " + token},
+                     json={"credit_top_up": 15.0,
+                           "first_line_address": "15 Sidwell Street",
+                           "postcode": "EX4 6NN",
+                           "name_on_card": "Joe Andrews",
+                           "card_number": "3782 8224 6310 005",
+                           "expiry_date": "2026-10-31",
+                           "cvv": "1234"})
+    credit_response_data = credit_response.json()
+    print(credit_response_data)

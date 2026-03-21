@@ -32,6 +32,12 @@ def get_test_session():
     with Session(test_engine) as session:
         yield session
 
+
+@pytest.fixture
+def session(): # to make changes to db using session in test files
+    with Session(test_engine) as session:
+        yield session
+
 @pytest.fixture(scope="session")
 def app():
     app = FastAPI()
