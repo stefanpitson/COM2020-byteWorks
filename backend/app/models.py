@@ -167,11 +167,11 @@ class Forecast_Output(SQLModel, table=True):
     output_id: Optional[int] = Field(default=None, primary_key=True)
     vendor_id: Optional[int] = Field(default=None, foreign_key="vendor.vendor_id")
     template_id: Optional[int] = Field(default=None, foreign_key="template.template_id")
-    date: Date = Field(default_factory=lambda:datetime.now().date()) # predcited day to sell
+    date: Date = Field(default_factory=lambda:datetime.now().date()) # predicted day to sell
     slot_start: Time # the start of a timeslot for a vendor to POST a bundle
-    slot_end: Time # the end of a timeslot for a vendor to POST a bundle -> this leads to actionalble requests to a vendor for when to POST a bundle NOT when they will sell a bundle or a pickup window
-    model_type: str = Field(default = "seasonal_naive") # to show what model made the predicition since many different models could make the same forecast
-    reservation_prediction: int # how many of these bundles will be sell
+    slot_end: Time # the end of a timeslot for a vendor to POST a bundle -> this leads to actionable requests to a vendor for when to POST a bundle NOT when they will sell a bundle or a pickup window
+    model_type: str = Field(default = "seasonal_naive") # to show what model made the prediction since many different models could make the same forecast
+    reservation_prediction: int # how many of these bundles will be sold
     no_show_prediction: int 
     recommendation: str
     rationale:str 

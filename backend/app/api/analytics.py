@@ -9,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.analytics.sell_through_prop import proportions_all_time, proportions_last_week
 from app.analytics.waste_proxy import waste_proxy
 from app.analytics.pricing_effectiveness import pricing_effectiveness
-from app.schema import discount_coordinate, discount_coordinate_data
+from app.schema import discount_coordinate_data
 
 # log errors produced
 logger = logging.getLogger(__name__)

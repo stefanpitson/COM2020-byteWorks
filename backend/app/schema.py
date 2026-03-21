@@ -262,9 +262,33 @@ class ForecastDayData(BaseModel):
 
 # for analytics
 
+# for pricing effectiveness
 class discount_coordinate_data(BaseModel):
     coordinates: List[discount_coordinate] # a list of the discount coordinates
 
 class discount_coordinate(BaseModel):
     discount: float # between 0 and 1 
     sell_through: float # between 0 and 1 - 1 meaning every bundle posted was sold
+
+
+# for operational insights
+
+# for identify best POSTING windows
+class post_window_datapoint(BaseModel):
+    posting_timeslot: str
+    weekly_average: int # average number of bundles sold per week over the last e.g. 6 weeks
+
+class post_windows_data(BaseModel):
+    top_post_window: str
+    window_datapoints: List[post_window_datapoint]
+
+
+# for the most popular 3 bundles
+class popular_bundle_datapoint(BaseModel):
+    bundle_title: str
+    weekly_average: int # average number of bundles sold per week over the last e.g. 6 weeks
+
+class popular_bundle_data(BaseModel):
+    top_bundle: str
+    bundle_datapoints: List[popular_bundle_datapoint]
+    
