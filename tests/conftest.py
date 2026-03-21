@@ -13,6 +13,7 @@ from app.api.customers import router as customers_router
 from app.api.templates import router as templates_router
 from app.api.vendors import router as vendors_router
 from app.api.bundles import router as bundles_router
+from app.api.reports import router as reports_router
 from app.core.database import get_session
 from app.core.security import get_password_hash
 from app.models import User, Vendor, Customer, Allergen # UserBase no longer exists
@@ -46,6 +47,7 @@ def app():
     app.include_router(vendors_router, prefix="/vendors")
     app.include_router(templates_router, prefix="/templates")
     app.include_router(bundles_router, prefix="/bundles")
+    app.include_router(reports_router, prefix="/reports")
     app.dependency_overrides[get_session] = get_test_session
     return app
 
@@ -63,9 +65,20 @@ def setup_test_db():
 def seed_allergens(setup_test_db):
     with Session(test_engine) as session:
         session.add_all([
-            Allergen(title="peanuts", description="Contains peanuts"),
-            Allergen(title="gluten", description="Contains gluten"),
-            Allergen(title="dairy", description="Contains dairy"),
+            Allergen(title="Celery"),
+            Allergen(title="Gluten"),
+            Allergen(title="Crustaceans"),
+            Allergen(title="Eggs"),
+            Allergen(title="Fish"),
+            Allergen(title="Lupin"),
+            Allergen(title="Milk"),
+            Allergen(title="Molluscs"),
+            Allergen(title="Mustard"),
+            Allergen(title="Treenuts"),
+            Allergen(title="Peanuts"),
+            Allergen(title="Sesame"),
+            Allergen(title="Soybean"),
+            Allergen(title="Sulphur Dioxide"),
         ])
         session.commit()
 
