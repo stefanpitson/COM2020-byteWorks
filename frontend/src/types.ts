@@ -88,7 +88,30 @@ export interface ForecastDayData {
 }
 
 export interface ForecastWeekData {
-  week_date: string; 
-  day_datapoints: ForecastDayData[];
+week_date: string; 
+day_datapoints: ForecastDayData[];
 }
 
+export interface AnalyticSellThrough {
+  weekly: {
+    collected: number;
+    no_show: number;
+    expired: number;
+    week_start_date: string;
+  };
+  all_time: {
+    collected: number;
+    no_show: number;
+    expired: number;
+  }
+}
+
+export interface AnalyticWaste {
+total_waste_avoided: number;
+average_bundle_weight: number;
+}
+
+
+export interface AnalyticsPricingEffectiveness {
+  plots:
+}
