@@ -189,7 +189,10 @@ def add_credit_customer(
     card_number_len = len(card_details.card_number)
     for index in range(card_number_len-2, -1, -1):
         if should_double:
-            sum_total += 2 * int(card_details.card_number[index])
+            doubled_digit = 2 * int(card_details.card_number[index])
+            if doubled_digit > 9:
+                doubled_digit -= 9
+            sum_total += doubled_digit
             should_double = False
         else:
             sum_total += int(card_details.card_number[index])
