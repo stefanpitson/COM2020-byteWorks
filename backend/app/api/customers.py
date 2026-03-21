@@ -168,7 +168,7 @@ def add_credit_customer(
     # Visa or Mastercard Pattern ( they have 3 digit CVV's )
     # - VISA starts with 4 and can have 13, 16 or 19 digits
     # - Mastercard starts as a number between 51 and 55 or as a number between 2221 and 2720 and has 16 digits
-    if re.compile(r"^4(\d{12})((\d{3}){0,2})$").match(card_details.card_number) or re.compile(r"^((5[1-5](\d{14}))|((2(2(2[1-9]|[3-9][0-9])|[3-6][0-9][0-9]|7([0-1][0-9]|20)))(\d{12}))$").match(card_details.card_number):
+    if re.compile(r"^4(\d{12})((\d{3}){0,2})$").match(card_details.card_number) or re.compile(r"^((5[1-5](\d{14}))|((2(2(2[1-9]|[3-9][0-9])|[3-6][0-9][0-9]|7([0-1][0-9]|20)))(\d{12})))$").match(card_details.card_number):
         card_number_verified = True
         if len(card_details.cvv) != 3:
             raise HTTPException(status_code=404, detail = "CVV should be three digits for Visa or Mastercard")
