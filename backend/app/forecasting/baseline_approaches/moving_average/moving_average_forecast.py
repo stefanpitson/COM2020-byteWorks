@@ -28,7 +28,7 @@ def moving_avg_confidence_score(num_days: int, expected_max: int, avg: Optional[
             v = 0.0
 
     else:
-        cv = std / avg #covar
+        cv = float(std) / float(avg) #covar
         v = max(0.0, 1.0 - float(cv))
 
     if num_days < 3: # threshold for minimum num days allowed
