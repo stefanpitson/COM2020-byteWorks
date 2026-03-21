@@ -79,6 +79,12 @@ class VendorSignupRequest(BaseModel):
         phone_number: str
         opening_hours: str
 
+class PasswordCheck(BaseModel):
+    password: str
+
+class PasswordCheckRead(BaseModel):
+    valid: bool
+
 #data for updating the customer 
 # all are optional as only updated information is given
 class CustomerUpdate(BaseModel):
@@ -237,6 +243,28 @@ class StreakRead(BaseModel):
     last: date
     ended:bool
 
+
+class BadgeRead(BaseModel):
+    badge_id: int
+    title: str
+    description: str
+    metric: str
+    threshold: float
+
+class BadgeList(BaseModel):
+    total_count: int
+    badges: List[BadgeRead]
+
+class LeaderboardEntry(BaseModel):
+    customer_id: int
+    rank: int
+    name: str
+    food_saved: float
+    is_you: bool
+
+class LeaderboardList(BaseModel):
+    total_count: int
+    entries: List[LeaderboardEntry]
 class ReportCreate(BaseModel):
     vendor_id: int
     title: str
@@ -289,3 +317,12 @@ class ForecastWeekData(BaseModel):
 class DeleteBundles(BaseModel):
     template_id: int
     amount: int
+
+
+class AllUsers(BaseModel):
+    total_count: int
+    users: List[UserData]
+    class UserData(BaseModel):
+        user_id: int
+        email: str
+        role: str
