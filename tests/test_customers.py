@@ -250,8 +250,8 @@ def test_post_add_credit(test_client, customer_login_response):
                            "first_line_address": "15 Sidwell Street",
                            "postcode": "EX4 6NN",
                            "name_on_card": "Joe Andrews",
-                           "card_number": "3782 8224 6310 005",
+                           "card_number": "4111111111111111",
                            "expiry_date": "2026-10-31",
-                           "cvv": "1234"})
+                           "cvv": "123"})
     credit_response_data = credit_response.json()
     print(credit_response_data)
