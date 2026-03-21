@@ -5,6 +5,7 @@ from app.forecasting.database_creation.generate_input_forecasts import sync_fore
 from app.schema import post_window_datapoint, post_windows_data, popular_bundle_datapoint, popular_bundle_data
 from typing import List
 from datetime import date, timedelta, time
+import json
 
 
 def get_posting_windows(session: Session, vendor_id: int, days_back: int = 42) -> post_windows_data:
@@ -26,7 +27,8 @@ def get_posting_windows(session: Session, vendor_id: int, days_back: int = 42) -
         ).where(Forecast_Input.vendor_id == vendor_id,
             Forecast_Input.date.between(start_date, end_date)
         ).group_by(Forecast_Input.slot_start, 
-            Forecast_Input.slot_end)
+            Forecast_Input.slot_end
+        ).order_by(Forecast_Input.slot_start)
 
     result = session.exec(statement).all()
 
@@ -47,7 +49,6 @@ def get_posting_windows(session: Session, vendor_id: int, days_back: int = 42) -
     # post datapoints may be empty
     if not post_datapoints:
         return post_windows_data(top_post_window="", window_datapoints=[])
-    
 
     # get the timeslot where the most bundles have been sold
     best_datapoint = max(post_datapoints, key=lambda p: p.weekly_average)
@@ -107,3 +108,18 @@ def get_bestselling_bundle_titles(session: Session, vendor_id: int, days_back: i
     return popular_bundle_data(top_bundle=top_bundle, bundle_datapoints=top_three)
 
 
+if __name__ == "__main__":
+
+    # python -m app.analytics.operational_insights
+
+    with Session(engine) as session:
+        vendor_ids = session.exec(select(Vendor.vendor_id)).all()
+        for vid in vendor_ids:
+            try:
+                result = get_posting_windows(session=session, vendor_id=vid)
+                print("Posting windows:")
+                print(json.dumps(result.model_dump(), indent=2, default=str))
+            except Exception as e:
+                print(f"Error in posting windows: {e}")
+
+         

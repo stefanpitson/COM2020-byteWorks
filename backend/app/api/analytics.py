@@ -9,7 +9,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.analytics.sell_through_prop import proportions_all_time, proportions_last_week
 from app.analytics.waste_proxy import waste_proxy
 from app.analytics.pricing_effectiveness import pricing_effectiveness
-from app.schema import discount_coordinate_data
+from app.analytics.operational_insights import get_bestselling_bundle_titles, get_posting_windows
+from app.schema import discount_coordinate_data, popular_bundle_data, post_windows_data
 
 # log errors produced
 logger = logging.getLogger(__name__)
@@ -99,6 +100,69 @@ def get_pricing_effectiveness(current_user = Depends(get_current_user), session:
         # call and return result of plots
         plots: discount_coordinate_data = pricing_effectiveness(session, vendor_id, days_back=42)
         return plots
+    
+    # use the logger to log the exceptions made
+    except SQLAlchemyError:
+        logger.exception("error when loading database")
+        raise HTTPException(status_code=500, detail="Data Base error")
+    
+    except Exception: # generic exception to catch all other exceptions
+        logger.exception("error in analytic generation")
+        raise HTTPException(status_code=500, detail="internal server error")
+
+
+
+@router.post("/posting_windows", response_model=post_windows_data)
+def get_post_window_data(current_user = Depends(get_current_user), session: Session = Depends(get_session)):
+    """
+    Endpoint for frontend to call that returns the necessary datapoints for a bar chart
+    function get_posting_windows is called returning a class to represent datapoints
+    x axis = time slots from 06:00 onwards
+    y axis = the weekly average number of all bundles sold in that timeslot
+    title: most popular posting times
+    subtitle: your most popular timeslot is xx:yy:zz - xx:yy:zz
+    """
+    # if the vendor does not exist or has been incorrectly received: 400 code: client send bad request
+    if not current_user.vendor_profile:
+        raise HTTPException(status_code=400, detail="User has no vendor profile associated")
+        
+    vendor_id = current_user.vendor_profile.vendor_id # get the vendor id from current user
+
+    try:
+        # call and return result of datapoints
+        points: post_windows_data = get_posting_windows(session=session, vendor_id=vendor_id, days_back=42)
+        return points
+    
+    # use the logger to log the exceptions made
+    except SQLAlchemyError:
+        logger.exception("error when loading database")
+        raise HTTPException(status_code=500, detail="Data Base error")
+    
+    except Exception: # generic exception to catch all other exceptions
+        logger.exception("error in analytic generation")
+        raise HTTPException(status_code=500, detail="internal server error")
+    
+
+
+@router.post("/bestsellers", response_model=popular_bundle_data)
+def get_popular_bundle_data(current_user = Depends(get_current_user), session: Session = Depends(get_session)):
+    """
+    endpoint to be called for making a bar chart to identify the top 3 most popular bundles by title
+    x axis: bundle title
+    y axis: weekly average sold 
+    title: best selling bundles
+    subtitle: you best selling bundle is {x}_bundle
+    """
+    # if the vendor does not exist or has been incorrectly received: 400 code: client send bad request
+    if not current_user.vendor_profile:
+        raise HTTPException(status_code=400, detail="User has no vendor profile associated")
+        
+    vendor_id = current_user.vendor_profile.vendor_id # get the vendor id from current user
+
+    try:
+        # call and return result of datapoints
+        points: popular_bundle_data = get_bestselling_bundle_titles(session=session, vendor_id=vendor_id, days_back=42)
+        return points
     
     # use the logger to log the exceptions made
     except SQLAlchemyError:
