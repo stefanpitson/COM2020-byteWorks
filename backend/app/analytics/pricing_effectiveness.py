@@ -30,7 +30,6 @@ def pricing_effectiveness(session: Session, vendor_id: int, days_back = 42) -> d
     
     for discount, posted, reserved, no_shows in result:
         if posted == 0:
-            print("\nposted was 0\n")
             continue
         
         rounded_discount = round(discount, 2) 
