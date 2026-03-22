@@ -2,7 +2,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.api import customers, auth, vendors, bundles, templates, reservations, admin, reports
+from app.core.database import create_db_and_tables
+from app.api import customers, auth, vendors, bundles, templates, reservations, reports, admin
 from app.core.database import engine, create_db_and_tables 
 from sqlmodel import SQLModel
 import os

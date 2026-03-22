@@ -4,9 +4,9 @@ from sqlmodel import Session, select
 from app.core.database import get_session
 from app.models import Customer, User, Vendor
 from app.core.security import get_password_hash, verify_password, create_access_token
-from app.schema import LoginResponse, LoginRequest, CustomerSignupRequest, VendorSignupRequest
 from ukpostcodeutils import validation
-
+from app.schema import LoginResponse, LoginRequest, CustomerSignupRequest, VendorSignupRequest, PasswordCheck, PasswordCheckRead
+from app.api.deps import get_current_user
 router = APIRouter()
 
 # this module handles the login and registering for users
@@ -127,3 +127,16 @@ def register_vendor(
     except Exception as e:
         session.rollback() # If anything fails, undo the Vendor creation
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/password-check", response_model=PasswordCheckRead, tags = ["Auth"], summary = "Checks if a provided password is correct or not")
+def password_check(
+    data: PasswordCheck,
+    session: Session = Depends(get_session),
+    current_user = Depends(get_current_user)
+    ):
+
+    if data.password == None or len(data.password) == 0:
+        raise HTTPException(status_code=400, detail="No password provided")
+    
+    result = verify_password(data.password, current_user.password_hash)
+    return {"valid": result}
