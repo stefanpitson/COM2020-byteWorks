@@ -30,15 +30,17 @@ def pricing_effectiveness(session: Session, vendor_id: int, days_back = 42) -> d
     
     for discount, posted, reserved, no_shows in result:
         if posted == 0:
+            print("\nposted was 0\n")
             continue
-        else:
-            sell_t = (reserved-no_shows)/posted
+        
+        rounded_discount = round(discount, 2) 
+        sell_t = (reserved - no_shows) / posted
 
-        if acc.get(discount) is not None:
-            acc[discount][0] += sell_t
-            acc[discount][1] += 1
+        if rounded_discount in acc:
+            acc[rounded_discount][0] += sell_t
+            acc[rounded_discount][1] += 1
         else:
-            acc[discount] = [sell_t, 1]
+            acc[rounded_discount] = [sell_t, 1]
 
             
     coordinates: List[discount_coordinate] = []
@@ -48,6 +50,8 @@ def pricing_effectiveness(session: Session, vendor_id: int, days_back = 42) -> d
         coordinate = discount_coordinate(discount=round(discount, 2), sell_through=round((sell_through/total), 2))
 
         coordinates.append(coordinate)
+
+    coordinates.sort(key=lambda d: d.discount)
 
     return discount_coordinate_data(coordinates=coordinates)
 
@@ -61,7 +65,7 @@ if __name__ == "__main__":
         vendor_ids = session.exec(select(Vendor.vendor_id)).all()
         for vid in vendor_ids:
             effect = pricing_effectiveness(session, vid)
-            print(f"effect for vendor {vid}: {effect}")
+            print(f"\n\neffect for vendor {vid}: {effect}\n\n\n")
 
     
 

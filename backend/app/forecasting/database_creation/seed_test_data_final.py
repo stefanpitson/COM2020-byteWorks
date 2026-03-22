@@ -97,7 +97,7 @@ def seed_database():
             template_list = [] 
             for template in info["templates"]: 
                 estimated_value = round(random.uniform(5.0, 15.0),2)
-                discount = round(random.uniform(0.4,1.0),2) # could be up to 60% off
+                discount = round(random.uniform(0.2, 0.8), 3)  # could be up to 80% off
 
                 template_register = Template( # template creation in loop utlising photo dir for images
                     title=template["name"],
