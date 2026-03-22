@@ -1,7 +1,7 @@
-from sqlmodel import Session, SQLModel, select
-from app.core.database import engine, seed_allergens
+from sqlmodel import Session, SQLModel, select, func
+from app.core.database import engine, seed_allergens, seed_badges
 from app.core.security import get_password_hash
-from app.models import User, Vendor, Customer, Template, Bundle, Reservation, Streak, Allergen, Report
+from app.models import User, Vendor, Customer, Template, Bundle, Reservation, Streak, Allergen, Report, Badge
 from datetime import datetime, timedelta, time as dt_time
 import random
 import copy
@@ -18,6 +18,7 @@ def seed_database():
     SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
     seed_allergens()
+    seed_badges()
 
     vendors_runtime = copy.deepcopy(vendors)  # so as to keep the original dictionary
     # customer_names = ["alice", "bob", "charlie", "david", "eve", "frank", "grace", "hannah", "irene", "jack"]
@@ -31,10 +32,22 @@ def seed_database():
             for allergen in session.exec(select(Allergen)).all()
         }
 
+        # create a default admin user on every full reseed
+        admin_user = User(
+            email="admin@admin.com",
+            password_hash=get_password_hash("Admin123"),
+            role="admin",
+        )
+        
+        session.add(admin_user)
+        session.commit()
+        session.refresh(admin_user)
+
+
         for i in range(num_customers):
             user = User(
                 email=f"customer{i}@gmail.com",
-                password_hash=get_password_hash(f"customer{i}123"),
+                password_hash=get_password_hash(f"Customer{i}"),
                 role="customer",
             )
             session.add(user)
@@ -46,7 +59,7 @@ def seed_database():
                 name=f"customer{i}",
                 post_code="EX4 6TJ",
                 carbon_saved=0,
-                store_credit=800,
+                store_credit=300,
             )
             customer_list.append(customer)
             session.add(customer)
@@ -223,6 +236,8 @@ def seed_database():
                                 vendor_account.food_saved += template_obj.weight
                                 vendor_account.carbon_saved += carbon_saved
                                 customer.carbon_saved += carbon_saved
+                                customer.food_saved += template_obj.weight
+                                customer.money_saved += template_obj.estimated_value - template_obj.cost
 
             # sync forecast inputs
             session.flush()
@@ -299,6 +314,8 @@ def seed_database():
                             vendor_account.food_saved += template_obj.weight
                             vendor_account.carbon_saved += carbon_saved
                             customer.carbon_saved += carbon_saved
+                            customer.food_saved += template_obj.weight
+                            customer.money_saved += template_obj.estimated_value - template_obj.cost
 
         # set streaks for each customer based on their historical collected reservations, must be done manually
         for customer in customer_list:
@@ -352,7 +369,49 @@ def seed_database():
                 current_streak.ended = True
                 session.add(current_streak)
 
-        # Create Issue Reports with bell curve distribution
+        # customer badge seeding
+        customer_badges = session.exec(
+            select(Badge).where(Badge.user_role == "customer")
+        ).all()
+
+        for customer in customer_list:
+            user = session.exec(
+                select(User).where(User.user_id == customer.user_id)
+            ).first()
+            if not user:
+                continue
+
+            current_streak = session.exec(
+                select(Streak.count)
+                .where(Streak.customer_id == customer.customer_id)
+                .where(Streak.ended.is_(False))
+            ).first() or 0
+
+            bundles_saved = session.exec(
+                select(func.count(Reservation.reservation_id))
+                .where(Reservation.customer_id == customer.customer_id)
+                .where(Reservation.status == "collected")
+            ).first() or 0
+
+            for badge in customer_badges:
+                if badge.metric == "carbon_saved":
+                    value = customer.carbon_saved
+                elif badge.metric == "food_saved":
+                    value = customer.food_saved
+                elif badge.metric == "money_saved":
+                    value = customer.money_saved
+                elif badge.metric == "bundles_saved":
+                    value = bundles_saved
+                elif badge.metric == "streak_count":
+                    value = current_streak
+                else:
+                    continue
+
+                if value >= badge.threshold and badge not in user.badges:
+                    user.badges.append(badge)
+                    session.add(user)
+
+        # Create Issue Reports with bell curve distribution of reporting customers on distribution of vendors
         num_reports = 150
         mid_customers = num_customers // 2
         base_customers = mid_customers ** 2
