@@ -22,7 +22,8 @@ def waste_proxy(session: Session, vendor_id: int) -> Dict[str, float]:
         return {"total_waste_avoided": 0.0, "average_bundle_weight": 0.0}
 
     # return appropriate dictionary
-    return {"total_waste_avoided": round(float(weight_metrics.total_weight), 3), "average_bundle_weight": round(float(weight_metrics.avg_weight), 3)}
+    return {"total_waste_avoided": round(float(weight_metrics.total_weight), 3), 
+            "average_bundle_weight": round(float(weight_metrics.avg_weight), 3)}
 
 
 if __name__ == "__main__":
