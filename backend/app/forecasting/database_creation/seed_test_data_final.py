@@ -15,12 +15,17 @@ from app.forecasting.database_creation.generate_input_forecasts import sync_fore
 
 def seed_database():
 
-    SQLModel.metadata.drop_all(engine)
+    """
+    the final seed database function
+    a comprehensive seeding of multiple vendors, customers, users covering 6 weeks worth of previous data
+    the function is intended to simulate real life spending and marketplace habits e.g. more sales on a weekend
+    """
+
+    SQLModel.metadata.drop_all(engine) # make sure the db is empty first to prevent duplication
     SQLModel.metadata.create_all(engine)
-    seed_allergens()
+    seed_allergens() # helper function for allergens
 
     vendors_runtime = copy.deepcopy(vendors)  # so as to keep the original dictionary
-    # customer_names = ["alice", "bob", "charlie", "david", "eve", "frank", "grace", "hannah", "irene", "jack"]
     customer_list = []
     vendor_list = []
     num_customers = 150
@@ -40,7 +45,7 @@ def seed_database():
             session.add(user)
             session.commit()
             session.refresh(user)
-
+            # create customer entity with base store credit and 0 carbon saved
             customer = Customer(
                 user_id=user.user_id,
                 name=f"customer{i}",
@@ -94,7 +99,7 @@ def seed_database():
                 estimated_value = round(random.uniform(5.0, 15.0),2)
                 discount = round(random.uniform(0.4,1.0),2) # could be up to 60% off
 
-                template_register = Template(
+                template_register = Template( # template creation in loop utlising photo dir for images
                     title=template["name"],
                     description=template["description"],
                     estimated_value=estimated_value,
@@ -139,92 +144,101 @@ def seed_database():
             today = datetime.now().date()
 
             # 6 WEEKS OF SEEDED DATA
-            for i in range(len(template_list)):
+            for template in template_list:
+                # make postingd ays for a template
+                num_post_days = random.randint(2, 4)
+                # get distinct days
+                post_days = random.sample(range(7), num_post_days)
 
-                # for this template, num bundles will be sold depending on its popularity and total bundles sold in a week
-                num_bundle = int(round(popularity_list[i] * total_bundles_sold_per_week))
-                day = random.randint(0, 6)
-                bundle_hour = random.randint(open_hour, close_hour - 1)
+                for week in range(6):
+                    # for a day make multiple slots
+                    for day in post_days:
+                        # random num timeslots 1-3 for a day
+                        num_slots = random.randint(1, 3)
+                        # possible starting hours 
+                        possible_hours = list(range(open_hour, close_hour - 1))
+                        if len(possible_hours) < num_slots:
+                            continue
+                        slot_hours = random.sample(possible_hours, num_slots)
 
-                for week in range(6): 
-                    if num_bundle > 1: # add small variance if bigger than 1, rudimentary variance
-                        num_bundle = num_bundle + random.randint(-1,1)
+                        for hour in slot_hours:
+                            # num bundles for a slot
+                            slot_bundles = random.randint(3, 10)
+                            # actual date
+                            bundle_date = today - timedelta(days=(42 - (week * 7 + day)))
+                            slot_start = dt_time(hour, 0)
+                            slot_end = dt_time(hour + 2, 0)
 
-                    bundle_date = today - timedelta(days=(42 - (week * 7 + day)))
-                    day_of_week = bundle_date.weekday()
-                    
-                    # distribute status of bundle reservation
-                    for j in range(num_bundle):
-                        gets_reserved = (j < (num_bundle) * 0.8) # 80 percent chance to be reserved
-                        if gets_reserved:
-                            rand = random.randint(0,9)
-                            if rand < 7: # 70% collected
-                                status = "collected"
-                                picked_up = True
-                            elif rand < 9: 
-                                status = "no_show"
-                                picked_up = False
-                            else:
-                                status = "cancelled"
-                                picked_up = False
-                        else:
-                            status = None
-                            picked_up = False
+                            for _ in range(slot_bundles):
+                                # Determine reservation status 
+                                gets_reserved = (random.random() < 0.8)  # 80% chance to be reserved
+                                if gets_reserved:
+                                    rand = random.randint(0,9)
+                                    if rand < 7:
+                                        status = "collected"
+                                        picked_up = True
+                                    elif rand < 9:
+                                        status = "no_show"
+                                        picked_up = False
+                                    else:
+                                        status = "cancelled"
+                                        picked_up = False
+                                else:
+                                    status = None
+                                    picked_up = False
 
-                        bundle_time = dt_time(bundle_hour, random.randint(0, 59))
-                        bundle = Bundle(
-                            template_id=template_list[i].template_id,
-                            date=bundle_date,
-                            time=bundle_time,
-                            picked_up=picked_up
-                        )
-                        session.add(bundle)
-                        session.flush()
-                        bundles_created.append(bundle)
+                                bundle_time = dt_time(hour, random.randint(0, 59))
+                                bundle = Bundle(
+                                    template_id=template.template_id,
+                                    date=bundle_date,
+                                    time=bundle_time,
+                                    picked_up=picked_up
+                                )
+                                session.add(bundle)
+                                session.flush()
+                                bundles_created.append(bundle)
 
-                        if gets_reserved:
-                            template_obj = template_list[i]
-                            eligible_customers = [
-                                c for c in customer_list if c.store_credit >= template_obj.cost
-                            ]
-                            if not eligible_customers:
-                                continue
-                            customer = random.choice(eligible_customers)
+                                if gets_reserved:
+                                    template_obj = template
+                                    eligible_customers = [
+                                        c for c in customer_list if c.store_credit >= template_obj.cost
+                                    ]
+                                    if not eligible_customers:
+                                        continue
+                                    customer = random.choice(eligible_customers)
 
-                            # Simulate real reservation wallet behaviour.
-                            customer.store_credit -= template_obj.cost
-                            if status == "cancelled":
-                                # Cancellation should release the bundle and restore wallet credit.
-                                customer.store_credit += template_obj.cost
-                                bundle.purchased_by = None
-                            else:
-                                bundle.purchased_by = customer.customer_id
+                                    # Simulate wallet behaviour
+                                    customer.store_credit -= template_obj.cost
+                                    if status == "cancelled":
+                                        customer.store_credit += template_obj.cost
+                                        bundle.purchased_by = None
+                                    else:
+                                        bundle.purchased_by = customer.customer_id
 
-                            # reservation time is same day as bundle, with up to two hour difference
-                            reservation_hour = min(bundle_hour + random.randint(0, 2), close_hour - 1)
-                            reservation_dt = datetime(
-                                bundle_date.year, bundle_date.month, bundle_date.day,
-                                reservation_hour, random.randint(0, 59)
-                            )
-                            reservation = Reservation(
-                                bundle_id=bundle.bundle_id,
-                                customer_id=customer.customer_id,
-                                status=status,
-                                code=reservation_code,
-                                time_created=reservation_dt,
-                            )
-                            session.add(reservation)
-                            reservation_code += 1
+                                    # reservation time same day within 2 hours after bundle
+                                    reservation_hour = min(hour + random.randint(0, 2), close_hour - 1)
+                                    reservation_dt = datetime(
+                                        bundle_date.year, bundle_date.month, bundle_date.day,
+                                        reservation_hour, random.randint(0, 59)
+                                    )
+                                    reservation = Reservation( # create the reservation entity
+                                        bundle_id=bundle.bundle_id,
+                                        customer_id=customer.customer_id,
+                                        status=status,
+                                        code=reservation_code,
+                                        time_created=reservation_dt,
+                                    )
+                                    session.add(reservation)
+                                    reservation_code += 1
 
-                            if status == "collected":
-                                # calculating analytics manually
-                                carbon_saved = template_obj.carbon_saved or 0.0
-                                vendor_account.total_revenue += template_obj.cost
-                                vendor_account.food_saved += template_obj.weight
-                                vendor_account.carbon_saved += carbon_saved
-                                customer.carbon_saved += carbon_saved
+                                    if status == "collected": # update the vendor stats accordingly once a bundle is confirmed as collected
+                                        carbon_saved = template_obj.carbon_saved or 0.0
+                                        vendor_account.total_revenue += template_obj.cost
+                                        vendor_account.food_saved += template_obj.weight
+                                        vendor_account.carbon_saved += carbon_saved
+                                        customer.carbon_saved += carbon_saved
 
-            # sync forecast inputs
+            # flush the db so above additions can be utilised in further seeding logic                         
             session.flush()
             sync_forecast_inputs(session, vendor_id=vendor_account.vendor_id, days_back=60)
         

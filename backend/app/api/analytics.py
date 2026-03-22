@@ -22,10 +22,10 @@ router = APIRouter()
 def get_sell_through_proportions(current_user = Depends(get_current_user), session: Session = Depends(get_session)):
 
     """
-    endpoint for returning a dictionary of sell through
-    dictionary 1 form {"collected": x, "no_show": y, "expired": z, "week_start_date": some_date}
-    dictionary 2 form {"collected": x, "no_show": y, "expired": z}
-    we return a single dictionary 3 in the form {"weekly_proportions": dictionary 1, "all_time_proportions": dictionary 2}
+    endpoint for returning a data for sell through
+    weekly sell through proportions are in the form: class {num_collected: int, num_no_show: int, num_expired: int, week_start_date: str}
+    all time sell through proportions are in the form: class {num_collected: int, num_no_show: int, num_expired: int}
+    the returned object (combined_sell_through_data) combines the above 2 classes for a full scope of recent and all time sell through
     """
 
     # if the vendor does not exist or has been incorrectly received: 400 code: client send bad request
