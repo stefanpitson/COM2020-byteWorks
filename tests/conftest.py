@@ -5,6 +5,7 @@ load_dotenv(".env.test") # loads the test env variables, create this locally wit
 
 import pytest
 from fastapi import FastAPI
+from app.models import Report
 from fastapi.testclient import TestClient
 
 # Retrieves all the modules and functions
@@ -17,6 +18,7 @@ from app.api.reports import router as reports_router
 from app.core.database import get_session
 from app.core.security import get_password_hash
 from app.models import User, Vendor, Customer, Allergen # UserBase no longer exists
+from uploads.issue_reports_data import issue_data_pool
 from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel, create_engine, Session
 
@@ -230,6 +232,123 @@ def registered_bundle(test_client, vendor_login_response, template_factory):
         }
     )
     return bundle_response
+
+@pytest.fixture
+def customer_factory():
+    def create(
+        count=10
+    ):
+        customers = []
+        with Session(test_engine) as session:
+            for i in range(count):
+                email = f"customer{i}@gmail.com"
+                raw_password = f"{i}"
+
+                user = User(
+                    email=email,
+                    password_hash=get_password_hash(raw_password),
+                    role="customer",
+                )
+                session.add(user)
+                session.flush()
+
+                customer = Customer(
+                    user_id=user.user_id,
+                    name=f"Customer{i}",
+                    post_code="EX1 2HU",
+                )
+                session.add(customer)
+                session.flush()
+
+                customers.append(
+                    {
+                        "user_id": user.user_id,
+                        "customer_id": customer.customer_id,
+                        "email": email,
+                        "password": raw_password,
+                        "name": customer.name,
+                    }
+                )
+
+            session.commit()
+
+        return customers
+
+    return create
+
+@pytest.fixture
+def vendor_factory():
+    def create(
+        count=10
+    ):
+        customers = []
+        with Session(test_engine) as session:
+            for i in range(count):
+                email = f"customer{i}@gmail.com"
+                raw_password = f"{i}"
+
+                user = User(
+                    email=email,
+                    password_hash=get_password_hash(raw_password),
+                    role="customer",
+                )
+                session.add(user)
+                session.flush()
+
+                customer = Customer(
+                    user_id=user.user_id,
+                    name=f"Customer{i}",
+                    post_code="EX1 2HU",
+                )
+                session.add(customer)
+                session.flush()
+
+                customers.append(
+                    {
+                        "user_id": user.user_id,
+                        "customer_id": customer.customer_id,
+                        "email": email,
+                        "password": raw_password,
+                        "name": customer.name,
+                    }
+                )
+
+            session.commit()
+
+        return customers
+
+    return create
+
+import random
+
+@pytest.fixture
+def seed_reports(test_client):
+    customer_list = customer_factory()
+    category = random.choice(list(issue_data_pool.keys()))
+    data = issue_data_pool[category]
+
+    title = random.choice(data["titles"])
+    subject = random.choice(data["A_subjects"])
+    problem = random.choice(data["B_problems"])
+    feedback = random.choice(data["C_feedback"])
+    full_complaint = f"{subject} {problem}\n{feedback}"
+    responded = random.choice([True, False])
+    response = None
+
+    if (responded):
+        response = random.choice(data["vendor_responses"])
+
+    seeded_report = Report(
+    customer_id=customer_list[i].customer_id,
+    vendor_id=vendor_list[vendor_idx].vendor_id,
+    title=title,
+    complaint=(
+        full_complaint 
+    ),
+    responded=responded,
+    response=response,
+    )
+    session.add(seeded_report)
 
 # FUNCTION FOR CREATING EXISTING USERS IN THE DATABASE DIRECTLY
 # test_user() must then be passed into the test function
