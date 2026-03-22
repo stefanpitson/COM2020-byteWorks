@@ -106,12 +106,40 @@ export interface AnalyticSellThrough {
   }
 }
 
-export interface AnalyticWaste {
+// Price Effectiveness
+export interface AnalyticsDiscountData{
+  coordinates: AnalyticsDiscountCoordinate[];
+}
+
+export interface AnalyticsDiscountCoordinate{
+  discount: number;
+  sell_through: number;
+}
+
+// Posting Windows
+export interface AnalyticsPostingWindows{
+  posting_timeslot: string;
+  weekly_average: number;
+}
+
+export interface AnalyticsPostingDate{
+  top_post_window: string;
+  window_datapoints: AnalyticsPostingWindows[];
+}
+
+// Waste Proxy
+export interface AnalyticsWaste {
 total_waste_avoided: number;
 average_bundle_weight: number;
 }
 
+// Best Sellers
+export interface AnalyticsPopularBundle {
+  bundle_title: string;
+  weekly_average: number;
+}
 
-export interface AnalyticsPricingEffectiveness {
-  plots:
+export interface AnalyticsBestBundles {
+  top_bundle: string;
+  bundle_datapoints: AnalyticsPopularBundle[];
 }

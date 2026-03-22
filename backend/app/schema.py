@@ -292,3 +292,7 @@ class popular_bundle_data(BaseModel):
     top_bundle: str
     bundle_datapoints: List[popular_bundle_datapoint]
     
+
+class waste_proxy_data(BaseModel):
+    total_waste_avoided: float
+    average_bundle_weight: float

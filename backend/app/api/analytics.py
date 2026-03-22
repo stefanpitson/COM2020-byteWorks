@@ -10,7 +10,7 @@ from app.analytics.sell_through_prop import proportions_all_time, proportions_la
 from app.analytics.waste_proxy import waste_proxy
 from app.analytics.pricing_effectiveness import pricing_effectiveness
 from app.analytics.operational_insights import get_bestselling_bundle_titles, get_posting_windows
-from app.schema import discount_coordinate_data, popular_bundle_data, post_windows_data
+from app.schema import discount_coordinate_data, popular_bundle_data, post_windows_data, waste_proxy_data
 
 # log errors produced
 logger = logging.getLogger(__name__)
@@ -52,7 +52,7 @@ def get_sell_through_proportions(current_user = Depends(get_current_user), sessi
     
 
 
-@router.get("/waste_proxy")
+@router.get("/waste_proxy", response_model=waste_proxy_data)
 def get_waste_proxy(current_user = Depends(get_current_user), session: Session = Depends(get_session)):
     """
     endpoint to call the function waste_proxy
@@ -66,8 +66,7 @@ def get_waste_proxy(current_user = Depends(get_current_user), session: Session =
     vendor_id = current_user.vendor_profile.vendor_id # get the vendor id from current user
 
     try: # attempt to extract info from the function for the current vendor
-        waste: Dict[str, float] = waste_proxy(session, vendor_id)
-
+        waste: waste_proxy_data = waste_proxy(session, vendor_id)
         return waste
     
     # use the logger to log the exceptions made
