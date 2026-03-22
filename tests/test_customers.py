@@ -369,3 +369,4 @@ def test_get_badges_owned_with_multiple_badges_success(test_client, registered_c
     assert badges_response_data["total_count"] == 1
     assert len(badges_response_data["badges"]) == 1
     assert badges_response.status_code == 200
+

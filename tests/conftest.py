@@ -139,7 +139,7 @@ def registered_customer(test_client):
     customer_data = {
         "user": {
             "email": "test2@exeter.ac.uk",
-            "password": "password456",
+            "password": "Customer123",
             "role": "customer"
         },
         "customer": {
@@ -155,12 +155,19 @@ def registered_customer(test_client):
 
 @pytest.fixture
 def customer_login_response(test_client, registered_customer):
-    customer = registered_customer["customer_data"]
-    response = test_client.post("/login", json={
-        "email": customer["user"]["email"],
-        "password": customer["user"]["password"]
-    })
-    return response.json()
+    default_user = registered_customer["customer_data"]["user"]
+
+    def login(email=None, password=None):
+        response = test_client.post(
+            "/login",
+            json={
+                "email": email or default_user["email"],
+                "password": password or default_user["password"],
+            },
+        )
+        return response.json()
+
+    return login
 
 @pytest.fixture
 def vendor_login_response(test_client, registered_vendor):
@@ -236,17 +243,16 @@ def registered_bundle(test_client, vendor_login_response, template_factory):
 @pytest.fixture
 def customer_factory():
     def create(
-        count=10
+        count=1
     ):
         customers = []
         with Session(test_engine) as session:
             for i in range(count):
                 email = f"customer{i}@gmail.com"
-                raw_password = f"{i}"
 
                 user = User(
                     email=email,
-                    password_hash=get_password_hash(raw_password),
+                    password_hash=get_password_hash(f"Customer{i}"),
                     role="customer",
                 )
                 session.add(user)
@@ -259,16 +265,15 @@ def customer_factory():
                 )
                 session.add(customer)
                 session.flush()
-
-                customers.append(
-                    {
-                        "user_id": user.user_id,
-                        "customer_id": customer.customer_id,
-                        "email": email,
-                        "password": raw_password,
-                        "name": customer.name,
-                    }
-                )
+                
+                # Extract scalar values before session closes
+                customers.append({
+                    "user_id": user.user_id,
+                    "customer_id": customer.customer_id,
+                    "email": email,
+                    "password": f"Customer{i}",
+                    "name": f"Customer{i}",
+                })
 
             session.commit()
 
@@ -279,76 +284,93 @@ def customer_factory():
 @pytest.fixture
 def vendor_factory():
     def create(
-        count=10
+        count=1
     ):
-        customers = []
+        vendors = []
         with Session(test_engine) as session:
             for i in range(count):
-                email = f"customer{i}@gmail.com"
-                raw_password = f"{i}"
-
-                user = User(
-                    email=email,
-                    password_hash=get_password_hash(raw_password),
-                    role="customer",
+                vendor_user = User(
+                    email=f"admin@vendor{i}.com",
+                    password_hash=get_password_hash(f"Vendor{i}"),
+                    role="vendor",
                 )
-                session.add(user)
+
+                session.add(vendor_user)
                 session.flush()
 
-                customer = Customer(
-                    user_id=user.user_id,
-                    name=f"Customer{i}",
-                    post_code="EX1 2HU",
-                )
-                session.add(customer)
-                session.flush()
+                open_hour = random.randint(7,12)
+                close_hour = random.randint(17,23)
 
-                customers.append(
-                    {
-                        "user_id": user.user_id,
-                        "customer_id": customer.customer_id,
-                        "email": email,
-                        "password": raw_password,
-                        "name": customer.name,
-                    }
+                vendor_account = Vendor(
+                    user_id=vendor_user.user_id,
+                    name=f"Vendor{i}",
+                    street=f"{i} street",
+                    city="Exeter",
+                    post_code=f"EX{i%10} {i%10}{chr(open_hour+58)}{chr(close_hour+58)}",
+                    phone_number= f"01392 {random.randint(200000, 499999)}",
+                    opening_hours=f"{open_hour:02}:00-{close_hour}:00",# class of days
+                    validated=True,
+                    carbon_saved=0,
                 )
+
+                session.add(vendor_account)
+                session.flush()
+                
+                # Extract scalar values before session closes
+                vendors.append({
+                    "user_id": vendor_user.user_id,
+                    "vendor_id": vendor_account.vendor_id,
+                    "email": f"admin@vendor{i}.com",
+                    "password": f"Vendor{i}",
+                    "name": f"Vendor{i}",
+                })
 
             session.commit()
-
-        return customers
-
+        return vendors
     return create
 
 import random
 
 @pytest.fixture
-def seed_reports(test_client):
-    customer_list = customer_factory()
-    category = random.choice(list(issue_data_pool.keys()))
-    data = issue_data_pool[category]
+def seed_reports(customer_factory, vendor_factory, session):
+    customer_list = customer_factory(10)
+    vendor_list = vendor_factory(10)
+    # seed_list = []
 
-    title = random.choice(data["titles"])
-    subject = random.choice(data["A_subjects"])
-    problem = random.choice(data["B_problems"])
-    feedback = random.choice(data["C_feedback"])
-    full_complaint = f"{subject} {problem}\n{feedback}"
-    responded = random.choice([True, False])
-    response = None
+    def create(count=10):
+        for i in range(count):
+            category = random.choice(list(issue_data_pool.keys()))
+            data = issue_data_pool[category]
 
-    if (responded):
-        response = random.choice(data["vendor_responses"])
+            title = random.choice(data["titles"])
+            subject = random.choice(data["A_subjects"])
+            problem = random.choice(data["B_problems"])
+            feedback = random.choice(data["C_feedback"])
+            full_complaint = f"{subject} {problem}\n{feedback}"
+            responded = random.choice([True, False])
+            response = None
+            chosen_vendor = random.choice(vendor_list)
+            chosen_customer = random.choice(customer_list)
 
-    seeded_report = Report(
-    customer_id=customer_list[i].customer_id,
-    vendor_id=vendor_list[vendor_idx].vendor_id,
-    title=title,
-    complaint=(
-        full_complaint 
-    ),
-    responded=responded,
-    response=response,
-    )
-    session.add(seeded_report)
+            if (responded):
+                response = random.choice(data["vendor_responses"])
+
+            seeded_report = Report(
+            customer_id=chosen_customer["customer_id"],
+            vendor_id=chosen_vendor["vendor_id"],
+            title=title,
+            complaint=(
+                full_complaint 
+            ),
+            responded=responded,
+            response=response,
+            )
+            # seed_list.append(seeded_report)
+            session.add(seeded_report)
+            session.flush()
+        session.commit()
+
+    return create
 
 # FUNCTION FOR CREATING EXISTING USERS IN THE DATABASE DIRECTLY
 # test_user() must then be passed into the test function

@@ -1,5 +1,5 @@
 def test_post_create_report_success(test_client, customer_login_response, registered_vendor):
-    token = customer_login_response["access_token"]
+    token = customer_login_response()["access_token"]
     report_response = test_client.post("/reports/create",
                                        headers={"Authorization": "Bearer "+token},
                                        json={
@@ -12,7 +12,7 @@ def test_post_create_report_success(test_client, customer_login_response, regist
     assert report_response.status_code == 200
 
 def test_post_create_report_with_title_of_invalid_length_fail(test_client, customer_login_response, registered_vendor):
-    token = customer_login_response["access_token"]
+    token = customer_login_response()["access_token"]
     report_response = test_client.post("/reports/create",
                                        headers={"Authorization": "Bearer "+token},
                                        json={
@@ -25,7 +25,7 @@ def test_post_create_report_with_title_of_invalid_length_fail(test_client, custo
     assert report_response.status_code == 422
 
 def test_post_create_report_with_complaint_of_invalid_length_fail(test_client, customer_login_response, registered_vendor):
-    token = customer_login_response["access_token"]
+    token = customer_login_response()["access_token"]
     report_response = test_client.post("/reports/create",
                                        headers={"Authorization": "Bearer "+token},
                                        json={
@@ -36,3 +36,11 @@ def test_post_create_report_with_complaint_of_invalid_length_fail(test_client, c
     report_response_data = report_response.json()
     assert report_response_data == {'detail': 'Complaint of an invalid length.'}
     assert report_response.status_code == 422
+
+def test_get_list_of_reports_from_customer(test_client, seed_reports, customer_login_response):
+    seed_reports()
+    customer_data = customer_login_response(email="customer0@gmail.com",password="Customer0")
+    token = customer_data["access_token"]
+    report_response = test_client.get("reports/list",
+                    headers={"Authorization": "Bearer "+ token})
+    print(report_response.json())
