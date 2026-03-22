@@ -53,7 +53,10 @@ def train_lin_regression(df: pd.DataFrame, model_dir: str = "app/forecasting/lin
 if __name__ == "__main__":
 
     #python -m app.forecasting.linear_regression.train
-    
+        
+    #test_start = date.today() - timedelta(days=14)   # 2 week held out test period
+    #train_cutoff = test_start - timedelta(days=1)
+
     with Session(engine) as session:
-        train_data = create_train_data(session)
-        train_lin_regression(train_data)
+        train_df = create_train_data(session)
+        train_lin_regression(train_df)

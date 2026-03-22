@@ -122,17 +122,20 @@ def extract_features_for_record(session: Session, record: Forecast_Input, vendor
 
 
 
-def create_train_data(session: Session) -> pd.DataFrame:
+def create_train_data(session: Session, max_date: Optional[date] = None) -> pd.DataFrame:
     """
     here we make the cache used in extract_features_for_record
     the training data is built as a list of dictinaries where ground truth labels are added
     the list of dicts is convedted into a PD dataframe for ML use and efficiency when training
     """
-    # get all input forecasts
-    all_recs = session.exec(select(Forecast_Input)).all()
+    # if a max date parameter is specified then this becomes the end of history for training date so that we can still have a held out test set for fair validation later on
+    if max_date:
+        records = session.exec(select(Forecast_Input).where(Forecast_Input.date <= max_date)).all()
+    else:
+        records = session.exec(select(Forecast_Input)).all()
 
     # make a set containing all unique dates that exists in the dataset
-    cutoff_dates = {r.date - timedelta(days=1) for r in all_recs}
+    cutoff_dates = {r.date - timedelta(days=1) for r in records}
     vendor_stats_cache = {}
 
     # for all the cutoff dates populate the cache to give us cutoff_date: vendor performance
@@ -141,7 +144,7 @@ def create_train_data(session: Session) -> pd.DataFrame:
     
     # for all the records we go through and add the ground truth labels to the dict leaving us with a list of dicts containing the training data 
     rows = []
-    for rec in all_recs:
+    for rec in records:
         feat = extract_features_for_record(session, rec, vendor_stats_cache)
         feat['target_reserved'] = rec.bundles_reserved
         feat['target_no_show'] = rec.no_shows
