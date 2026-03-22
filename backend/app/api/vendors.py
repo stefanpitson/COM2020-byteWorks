@@ -14,10 +14,12 @@ import shutil
 from datetime import datetime
 from app.core.security import verify_password, get_password_hash
 from ukpostcodeutils import validation
-from geopy import distance, geocoders
+from ukpostcodeio.client import UKPostCodeIO
+from geopy import distance
 from geopy.geocoders import Nominatim
 
 router = APIRouter()
+postcodeAPI = UKPostCodeIO()
 
 # Gets the vendor profile 
 @router.get("/profile", response_model= VendorRead, tags=["Vendors"], summary="Get the Vendor Profile for the User logged in")
@@ -73,9 +75,10 @@ def update_vendor_profile(
 
     if data.vendor.post_code != None:
         parsed_postcode = (data.vendor.post_code).upper().replace(" ","")
-        if not validation.is_valid_postcode(parsed_postcode):
-                    raise HTTPException(status_code=400, detail="Postcode is not valid")
-        current_user.vendor_profile.post_code = data.vendor.post_code
+        if not postcodeAPI.validate_postcode(parsed_postcode):
+            raise HTTPException(status_code=400, detail="Postcode is not valid")
+        current_user.vendor_profile.post_code = data.customer.post_code
+
     if data.vendor.phone_number != None:
          current_user.vendor_profile.phone_number = data.vendor.phone_number
     
@@ -295,6 +298,6 @@ def get_dist_to_vendor(
     vendorLoc = postcodeConvertor.geocode(vendor.post_code)
     
     if useMiles:
-        return distance.distance(userLoc, vendorLoc).miles
+        return distance.distance((userLoc.latitude, userLoc.longitude), (vendorLoc.latitude, vendorLoc.longitude)).miles
     else:
-        return distance.distance(userLoc, vendorLoc).km
+        return distance.distance((userLoc.latitude, userLoc.longitude), (vendorLoc.latitude, vendorLoc.longitude)).km
