@@ -75,8 +75,17 @@ export default function CustomerSignUp() {
         { name: name, post_code: postCode.toUpperCase().replace(/\s+/g, "")},
       );
       navigate("/login");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Signup failed:" + error);
+      const backendError = error.response?.data?.detail || "An error occurred during signup.";
+      
+      if (backendError.toLowerCase().includes("postcode") || backendError.toLowerCase().includes("post code")) {
+        setErrors((prev) => ({ ...prev, postCode: "Invalid or unrecognized Post Code." }));
+      } else if (backendError.toLowerCase().includes("email")) {
+        setErrors((prev) => ({ ...prev, email: backendError }));
+      } else {
+        setErrors((prev) => ({ ...prev, name: backendError })); 
+      }
     } finally {
       setIsLoading(false);
     }
