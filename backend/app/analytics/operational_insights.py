@@ -41,7 +41,7 @@ def get_posting_windows(session: Session, vendor_id: int, days_back: int = 42) -
         if end < time(6): 
             continue
         new_datapoint = post_window_datapoint(
-            posting_timeslot=f"{start} - {end}",
+            posting_timeslot=f"{start.strftime('%H:%M')} - {end.strftime('%H:%M')}",
             weekly_average=int(round((avg_sold*7), 0))
         )
         post_datapoints.append(new_datapoint)
