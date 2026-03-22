@@ -296,3 +296,28 @@ class popular_bundle_data(BaseModel):
 class waste_proxy_data(BaseModel):
     total_waste_avoided: float
     average_bundle_weight: float
+
+
+# for sell through proportions
+
+# for last week sell through proportions
+
+class week_sell_through_proportions(BaseModel):
+    num_collected: int
+    num_no_show: int
+    num_expired: int
+    week_start_date: str
+
+
+# for all time sell through proportions
+class all_time_sell_through_proportions(BaseModel):
+    num_collected: int
+    num_no_show: int
+    num_expired: int
+
+
+# for combining the above 2
+class combined_sell_through_data(BaseModel):
+    weekly_proportions: week_sell_through_proportions
+    all_time_proportions: all_time_sell_through_proportions
+

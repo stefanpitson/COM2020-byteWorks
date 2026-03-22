@@ -1,13 +1,14 @@
 from sqlmodel import Session, select
 from app.models import Template, Bundle, Reservation, Vendor
 from app.core.database import engine
+from app.schema import week_sell_through_proportions, all_time_sell_through_proportions
 from datetime import date, timedelta
 from typing import Dict, Tuple
 
 
 
 
-def proportions_last_week(session: Session, vendor_id: int) -> Dict:
+def proportions_last_week(session: Session, vendor_id: int) -> week_sell_through_proportions:
 
     """
     we calculate the last full weeks worth of bundles
@@ -42,18 +43,25 @@ def proportions_last_week(session: Session, vendor_id: int) -> Dict:
     total = no_shows + collected + expired
 
     if total == 0:
-        return {"collected": 0, "no_show": 0, "expired": 0, "week_start_date": start_date.isoformat()}
+        return week_sell_through_proportions(
+            num_collected=0,
+            num_no_show=0,
+            num_expired=0,
+            week_start_date=start_date.isoformat()
+        )   
     
-    return {"collected": collected,
-             "no_show": no_shows,
-             "expired": expired,
-             "week_start_date": start_date.isoformat()}
+    return week_sell_through_proportions(
+            num_collected=collected,
+            num_no_show=no_shows,
+            num_expired=expired,
+            week_start_date=start_date.isoformat()
+        )
         
 
 
 
 
-def proportions_all_time(session: Session, vendor_id: int) -> Dict[str, int]:
+def proportions_all_time(session: Session, vendor_id: int) -> all_time_sell_through_proportions:
 
     """
     we select all relevant bundles and their reservation status with a join
@@ -83,12 +91,17 @@ def proportions_all_time(session: Session, vendor_id: int) -> Dict[str, int]:
     total = no_shows + collected + expired
 
     if total == 0:
-        return {"collected": 0, "no_show": 0, "expired": 0}
+        return all_time_sell_through_proportions(
+            num_collected=0,
+            num_no_show=0,
+            num_expired=0
+        )   
     
-    return {"collected": collected,
-             "no_show": no_shows,
-             "expired": expired}
-
+    return all_time_sell_through_proportions(
+            num_collected=collected,
+            num_no_show=no_shows,
+            num_expired=expired
+        )
 
 
 if __name__ == "__main__":

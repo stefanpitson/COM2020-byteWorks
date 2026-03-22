@@ -10,7 +10,7 @@ from app.analytics.sell_through_prop import proportions_all_time, proportions_la
 from app.analytics.waste_proxy import waste_proxy
 from app.analytics.pricing_effectiveness import pricing_effectiveness
 from app.analytics.operational_insights import get_bestselling_bundle_titles, get_posting_windows
-from app.schema import discount_coordinate_data, popular_bundle_data, post_windows_data, waste_proxy_data
+from app.schema import discount_coordinate_data, popular_bundle_data, post_windows_data, waste_proxy_data, week_sell_through_proportions, all_time_sell_through_proportions, combined_sell_through_data
 
 # log errors produced
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 # more descriptive router with forecasting prefix added
 router = APIRouter()
 
-@router.get("/sell_through_proportions")
+@router.get("/sell_through_proportions", response_model=combined_sell_through_data)
 def get_sell_through_proportions(current_user = Depends(get_current_user), session: Session = Depends(get_session)):
 
     """
@@ -36,10 +36,11 @@ def get_sell_through_proportions(current_user = Depends(get_current_user), sessi
 
     try:
         # attempt to call the functions we use for different sell through
-        last_week: Dict = proportions_last_week(session=session, vendor_id=vendor_id)
-        all_time: Dict[str, float] = proportions_all_time(session=session, vendor_id=vendor_id)
+        last_week: week_sell_through_proportions = proportions_last_week(session=session, vendor_id=vendor_id)
+        all_time: all_time_sell_through_proportions = proportions_all_time(session=session, vendor_id=vendor_id)
+        combined: combined_sell_through_data = combined_sell_through_data(weekly_proportions=last_week, all_time_proportions=all_time)
 
-        return {"weekly_proportions": last_week, "all_time_proportions": all_time}
+        return combined
 
     # use the logger to log the exceptions made
     except SQLAlchemyError:
