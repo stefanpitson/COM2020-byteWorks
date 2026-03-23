@@ -81,7 +81,7 @@ export default function CustomerSignUp() {
         setErrors({ email: error.response.data.detail})
       } else {
         setErrors({ email: "An error occurred during sign up. Please try again."})
-        
+      }  
       const backendError = error.response?.data?.detail || "An error occurred during signup.";
       
       if (backendError.toLowerCase().includes("postcode") || backendError.toLowerCase().includes("post code")) {
