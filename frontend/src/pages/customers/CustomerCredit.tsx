@@ -93,26 +93,26 @@ export default function CustomerCredit() {
     };
 
     const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let val = e.target.value.replace(/\D/g, "").slice(0, 19);
+        const value = e.target.value.replace(/\D/g, "").slice(0, 19);
 
-        const formatted = val.replace(/(\d{4})(?=\d)/g, "$1 ");
+        const formatted = value.replace(/(\d{4})(?=\d)/g, "$1 ");
 
         setCardNumber(formatted);
-        setCardType(getCardType(val));
+        setCardType(getCardType(value));
 
-        if (val.length > 12) {
-            setIsLuhnValid(isValidLuhn(val));
+        if (value.length > 12) {
+            setIsLuhnValid(isValidLuhn(value));
         } else {
             setIsLuhnValid(true);
         }
     };
 
     const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let val = e.target.value.replace(/\D/g, "");
-        if (val.length >= 2) {
-            val = val.slice(0, 2) + "/" + val.slice(2, 4);
+        let value = e.target.value.replace(/\D/g, "");
+        if (value.length >= 2) {
+            value = value.slice(0, 2) + "/" + value.slice(2, 4);
         }
-        setExpiry(val);
+        setExpiry(value);
     };
 
     const validateForm = () => {

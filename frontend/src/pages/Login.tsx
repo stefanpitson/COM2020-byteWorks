@@ -108,7 +108,7 @@ export default function Login() {
           </button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="flex flex-col mt-6 text-center gap-4">
           <p className="text-gray-500 text-sm">
             Don't have an account?{" "}
             <button
@@ -116,6 +116,15 @@ export default function Login() {
               className="text-primary font-bold hover:underline hover:text-primaryHover "
             >
               Create new account
+            </button>
+          </p>
+          <p className="text-gray-500 text-sm">
+            By using our service, you are agreeing to our {" "}
+            <button
+              className=""
+              onClick={() => navigate("/tos")}
+              >
+              <span className="underline">Terms and Conditions</span>
             </button>
           </p>
         </div>

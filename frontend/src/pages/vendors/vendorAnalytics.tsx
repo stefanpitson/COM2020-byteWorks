@@ -84,7 +84,7 @@ export default function VendorAnalytics() {
   const navigate = useNavigate();
   const [data, setData] = useState<ForecastWeekData | null>(null);
   const [loading, setLoading] = useState(true);
-    const [vendor, setVendor] = useState<Vendor>();
+  const [vendor, setVendor] = useState<Vendor>();
 
   useEffect(() => {
     const fetchAnalytics = async () => {
