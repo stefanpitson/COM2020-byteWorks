@@ -262,7 +262,7 @@ export default function VendorPage() {
                  {vendor.carbon_saved > 0 && (
                      <div className="mt-6 inline-flex items-center gap-2 bg-[hsl(var(--primary)/0.1)] text-[hsl(var(--primary-dark))] px-5 py-3 rounded-2xl font-bold self-start border border-[hsl(var(--primary)/0.2)]">
                          <LeafIcon />
-                         <span>This vendor has saved {vendor.carbon_saved}kg of CO2e!</span>
+                         <span>This vendor has saved {vendor.carbon_saved?.toFixed(1) ?? "0.0"}kg of CO2e!</span>
                      </div>
                  )}
             </div>
