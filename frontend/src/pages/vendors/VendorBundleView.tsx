@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getTemplateById, getTemplateBundleCount } from "../../api/templates";
-import { getVendorById } from "../../api/vendors";
+import { getTemplateById, getTemplateBundleCount, deleteTemplate } from "../../api/templates";
+import { getVendorProfile } from "../../api/vendors";
 import type { Template, Vendor } from "../../types";
 import { resolveImageUrl } from "../../utils/imageUrl";
 
@@ -32,7 +32,7 @@ type TemplateWithCount = Template & {
   available_count: number;
 };
 
-export default function BundleDetailsPage() {
+export default function VendorBundleView() {
   const { templateId } = useParams();
   const navigate = useNavigate();
   
@@ -40,9 +40,6 @@ export default function BundleDetailsPage() {
   const [bundle, setBundle] = useState<TemplateWithCount | null>(null);
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [loading, setLoading] = useState(true);
-  const [userStoreCredit, setUserStoreCredit] = useState(0);
-  const [reservationCode, setReservationCode] = useState<string | null>(null);
-  const [reserving, setReserving] = useState(false);
 
   useEffect(() => {
     const fetchBundle = async () => {
@@ -52,12 +49,8 @@ export default function BundleDetailsPage() {
         const template = await getTemplateById(Number(templateId));
         const count = await getTemplateBundleCount(Number(templateId));
       
-
-        let vendorData = null;
-        if (template.vendor) {
-          vendorData = await getVendorById(template.vendor);
-          setVendor(vendorData);
-        }
+        const vendorData = await getVendorProfile();
+        setVendor(vendorData);
 
         setBundle({
           ...template,
@@ -74,24 +67,6 @@ export default function BundleDetailsPage() {
     fetchBundle();
   }, [templateId, navigate]);
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch("/api/customers/profile", {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-          },
-        }); 
-        const data = await response.json();
-        setUserStoreCredit(data.store_credit ?? 0);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchUserProfile();
-  }, []);
-
 
   if (loading) {
     return (
@@ -103,8 +78,6 @@ export default function BundleDetailsPage() {
 
   if (!bundle) return null;
 
-  const isSoldOut = bundle.available_count === 0;
-  const isInsufficientFunds = userStoreCredit < bundle.cost;
 
   const Badge = ({ type }: { type: "VE" | "V" }) => (
     <span
@@ -119,63 +92,28 @@ export default function BundleDetailsPage() {
     </span>
   );
 
-const handleReserve = async () => {
-  if (!bundle) return;
-  setReserving(true);
+  const handleDelete = async () => {
+    try {
+        await deleteTemplate(Number(templateId))
 
-  try {
-    const token = localStorage.getItem("token");
-
-    const res = await fetch(`/api/reservations/${bundle.template_id}/reserve`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-      },
-    });
-
-    if (!res.ok) {
-      const data = await res.json();
-      alert(data.detail || "Failed to reserve");
-      return;
+        navigate('/vendor/dashboard');
+    } catch (error) {
+        console.error("Failed to delete template", error);
+        alert("Could not delete template. Please try again.");
     }
-
-    const data = await res.json();
-
-    const updatedTemplate = await getTemplateById(bundle.template_id);
-    const updatedCount = await getTemplateBundleCount(bundle.template_id);
-    setBundle({
-      ...updatedTemplate,
-      available_count: updatedCount ?? 0,
-    });
-
-    const profileRes = await fetch("/api/customers/profile", {
-      headers: { "Authorization": `Bearer ${token}` },
-    });
-    const profileData = await profileRes.json();
-    setUserStoreCredit(profileData.store_credit ?? 0);
-
-    const codeRes = await fetch(`/api/reservations/${data.reservation_id}/customer`, {
-      headers: { "Authorization": `Bearer ${token}` },
-    });
-    const codeData = await codeRes.json();
-    setReservationCode(codeData.code);
-
-  } catch (err) {
-    console.error(err);
-    alert("Error reserving bundle");
-  } finally {
-    setReserving(false);
   }
-};
 
   return (
     <div className="min-h-screen bg-pattern pb-32">
       <div className="max-w-6xl mx-auto px-6 pt-12">
         {bundle && 
           <div className="mb-8">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-black drop-shadow-md px-4 py-2 rounded-lg inline-block bg-white/5">
-              {vendor?.name}
-            </h1>
+            <button 
+            onClick={() => navigate(-1)}
+            className="text-sm font-bold text-gray-500 hover:text-gray-800 transition-colors"
+          >
+            ← Back to Dashboard
+          </button>
           </div>
         }
 
@@ -195,11 +133,10 @@ const handleReserve = async () => {
               </div>
             )}
 
-            {!isSoldOut && (
-              <div className="absolute top-6 right-6 bg-white px-5 py-2 rounded-full shadow-md text-sm font-bold text-[hsl(var(--accent))]">
-                {bundle.available_count} left today
-              </div>
-            )}
+            <div className="absolute top-6 right-6 bg-white px-5 py-2 rounded-full shadow-md text-sm font-bold text-[hsl(var(--accent))]">
+            {bundle.available_count} left today
+            </div>
+            
 
           {bundle.carbon_saved > 0 && (
             <div className="bg-[hsl(var(--primary)/0.08)] border border-[hsl(var(--primary)/0.15)] rounded-2xl p-6">
@@ -282,7 +219,6 @@ const handleReserve = async () => {
 
             {/* Pricing + Reserve Button */}
             <div className="mt-auto border-t border-gray-100 pt-8">
-
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <div className="text-sm text-gray-400 uppercase tracking-wide">
@@ -293,31 +229,13 @@ const handleReserve = async () => {
                   </div>
                 </div>
               </div>
-
-              <button
-                onClick={handleReserve}
-                disabled={isSoldOut || isInsufficientFunds || reserving}
-                className={`w-full py-5 rounded-2xl font-bold text-lg transition-all
-                  ${
-                    isSoldOut || reserving
-                      ? "bg-gray-200 text-gray-400"
-                      : isInsufficientFunds
-                      ? "bg-red-400 text-white"
-                      : "bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary-dark))] shadow-lg shadow-green-100 active:scale-95"
-                  }`}
-              >
-                {isSoldOut ? "Sold Out" : isInsufficientFunds ? "Insufficient Funds" : reserving ? "Reserving Bundle..." : "Reserve Bundle"}
-              </button>
-              
-              {reservationCode && (
-                <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg text-center">
-                  <p className="font-semibold">Reservation Confirmed!</p>
-                  <p>Your pickup code is:</p>
-                  <div className="text-2xl font-bold text-[hsl(var(--primary))]">{reservationCode}</div>
-                  <p>Show this code to the vendor to collect your bundle.</p>
-                </div>
-              )}
             </div>
+            <button 
+                className="w-full py-5 rounded-2xl font-bold text-lg bg-red-600 text-white hover:bg-red-800 shadow-lg shadow-red-100 active:scale-95"
+                onClick={handleDelete}
+            >
+                Delete Template
+            </button>
 
           </div>
         </div>
