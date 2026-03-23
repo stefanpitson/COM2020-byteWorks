@@ -13,3 +13,4 @@ SQLAlchemy==2.0.48
 sqlmodel==0.0.37
 ukpostcodeio==1.0.0
 geopy==2.4.1
+uvicorn[standard]
