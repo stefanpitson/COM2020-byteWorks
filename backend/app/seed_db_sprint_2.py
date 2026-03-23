@@ -12,6 +12,7 @@ from math import exp
 from uploads.vendors_data import vendors # vendor info
 from uploads.issue_reports_data import issue_data_pool
 from app.forecasting.database_creation.generate_input_forecasts import sync_forecast_inputs
+from app.forecasting.database_creation.previous_weather import update_weather_for_vendor
 
 def seed_database():
 
@@ -34,7 +35,7 @@ def seed_database():
 
         # create a default admin user on every full reseed
         admin_user = User(
-            email="admin@admin.com",
+            email="admin@byte.com",
             password_hash=get_password_hash("Admin123"),
             role="admin",
         )
@@ -134,7 +135,7 @@ def seed_database():
 
                 template_list.append(template_register)
 
-            total_bundles_sold_per_week = random.randint(2,15) # total bundles a week for a specific vendor
+            total_bundles_sold_per_week = random.randint(10,30) # total bundles a week for a specific vendor
             distribution = 1.0
             popularity_list = []
 
@@ -242,10 +243,13 @@ def seed_database():
             # sync forecast inputs
             session.flush()
             sync_forecast_inputs(session, vendor_id=vendor_account.vendor_id, days_back=60)
+            # backfill historical precipitation for seeded forecast inputs
+            update_weather_for_vendor(vendor_id=vendor_account.vendor_id, days_back=60)
         
             # current bundles available today
             for i in range(len(template_list)):
-                num_today = max(1, int(round(popularity_list[i] * total_bundles_sold_per_week)))
+                max_today = max(1, int(round(popularity_list[i] * total_bundles_sold_per_week)))
+                num_today = max_today
                 template_post_hour = random.randint(open_hour, max(open_hour, close_hour - 1))
 
                 for j in range(num_today):
@@ -316,6 +320,18 @@ def seed_database():
                             customer.carbon_saved += carbon_saved
                             customer.food_saved += template_obj.weight
                             customer.money_saved += template_obj.estimated_value - template_obj.cost
+
+                # Simple stock boost: add extra unsold bundles after today's reservation generation.
+                extra_today = random.randint(0, max_today)
+                for _ in range(extra_today):
+                    session.add(
+                        Bundle(
+                            template_id=template_list[i].template_id,
+                            date=today,
+                            time=dt_time(template_post_hour, random.randint(0, 59)),
+                            picked_up=False,
+                        )
+                    )
 
         # set streaks for each customer based on their historical collected reservations, must be done manually
         for customer in customer_list:
@@ -422,6 +438,7 @@ def seed_database():
         sigma_vendors = max(1.0, num_vendors / 4)
 
         vendor_weights = [exp(-((k - mid_vendors) ** 2) / (2 * sigma_vendors ** 2)) for k in range(num_vendors)]
+        reports_today = datetime.now().date()
 
         for i in range(len(customer_list)):
             val_customers = mid_customers + 1 - abs(mid_customers - i)
@@ -436,10 +453,14 @@ def seed_database():
                 feedback = random.choice(data["C_feedback"])
                 full_complaint = f"{subject} {problem}\n{feedback}"
                 responded = random.choice([True, False])
+                date_made = reports_today - timedelta(days=random.randint(0, 41))
                 response = None
+                date_responded = None
 
                 if (responded):
-                    response = random.choice(data["vendor_responses"])
+                    response = random.choice(data["vendor_responses"]) # choose a random response
+                    days_after_report = random.randint(0, 7)
+                    date_responded = min(reports_today, date_made + timedelta(days=days_after_report))
 
                 seeded_report = Report(
                     customer_id=customer_list[i].customer_id,
@@ -450,6 +471,8 @@ def seed_database():
                     ),
                     responded=responded,
                     response=response,
+                    date_made=date_made,
+                    date_responded=date_responded,
                 )
                 session.add(seeded_report)
         session.flush()
