@@ -1,7 +1,7 @@
 from sqlmodel import Session, SQLModel, select, func
 from app.core.database import engine, seed_allergens, seed_badges
 from app.core.security import get_password_hash
-from app.models import User, Vendor, Customer, Template, Bundle, Reservation, Streak, Allergen, Report, Badge
+from app.models import User, Vendor, Customer, Template, Bundle, Reservation, Streak, Allergen, Report, Badge, Forecast_Input
 from datetime import datetime, timedelta, time as dt_time
 import random
 import copy
@@ -68,6 +68,8 @@ def seed_database():
             session.refresh(customer)
 
         reservation_code = 1000
+
+        weather_backfill_results = []
 
         for vendor, info in vendors_runtime.items():
             # VENDOR CREATION
@@ -244,7 +246,8 @@ def seed_database():
             session.flush()
             sync_forecast_inputs(session, vendor_id=vendor_account.vendor_id, days_back=60)
             # backfill historical precipitation for seeded forecast inputs
-            update_weather_for_vendor(vendor_id=vendor_account.vendor_id, days_back=60)
+            weather_result = update_weather_for_vendor(vendor_id=vendor_account.vendor_id, days_back=60)
+            weather_backfill_results.append((vendor_account.name, weather_result))
         
             # current bundles available today
             for i in range(len(template_list)):
@@ -481,7 +484,24 @@ def seed_database():
 
         session.commit()
 
+        def count_rows(model):
+            return session.exec(select(func.count()).select_from(model)).one()
+
+        seeded_stats = {
+            "Number of users": count_rows(User),
+            "Number of vendors": count_rows(Vendor),
+            "Number of customers": count_rows(Customer),
+            "Number of bundles": count_rows(Bundle),
+            "Number of reservations": count_rows(Reservation),
+            "Number of reports": count_rows(Report),
+        }
+
+        print("Seeded entity counts:")
+        for entity, count in seeded_stats.items():
+            print(f"  {entity}: {count}")
+
     print("Database seeded")
+    
 
 if __name__ == '__main__':
     seed_database()
