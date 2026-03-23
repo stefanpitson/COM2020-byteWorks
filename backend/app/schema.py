@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import List, Optional
 from datetime import date, time
 import re
+from pydantic import field_validator
 
 # schemas contains what the frontend will send and expect in return 
 
@@ -300,19 +301,88 @@ class CreditTopUpDetails(BaseModel):
 
 class ForecastDatapoint(BaseModel):
     bundle_name: str        
-    predicted_sales: int
-    no_show: int
-    chance_of_no_show: float
-    day: str
-    start_time: str
-    end_time: str
-    confidence: float
-    recommendation: str
-    rationale: str
+    predicted_sales: int # aggregated
+    predicted_no_show: int # aggregated
+    chance_of_no_show: float # averaged
+    confidence: float # averaged
+    recommendation: List[str] # contains timeslot details - aggregated
+    rationale: List[str] #aggregated
+
+    @field_validator('rationale') # ensures that there are noo rationale duplicates
+    def remove_rationale_duplicates(cls, it: List[str]):
+        return list(dict.fromkeys(it))
+
 
 class ForecastWeekData(BaseModel):
     week_date: str
+    day_datapoints: List[ForecastDayData]
+
+class ForecastDayData(BaseModel):
+    date: str
     datapoints: List[ForecastDatapoint]
+
+
+# for analytics
+
+# for pricing effectiveness
+class discount_coordinate_data(BaseModel):
+    coordinates: List[discount_coordinate] # a list of the discount coordinates
+
+class discount_coordinate(BaseModel):
+    discount: float # between 0 and 1 
+    sell_through: float # between 0 and 1 - 1 meaning every bundle posted was sold
+
+
+# for operational insights
+
+# for identify best POSTING windows
+class post_window_datapoint(BaseModel):
+    posting_timeslot: str
+    weekly_average: int # average number of bundles sold per week over the last e.g. 6 weeks
+
+class post_windows_data(BaseModel):
+    top_post_window: str
+    window_datapoints: List[post_window_datapoint]
+
+
+# for the most popular 3 bundles
+class popular_bundle_datapoint(BaseModel):
+    bundle_title: str
+    weekly_average: int # average number of bundles sold per week over the last e.g. 6 weeks
+
+class popular_bundle_data(BaseModel):
+    top_bundle: str
+    bundle_datapoints: List[popular_bundle_datapoint]
+    
+
+class waste_proxy_data(BaseModel):
+    total_waste_avoided: float
+    average_bundle_weight: float
+
+
+# for sell through proportions
+
+# for last week sell through proportions
+
+class week_sell_through_proportions(BaseModel):
+    collected: int
+    no_show: int
+    expired: int
+    week_start_date: str
+
+
+# for all time sell through proportions
+class all_time_sell_through_proportions(BaseModel):
+    collected: int
+    no_show: int
+    expired: int
+
+
+# for combining the above 2
+class combined_sell_through_data(BaseModel):
+    weekly_proportions: week_sell_through_proportions
+    all_time_proportions: all_time_sell_through_proportions
+
 
 class DeleteBundles(BaseModel):
     template_id: int

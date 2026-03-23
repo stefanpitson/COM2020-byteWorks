@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 from sqlmodel import Session, select
-from app.models import Forecast_Input
+from app.models import Forecast_Input, Vendor
 from app.core.database import engine
 
 def get_naive_confidence_for_bundle_day(vendor_id: int,template_id: int,target_date: date,weeks_history: int = 4) -> float:
@@ -75,8 +75,9 @@ def get_naive_confidence_for_bundle_day(vendor_id: int,template_id: int,target_d
 
 
 if __name__ == "__main__":
-    result = get_naive_confidence_for_bundle_day(vendor_id=1, template_id=2, target_date=date.today())
-    print(result)
+    
+    pass
+            
 
 
 #inside backend
