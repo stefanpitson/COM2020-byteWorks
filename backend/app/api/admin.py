@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select 
 from app.core.database import get_session, engine
 from app.core.security import get_password_hash
-from app.models import Vendor, User
+from app.models import Vendor, User, Customer
 from app.schema import AdminVendorList, AllUsers
 from app.api.deps import get_current_user
 
@@ -35,7 +35,12 @@ def delete_user(
             statement = select(Vendor).where(Vendor.vendor_id == user.vendor_profile.vendor_id)
             vendor = session.exec(statement).first()
             session.delete(vendor)
-        # we dont need to delete customer profiles
+
+        elif user.role == "customer":
+            statement = select(Customer).where(Customer.customer_id == user.customer_profile.customer_id)
+            customer = session.exec(statement).first()
+            session.delete(customer)
+            
         session.delete(user)
         session.commit()
     except Exception as e:
