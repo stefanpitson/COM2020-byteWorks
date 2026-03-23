@@ -406,7 +406,7 @@ export default function CustomerCredit() {
                                 )}
                             </button>
                             <p className="text-center text-xs text-gray-400 mt-4 flex items-center justify-center gap-1">
-                                <LockClosedIcon /> Payments are secure and encrypted.
+                                <LockClosedIcon /> Payment details are not stored.
                             </p>
                         </div>
 
