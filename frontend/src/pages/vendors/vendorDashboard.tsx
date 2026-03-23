@@ -80,7 +80,7 @@ export default function VendorTemplateManager() {
       }
     };
     fetchData();
-  }, [navigate, refreshTrigger]);
+  }, [refreshTrigger]);
 
 
   const handleAddBundle = async (templateId: number, quantity: number) => {

@@ -189,6 +189,14 @@ export default function CustomerCredit() {
         }
     };
 
+    if (loading) {
+        return (
+        <div className="min-h-screen flex items-center justify-center">
+            <div className="animate-spin w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full" />
+        </div>
+        );
+    }
+
     if (success) {
         return (
         <div className="min-h-screen bg-pattern flex items-center justify-center p-4">
@@ -398,7 +406,7 @@ export default function CustomerCredit() {
                                 )}
                             </button>
                             <p className="text-center text-xs text-gray-400 mt-4 flex items-center justify-center gap-1">
-                                <LockClosedIcon /> Payments are secure and encrypted.
+                                <LockClosedIcon /> Payment details are not stored.
                             </p>
                         </div>
 

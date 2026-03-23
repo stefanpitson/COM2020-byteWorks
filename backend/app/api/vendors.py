@@ -54,14 +54,14 @@ def update_vendor_profile(
     if data.vendor.name != None:
         current_user.vendor_profile.name = data.vendor.name
 
-    if data.user.newPassword != None and data.user.oldPassword != None:
-        if verify_password(data.user.oldPassword, current_user.password_hash):
-            current_user.password_hash = get_password_hash(data.user.newPassword)
-    if data.user.newPassword == None and data.user.oldPassword != None:
+    if data.user.new_password != None and data.user.old_password != None:
+        if verify_password(data.user.old_password, current_user.password_hash):
+            current_user.password_hash = get_password_hash(data.user.new_password)
+    if data.user.new_password == None and data.user.old_password != None:
         raise HTTPException(status_code=400, detail="Old password is required to change new password")
-    if data.user.newPassword != None and data.user.oldPassword == None:
+    if data.user.new_password != None and data.user.old_password == None:
         raise HTTPException(status_code=400, detail="New password is missing")
-    
+
     # Maybe will provide future validation if decided with frontend
     if data.vendor.street != None:
          current_user.vendor_profile.street = data.vendor.street
@@ -73,18 +73,14 @@ def update_vendor_profile(
         parsed_postcode = (data.vendor.post_code).upper().replace(" ","")
         if not validation.is_valid_postcode(parsed_postcode):
                     raise HTTPException(status_code=400, detail="Postcode is not valid")
-        current_user.vendor_profile.post_code = data.customer.post_code
-
+        current_user.vendor_profile.post_code = data.vendor.post_code
     if data.vendor.phone_number != None:
          current_user.vendor_profile.phone_number = data.vendor.phone_number
     
     # May have to change when opening houts implementation is done properly
     if data.vendor.opening_hours != None:
          current_user.vendor_profile.opening_hours = data.vendor.opening_hours
-    
-    # May have to change when photo implementation is done properly
-    if data.vendor.photo != None:
-         current_user.vendor_profile.photo = data.vendor.photo
+
 
     try:
         session.add(current_user)
@@ -223,6 +219,7 @@ def get_all_vendors(
         .outerjoin(Template,Template.vendor == Vendor.vendor_id)
         .outerjoin(Bundle, Bundle.template_id == Template.template_id)
         .outerjoin(Reservation, Bundle.bundle_id == Reservation.bundle_id)
+        .where(Vendor.validated == True)
         .group_by(
                 Vendor.vendor_id,
                 Vendor.name, # count the number of bundles per vendor

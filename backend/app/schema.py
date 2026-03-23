@@ -29,6 +29,10 @@ class VendorRead(BaseModel):
     food_saved: float
     photo: Optional[str]
 
+class AdminVendorList(BaseModel):
+    total_count: int
+    vendors: List[VendorRead]
+
 # ___AUTH SCHEMAS___  
 
 #login
@@ -74,6 +78,12 @@ class VendorSignupRequest(BaseModel):
         post_code: str
         phone_number: str
         opening_hours: str
+
+class PasswordCheck(BaseModel):
+    password: str
+
+class PasswordCheckRead(BaseModel):
+    valid: bool
 
 #data for updating the customer 
 # all are optional as only updated information is given
@@ -233,6 +243,52 @@ class StreakRead(BaseModel):
     last: date
     ended:bool
 
+
+class BadgeRead(BaseModel):
+    badge_id: int
+    title: str
+    description: str
+    metric: str
+    threshold: float
+
+class BadgeList(BaseModel):
+    total_count: int
+    badges: List[BadgeRead]
+
+class LeaderboardEntry(BaseModel):
+    customer_id: int
+    rank: int
+    name: str
+    food_saved: float
+    is_you: bool
+
+class LeaderboardList(BaseModel):
+    total_count: int
+    entries: List[LeaderboardEntry]
+class ReportCreate(BaseModel):
+    vendor_id: int
+    title: str
+    complaint:str
+
+class ReportRead(BaseModel):
+    report_id: int
+    vendor_id:int
+    customer_id:int
+    title:str
+    complaint:str
+    responded: bool
+    response: str | None 
+    date_made: date
+    date_responded: date | None
+
+class ReportRespond(BaseModel):
+    response:str
+
+class ReportList(BaseModel):
+    total_count: int
+    reports: List [ReportRead]
+
+    
 class CreditTopUpDetails(BaseModel):
     credit_top_up : float
     first_line_address : str
@@ -321,3 +377,16 @@ class combined_sell_through_data(BaseModel):
     weekly_proportions: week_sell_through_proportions
     all_time_proportions: all_time_sell_through_proportions
 
+
+class DeleteBundles(BaseModel):
+    template_id: int
+    amount: int
+
+
+class AllUsers(BaseModel):
+    total_count: int
+    users: List[UserData]
+    class UserData(BaseModel):
+        user_id: int
+        email: str
+        role: str
