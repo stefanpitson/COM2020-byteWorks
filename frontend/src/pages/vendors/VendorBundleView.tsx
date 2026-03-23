@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getTemplateById, getTemplateBundleCount, deleteTemplate } from "../../api/templates";
-import { getVendorProfile } from "../../api/vendors";
-import type { Template, Vendor } from "../../types";
+import type { Template } from "../../types";
 import { resolveImageUrl } from "../../utils/imageUrl";
 
 const formatCurrency = (amount: number) => {
@@ -38,7 +37,6 @@ export default function VendorBundleView() {
   
 
   const [bundle, setBundle] = useState<TemplateWithCount | null>(null);
-  const [vendor, setVendor] = useState<Vendor | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -49,9 +47,6 @@ export default function VendorBundleView() {
         const template = await getTemplateById(Number(templateId));
         const count = await getTemplateBundleCount(Number(templateId));
       
-        const vendorData = await getVendorProfile();
-        setVendor(vendorData);
-
         setBundle({
           ...template,
           available_count: count ?? 0,
