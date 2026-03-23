@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import List, Optional
 from datetime import date, time
 import re
+from pydantic import field_validator
 
 # schemas contains what the frontend will send and expect in return 
 
@@ -306,6 +307,11 @@ class ForecastDatapoint(BaseModel):
     confidence: float # averaged
     recommendation: List[str] # contains timeslot details - aggregated
     rationale: List[str] #aggregated
+
+    @field_validator('rationale') # ensures that there are noo rationale duplicates
+    def remove_rationale_duplicates(cls, it: List[str]):
+        return list(dict.fromkeys(it))
+
 
 class ForecastWeekData(BaseModel):
     week_date: str
