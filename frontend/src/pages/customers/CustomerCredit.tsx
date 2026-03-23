@@ -363,7 +363,7 @@ export default function CustomerCredit() {
                             <div className="space-y-3">
                                 <input
                                     type="text"
-                                    placeholder="Address Line 1"
+                                    placeholder="Street Address"
                                     value={address}
                                     onChange={(e) => setAddress(e.target.value)}
                                     className={getInputClass(errors.address)}

@@ -77,6 +77,11 @@ export default function CustomerSignUp() {
       navigate("/login");
     } catch (error: any) {
       console.error("Signup failed:" + error);
+      if (error.response?.data?.detail) {
+        setErrors({ email: error.response.data.detail})
+      } else {
+        setErrors({ email: "An error occurred during sign up. Please try again."})
+        
       const backendError = error.response?.data?.detail || "An error occurred during signup.";
       
       if (backendError.toLowerCase().includes("postcode") || backendError.toLowerCase().includes("post code")) {
@@ -135,6 +140,8 @@ export default function CustomerSignUp() {
           <label className="block mb-4">
             <span className="text-sm text-gray-700">Email</span>
             <input
+              type="email" //helps with autofill with on mobile
+              autoComplete="username" //Allows autofill with password manager when signing in 
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -153,13 +160,14 @@ export default function CustomerSignUp() {
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
+                autoComplete="new-password" //prevents autofill confusion
                 value={password}
                 onChange={(e) => {
                   const value = e.target.value;
                   setPassword(value);
                   setPasswordStrength(getPasswordStrength(value));
                 }}
-                className={`${getInputClass(errors.password)} pr-10`}
+                className={`${getInputClass(errors.password)} pr-10 tracking-widest`} //spaces and formats the dots
                 placeholder="••••••••"
               />
 
@@ -169,7 +177,7 @@ export default function CustomerSignUp() {
                 onClick={() => setShowPassword(prev => !prev)}
                 className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
               >
-                {showPassword ? <EyeOffIcon className="size-6"/> : <EyeIcon className="size-6"/>}
+                {showPassword ? <EyeIcon className="size-6"/> : <EyeOffIcon className="size-6"/>}
               </button>
             </div>
 
