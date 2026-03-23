@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 import { getOwnedBadges, getUnownedBadges, getLeaderboard } from "../../api/customers";
 import type { Badge, LeaderboardEntry } from "../../types";
 
+//if user hasnt earnt the badge it turns it grey
 const getBadgeStyling = (metric: string, threshold: number, isOwned: boolean) => {
   if (!isOwned) {
     return { bg: "bg-gray-100", text: "text-gray-400", border: "border-gray-200", icon: "🔒" };
   }
 
+  //styling for badges
   if (metric === "streak_count" && threshold >= 30) {
     return { bg: "bg-[hsl(var(--accent)/0.2)]", text: "text-[hsl(var(--accent))]", border: "border-[hsl(var(--accent)/0.4)]", icon: "👑" };
   }
@@ -40,19 +42,22 @@ const getBadgeStyling = (metric: string, threshold: number, isOwned: boolean) =>
   return { bg: "bg-white", text: "text-[hsl(var(--text-main))]", border: "border-gray-200", icon: "⭐" };
 };
 
-function metricFormat(metric: string) {
-  if (metric === "streak_count") return "Days";
-  if (metric === "bundles_saved") return "Bundles";
-  if (metric === "food_saved") return "kg";
-  if (metric === "carbon_saved") return "kg CO₂";
-  if (metric === "money_saved") return "£ Saved";
-  return metric.replace("_", " ");
+//adds correct symbols 
+function formatGoal(metric: string, threshold: number) {
+  if (metric === "streak_count") return `${threshold} Days`;
+  if (metric === "bundles_saved") return `${threshold} Bundles`;
+  if (metric === "food_saved") return `${threshold} kg`;
+  if (metric === "carbon_saved") return `${threshold} kg CO₂`;
+  if (metric === "money_saved") return `£${threshold} Saved`; // Fixes the backwards £!
+  return `${threshold} ${metric.replace("_", " ")}`;
 }
 
+//sets which tab of the page the user is viewing
 export default function CustomerBadges() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"badges" | "leaderboard">("badges");
   
+  //holds data and shows spinning bar while loding
   const [ownedBadges, setOwnedBadges] = useState<Badge[]>([]);
   const [unownedBadges, setUnownedBadges] = useState<Badge[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -104,6 +109,7 @@ export default function CustomerBadges() {
               </p>
             </div>
 
+{/* toggle between badges and leaderboard */}
             <div className="flex bg-white/50 p-1.5 rounded-2xl border border-white backdrop-blur-sm w-fit shadow-sm">
               <button
                 onClick={() => setActiveTab("badges")}
@@ -139,6 +145,7 @@ export default function CustomerBadges() {
             <>
             {activeTab === "badges" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {/* shows the badges earnt in colour */}
                 {ownedBadges.map((badge) => {
                 const style = getBadgeStyling(badge.metric, badge.threshold, true);
                 return (
@@ -149,12 +156,13 @@ export default function CustomerBadges() {
                         <h3 className="text-lg font-extrabold text-[hsl(var(--primary-dark))] mb-2 leading-tight">{badge.title}</h3>
                         <p className="text-sm text-[hsl(var(--text-main))] leading-relaxed mb-6 flex-grow opacity-90">{badge.description}</p>
                         <div className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-xl bg-opacity-50 ${style.bg} ${style.text}`}>
-                            Target: {badge.threshold} {metricFormat(badge.metric)}
+                            Target: {formatGoal(badge.metric, badge.threshold)}
                         </div>
                     </div>
                 );
                 })}
 
+                {/* shows the locked badges in grey */}
                 {unownedBadges.map((badge) => {
                 const style = getBadgeStyling(badge.metric, badge.threshold, false);
                 return (
@@ -165,7 +173,7 @@ export default function CustomerBadges() {
                         <h3 className="text-lg font-bold text-gray-500 mb-2 leading-tight">{badge.title}</h3>
                         <p className="text-sm text-gray-400 leading-relaxed mb-6 flex-grow">{badge.description}</p>
                         <div className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-xl bg-gray-100 text-gray-400`}>
-                            Goal: {badge.threshold} {metricFormat(badge.metric)}
+                            Goal: {formatGoal(badge.metric, badge.threshold)}
                         </div>
                     </div>
                 );
@@ -181,11 +189,12 @@ export default function CustomerBadges() {
                     <span className="font-bold text-[hsl(var(--text-main))] uppercase tracking-wider text-xs text-right">Food Saved</span>
                 </div>
                 
+                {/* generate a row for each user */}
                 <div className="divide-y divide-gray-50">
                     {leaderboard.map((user) => {
                     const isTopThree = user.rank <= 3;
                     const isMe = user.is_you;
-                    
+                    // assigns special icons for top 3
                     let rankStyling = "text-[hsl(var(--text-main))] font-bold";
                     if (user.rank === 1) rankStyling = "text-yellow-500 font-extrabold text-lg";
                     if (user.rank === 2) rankStyling = "text-gray-400 font-extrabold text-lg";

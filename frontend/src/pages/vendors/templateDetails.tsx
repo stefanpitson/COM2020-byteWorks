@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createTemplate, uploadTemplateImage } from "../../api/templates";
 import CeleryImg from "../../assets/allergens/Celery.png";
@@ -19,6 +19,7 @@ import TreenutsImg from "../../assets/allergens/Treenuts.png";
 export default function TemplateDetails() {
     const navigate = useNavigate();
 
+    //sets all states
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [cost, setCost] = useState("");
@@ -34,6 +35,7 @@ export default function TemplateDetails() {
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
+    // sets all names and their corresponding images
     const ALLERGEN_LIST = [
         { name: "Celery", image: CeleryImg },
         { name: "Gluten", image: GlutenImg },
@@ -51,6 +53,7 @@ export default function TemplateDetails() {
         { name: "Sulphur Dioxide", image: So2Img } 
     ];
 
+    //checks if all fields are not empty and percentage equals 100%
     const validateForm = () => {
         const newErrors: { [key: string]: string } = {};
         if (!title.trim()) newErrors.title = "Title is required";
@@ -74,9 +77,17 @@ export default function TemplateDetails() {
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-        const file = e.target.files[0];
-        setSelectedImage(file);
-        setImagePreview(URL.createObjectURL(file));
+            const file = e.target.files[0];
+            setSelectedImage(file);
+            setImagePreview(URL.createObjectURL(file));
+        }
+    };
+
+    // prevents negative percentages
+    const handlePositiveChange = (setter: React.Dispatch<React.SetStateAction<string>>) => (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        if (val === "" || Number(val) >= 0) {
+            setter(val);
         }
     };
 
@@ -109,242 +120,287 @@ export default function TemplateDetails() {
             navigate("/vendor/dashboard"); 
         } catch (error: any) {
             console.error("Template creation failed:", error);
-            
             if (error.response && error.response.data && error.response.data.detail) {
                 const backendError = error.response.data.detail;
-
                 if (backendError === "Template already registered") {
-                    // This puts the red text directly under the "Bundle Name" box
                     setErrors((prev) => ({ ...prev, title: "This bundle name is already taken" }));
                 } else {
-                    // If it's some other error (like "Percentages do not add up"), show it generally
                     alert(`Error: ${backendError}`);
                 }
             }
-
         } finally {
             setIsLoading(false);
         }
     }
 
+    //handles toggling allergens
     const handleAllergenChange = (allergen: string) => {
         setAllergens((prev) =>
-        prev.includes(allergen) ? prev.filter((a) => a !== allergen) : [...prev, allergen]
+            prev.includes(allergen) ? prev.filter((a) => a !== allergen) : [...prev, allergen]
         );
     };
+
+    //handles toggling vegan and vegeterian
     const handleInclusionChange = (inclusion: string) => {
-        setInclusions((prev) =>
-        prev.includes(inclusion) ? prev.filter((i) => i !== inclusion) : [...prev, inclusion]
-        );
+        setInclusions((prev) => {
+            if (inclusion === "vegan") {
+                if (prev.includes("vegan")) {
+                    return prev.filter((i) => i !== "vegan");
+                } else {
+                    return prev.includes("vegetarian") ? [...prev, "vegan"] : [...prev, "vegan", "vegetarian"];
+                }
+            } else if (inclusion === "vegetarian") {
+                if (prev.includes("vegetarian")) {
+                    if (prev.includes("vegan")) return prev; 
+                    return prev.filter((i) => i !== "vegetarian");
+                } else {
+                    return [...prev, "vegetarian"];
+                }
+            }
+            return prev;
+        });
     };
 
     const getInputClass = (error?: string) => { 
         return `
-        /* YOUR original styles */
-        mt-1 block w-full rounded-md p-3 text-sm bg-white shadow-sm transition-colors text-gray-800
+        w-full rounded-md p-3 text-sm bg-white shadow-sm transition-colors text-gray-800
         focus:outline-none focus:ring-2 focus:border-transparent
-        
-        /* THE dynamic error borders */
         border 
         ${error ? "border-red-500 focus:ring-red-500" : "border-gray-200 focus:ring-primary"}
         `;
     };
 
-  const cardStyle = `
-    bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] 
-    p-6 border border-gray-100
-  `;
+    const cardStyle = `
+        bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] 
+        p-6 border border-gray-100
+    `;
 
-  return (
-    <div className="min-h-screen w-full flex justify-center bg-background p-10 font-sans">
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-[1100px] w-full">
-        <div className="col-span-1 md:col-span-3 flex justify-end">
-            <button 
-                type="button" // Good practice to prevent accidental form submission
-                onClick={() => navigate(-1)}
-                className="text-sm font-bold text-gray-500 hover:text-gray-800 transition-colors"
-            >
-                ← Back to Dashboard
-            </button>
-        </div>
-        {/* --- Left Column --- */}
-            <div className="md:col-span-1 relative md:border-r border-gray-200 md:pr-12 flex flex-col">
-            
-                <label className="bg-grayed border-2 border-dashed border-gray-300 rounded-xl h-[250px] flex items-center justify-center text-gray-500 text-sm mt-8 mb-8 cursor-pointer hover:bg-white transition-colors shadow-sm relative overflow-hidden group">
-                    {imagePreview ? (
-                        <>
-                            <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <span className="text-white font-medium">Change Image</span>
-                            </div>
-                        </>
-                    ) : (
-                        <span>+ Upload Image</span>
-                    )}
-
-                    <input 
-                        type="file" 
-                        accept="image/*" 
-                        className="hidden" 
-                        onChange={handleFileChange} 
-                    />
-                </label>
-
-                <label className="block mb-4">
-                    <span className="text-sm font-medium text-gray-700">Bundle Name</span>
-                    <input 
-                        type="text" 
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        className={getInputClass(errors.title)} 
-                        placeholder="Enter bundle name" 
-                    />
-                    {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
-                </label>
-            </div>
-
-            {/* --- Right Column --- */}
-            <div className="md:col-span-2 flex flex-col gap-6 pt-8">
-            
-                <div className={cardStyle}>
-                    <label className="block">
-                    <span className="text-sm font-medium text-gray-700 block mb-2">Description</span>
-                    <textarea
-                        rows={5}
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        className={`${getInputClass(errors.description)} resize-y leading-relaxed`}
-                        placeholder="Describe the items in this bundle..."
-                    />
-                    {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
-                    </label>
-                </div>
-
-                <div className={`${cardStyle} grid grid-cols-1 sm:grid-cols-3 gap-6`}>
-                    <label className="block">
-                        <span className="block mb-1 text-xs uppercase tracking-wider text-gray-500">Cost</span>
-                    <input 
-                        type="number" step="0.01" 
-                        value={cost} onChange={(e) => setCost(e.target.value)}
-                        className={getInputClass(errors.cost)} placeholder="£ 0.00"
-                    />
-                    {errors.cost && <p className="text-red-500 text-xs mt-1">{errors.cost}</p>}
-                    </label>
-                    <label className="block">
-                    <span className="block mb-1 text-xs uppercase tracking-wider text-gray-500">Est. Value</span>
-                        <input 
-                            type="number" step="0.01" 
-                            value={estimatedValue} onChange={(e) => setEstimatedValue(e.target.value)}
-                            className={getInputClass(errors.estimatedValue)} placeholder="£ 0.00"
-                        />
-                        {errors.estimatedValue && <p className="text-red-500 text-xs mt-1">{errors.estimatedValue}</p>}
-                    </label>
-                    <label className="block">
-                        <span className="block mb-1 text-xs uppercase tracking-wider text-gray-500">Weight</span>
-                        <input 
-                            type="number" step="1" 
-                            value={weight} onChange={(e) => setWeight(e.target.value)}
-                            className={getInputClass(errors.weight)} placeholder="e.g. 500g"
-                        />
-                        {errors.weight && <p className="text-red-500 text-xs mt-1">{errors.weight}</p>}
-                    </label>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1.5fr] gap-6">
-                
-                    <div className={cardStyle}>
-                    <h3 className="text-sm font-medium text-gray-900 mb-3">Allergens</h3>
-                    <div className="space-y-3 text-sm text-gray-600">
-                        {ALLERGEN_LIST.map((allergen) => (
-                        <label key={allergen.name} className="flex items-center cursor-pointer hover:text-gray-900">
-                        <input 
-                            type="checkbox" 
-                            checked={allergens.includes(allergen.name)}
-                            onChange={() => handleAllergenChange(allergen.name)}
-                            className="mr-3 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
-                        />
-
-                        <img 
-                            src={allergen.image}
-                            alt={allergen.name}
-                            className="w-6 h-6 mr-2 object-contain"
-                        />
-
-                        {allergen.name}
-                        </label>
-                    ))}
-                    </div>
-                </div>
-
-                <div className={cardStyle}>
-                <h3 className="text-sm font-medium text-gray-900 mb-3">Inclusions</h3>
-                <div className="space-y-3 text-sm text-gray-600">
-                    {["vegan", "vegetarian"].map((inclusion) => (
-                    <label key={inclusion} className="flex items-center cursor-pointer hover:text-gray-900">
-                        <input 
-                            type="checkbox" 
-                            checked={inclusions.includes(inclusion)}
-                            onChange={() => handleInclusionChange(inclusion)}
-                            className="mr-3 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
-                        />
-                        {inclusion}
-                    </label>
-                    ))}
-                </div>
-                </div>
-
-                <div className={cardStyle}>
-                <h3 className="text-sm font-medium text-gray-900 mb-3">Percentages</h3>
-                <div className="space-y-4 text-sm text-gray-600">
-                    <label className="block">
-                    <span className="block mb-1 text-xs uppercase tracking-wider text-gray-500">Meat</span>
-                    <input 
-                        type="number" 
-                        value={meatPercent} onChange={(e) => setMeatPercent(e.target.value)}
-                        className={getInputClass()} placeholder="e.g. 20" 
-                    />
-                    </label>
-                    <label className="block">
-                    <span className="block mb-1 text-xs uppercase tracking-wider text-gray-500">Carbs</span>
-                    <input 
-                        type="number" 
-                        value={carbPercent} onChange={(e) => setCarbPercent(e.target.value)}
-                        className={getInputClass()} placeholder="e.g. 50" 
-                    />
-                    </label>
-                    <label className="block">
-                    <span className="block mb-1 text-xs uppercase tracking-wider text-gray-500">Plant Based</span>
-                    <input 
-                        type="number" 
-                        value={vegPercent} onChange={(e) => setVegPercent(e.target.value)}
-                        className={getInputClass()} placeholder="e.g. 30"
-                    />
-                    </label>
-                    {errors.percentages && (
-                            <div className="p-2 bg-red-50 text-red-600 text-xs rounded border border-red-100 flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 shrink-0">
-                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                                </svg>
-                                {errors.percentages}
-                            </div>
-                        )}
-                </div>
-                </div>
-                
-            </div>
-
-            <div className="flex justify-end mt-4">
-                {/* Matches CustomerSignUp button exactly */}
-                <button
-                type="submit"
-                disabled={isLoading}
-                className="bg-primary text-white py-3 px-8 rounded-md font-medium hover:bg-primaryHover transition-colors shadow-sm min-w-[200px] disabled:opacity-50"
+    return (
+        <div className="min-h-screen w-full flex justify-center bg-background p-10 font-sans">
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-[1100px] w-full">
+            <div className="col-span-1 md:col-span-3 flex justify-end">
+                <button 
+                    type="button" 
+                    onClick={() => navigate(-1)}
+                    className="text-sm font-bold text-gray-500 hover:text-gray-800 transition-colors"
                 >
-                {isLoading ? "Creating..." : "Create Bundle"}
+                    ← Back to Dashboard
                 </button>
             </div>
+            
+            {/* --- Left Column --- */}
+                <div className="md:col-span-1 relative md:border-r border-gray-200 md:pr-12 flex flex-col">
+                
+                    <label className="bg-grayed border-2 border-dashed border-gray-300 rounded-xl h-[250px] flex items-center justify-center text-gray-500 text-sm mt-8 mb-8 cursor-pointer hover:bg-white transition-colors shadow-sm relative overflow-hidden group">
+                        {imagePreview ? (
+                            <>
+                                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span className="text-white font-medium">Change Image</span>
+                                </div>
+                            </>
+                        ) : (
+                            <span>+ Upload Image</span>
+                        )}
+
+                        <input 
+                            type="file" 
+                            accept="image/*" 
+                            className="hidden" 
+                            onChange={handleFileChange} 
+                        />
+                    </label>
+
+                    <label className="block mb-4">
+                        <span className="text-sm font-medium text-gray-700">Bundle Name</span>
+                        <div className="mt-1">
+                            <input 
+                                type="text" 
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                className={getInputClass(errors.title)} 
+                                placeholder="Enter bundle name" 
+                            />
+                        </div>
+                        {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
+                    </label>
+                </div>
+
+                {/* --- Right Column --- */}
+                <div className="md:col-span-2 flex flex-col gap-6 pt-8">
+                
+                    <div className={cardStyle}>
+                        <label className="block">
+                        <span className="text-sm font-medium text-gray-700 block mb-2">Description</span>
+                        <textarea
+                            rows={5}
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            className={`${getInputClass(errors.description)} resize-y leading-relaxed`}
+                            placeholder="Describe the items in this bundle..."
+                        />
+                        {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
+                        </label>
+                    </div>
+
+                    <div className={`${cardStyle} grid grid-cols-1 sm:grid-cols-3 gap-6`}>
+                        <label className="block">
+                            <span className="block mb-1 text-xs uppercase tracking-wider text-gray-500">Cost</span>
+                            <div className="relative mt-1">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm font-medium">£</span>
+                                </div>
+                                <input 
+                                    type="number" step="0.01" min="0"
+                                    value={cost} onChange={handlePositiveChange(setCost)}
+                                    className={`${getInputClass(errors.cost)} pl-7`} placeholder="0.00"
+                                />
+                            </div>
+                            {errors.cost && <p className="text-red-500 text-xs mt-1">{errors.cost}</p>}
+                        </label>
+                        <label className="block">
+                            <span className="block mb-1 text-xs uppercase tracking-wider text-gray-500">Est. Value</span>
+                            <div className="relative mt-1">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm font-medium">£</span>
+                                </div>
+                                <input 
+                                    type="number" step="0.01" min="0"
+                                    value={estimatedValue} onChange={handlePositiveChange(setEstimatedValue)}
+                                    className={`${getInputClass(errors.estimatedValue)} pl-7`} placeholder="0.00"
+                                />
+                            </div>
+                            {errors.estimatedValue && <p className="text-red-500 text-xs mt-1">{errors.estimatedValue}</p>}
+                        </label>
+                        <label className="block">
+                            <span className="block mb-1 text-xs uppercase tracking-wider text-gray-500">Weight</span>
+                            <div className="relative mt-1">
+                                <input 
+                                    type="number" step="1" min="0"
+                                    value={weight} onChange={handlePositiveChange(setWeight)}
+                                    className={`${getInputClass(errors.weight)} pr-8`} placeholder="500"
+                                />
+                                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm font-medium">g</span>
+                                </div>
+                            </div>
+                            {errors.weight && <p className="text-red-500 text-xs mt-1">{errors.weight}</p>}
+                        </label>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1.5fr] gap-6">
+                    
+                        <div className={cardStyle}>
+                        <h3 className="text-sm font-medium text-gray-900 mb-3">Allergens</h3>
+                        <div className="space-y-3 text-sm text-gray-600">
+                            {ALLERGEN_LIST.map((allergen) => (
+                            <label key={allergen.name} className="flex items-center cursor-pointer hover:text-gray-900">
+                            <input 
+                                type="checkbox" 
+                                checked={allergens.includes(allergen.name)}
+                                onChange={() => handleAllergenChange(allergen.name)}
+                                className="mr-3 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
+                            />
+
+                            <img 
+                                src={allergen.image}
+                                alt={allergen.name}
+                                className="w-6 h-6 mr-2 object-contain"
+                            />
+
+                            {allergen.name}
+                            </label>
+                        ))}
+                        </div>
+                    </div>
+
+                    <div className={cardStyle}>
+                    <h3 className="text-sm font-medium text-gray-900 mb-3">Inclusions</h3>
+                    <div className="space-y-3 text-sm text-gray-600">
+                        {["vegan", "vegetarian"].map((inclusion) => {
+                            const isLocked = inclusion === "vegetarian" && inclusions.includes("vegan");
+                            return (
+                                <label key={inclusion} className={`flex items-center hover:text-gray-900 ${isLocked ? 'opacity-50' : 'cursor-pointer'}`}>
+                                    <input 
+                                        type="checkbox" 
+                                        checked={inclusions.includes(inclusion)}
+                                        onChange={() => handleInclusionChange(inclusion)}
+                                        disabled={isLocked}
+                                        className="mr-3 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer disabled:cursor-not-allowed"
+                                    />
+                                    {inclusion}
+                                </label>
+                            );
+                        })}
+                    </div>
+                    </div>
+
+                    <div className={cardStyle}>
+                    <h3 className="text-sm font-medium text-gray-900 mb-3">Percentages</h3>
+                    <div className="space-y-4 text-sm text-gray-600">
+                        <label className="block">
+                            <span className="block mb-1 text-xs uppercase tracking-wider text-gray-500">Meat</span>
+                            <div className="relative mt-1">
+                                <input 
+                                    type="number" min="0" max="100"
+                                    value={meatPercent} onChange={handlePositiveChange(setMeatPercent)}
+                                    className={`${getInputClass()} pr-8`} placeholder="20" 
+                                />
+                                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm font-medium">%</span>
+                                </div>
+                            </div>
+                        </label>
+                        <label className="block">
+                            <span className="block mb-1 text-xs uppercase tracking-wider text-gray-500">Carbs</span>
+                            <div className="relative mt-1">
+                                <input 
+                                    type="number" min="0" max="100"
+                                    value={carbPercent} onChange={handlePositiveChange(setCarbPercent)}
+                                    className={`${getInputClass()} pr-8`} placeholder="50" 
+                                />
+                                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm font-medium">%</span>
+                                </div>
+                            </div>
+                        </label>
+                        <label className="block">
+                            <span className="block mb-1 text-xs uppercase tracking-wider text-gray-500">Plant Based</span>
+                            <div className="relative mt-1">
+                                <input 
+                                    type="number" min="0" max="100"
+                                    value={vegPercent} onChange={handlePositiveChange(setVegPercent)}
+                                    className={`${getInputClass()} pr-8`} placeholder="30"
+                                />
+                                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm font-medium">%</span>
+                                </div>
+                            </div>
+                        </label>
+                        {errors.percentages && (
+                                <div className="p-2 bg-red-50 text-red-600 text-xs rounded border border-red-100 flex items-center gap-2 mt-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 shrink-0">
+                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                                    </svg>
+                                    {errors.percentages}
+                                </div>
+                            )}
+                    </div>
+                    </div>
+                    
+                </div>
+
+                <div className="flex justify-end mt-4">
+                    <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="bg-primary text-white py-3 px-8 rounded-md font-medium hover:bg-primaryHover transition-colors shadow-sm min-w-[200px] disabled:opacity-50"
+                    >
+                    {isLoading ? "Creating..." : "Create Bundle"}
+                    </button>
+                </div>
+            </div>
+        </form>
         </div>
-      </form>
-    </div>
-  );
+    );
 }

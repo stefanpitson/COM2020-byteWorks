@@ -206,6 +206,8 @@ export default function VendorSignUp() {
             <p>Email:</p>
             <input
               name="email"
+              type="email" // helps mobile keyboards with autofill
+              autoComplete="username" //Allows for autocomplete to work 
               placeholder="vendor@domain.com"
               className={getInputClass(errors.email)}
               value={formData.email}
