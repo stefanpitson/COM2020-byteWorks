@@ -20,6 +20,7 @@ import AdminDashboard from "./pages/AdminDashboard"
 import CustomerReports from "./pages/customers/CustomerReports";
 import VendorReports from "./pages/vendors/VendorReports"
 import CustomerBadges from "./pages/customers/CustomerBadges";
+import VendorBundleView from "./pages/vendors/VendorBundleView";
 
 export default function App() {
   return (
@@ -54,6 +55,7 @@ export default function App() {
             <Route path="/vendor/reservations" element={<VendorReservations />} />
             <Route path="/vendor/template" element={<TemplateDetails />} />
             <Route path="/vendor/reports" element={<VendorReports />} />
+            <Route path="/vendor/template/:templateId" element={<VendorBundleView />} />
           </Route>
         </Route>
 
