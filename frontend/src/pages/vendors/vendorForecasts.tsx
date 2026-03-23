@@ -143,15 +143,15 @@ export default function VendorForecasts() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
             <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Lifetime Revenue</p>
-            <h2 className="text-4xl font-black text-green-600">£{vendor?.total_revenue?.toLocaleString()}</h2>
+            <h2 className="text-4xl font-black text-green-600">£{vendor?.total_revenue?.toFixed(1) ?? "0.0"}</h2>
           </div>
           <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
             <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Waste Prevented</p>
-            <h2 className="text-4xl font-black text-orange-500">{vendor?.food_saved}kg</h2>
+            <h2 className="text-4xl font-black text-orange-500">{vendor?.food_saved?.toFixed(1) ?? "0.0"}kg</h2>
           </div>
           <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
             <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">CO2e Offset</p>
-            <h2 className="text-4xl font-black text-blue-500">{vendor?.carbon_saved}kg</h2>
+            <h2 className="text-4xl font-black text-blue-500">{vendor?.carbon_saved?.toFixed(1) ?? "0.0"}kg</h2>
           </div>
         </div>
 

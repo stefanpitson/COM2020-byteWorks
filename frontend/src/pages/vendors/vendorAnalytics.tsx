@@ -139,11 +139,11 @@ export default function VendorAnalytics() {
           </div>
           <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 transition-all hover:shadow-md">
             <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Avg. Bundle Weight</p>
-            <h2 className="text-4xl font-black text-orange-500">{(waste?.average_bundle_weight || 0).toFixed(1)}kg</h2>
+            <h2 className="text-4xl font-black text-orange-500">{waste?.average_bundle_weight?.toFixed(1) ?? "0.0"}kg</h2>
           </div>
           <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 transition-all hover:shadow-md">
             <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Total Waste Saved</p>
-            <h2 className="text-4xl font-black text-green-600">{waste?.total_waste_avoided || "0"}kg</h2>
+            <h2 className="text-4xl font-black text-green-600">{waste?.total_waste_avoided?.toFixed(1) ?? "0.0"}kg</h2>
           </div>
           <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 transition-all hover:shadow-md">
             <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Best Posting Window</p>
@@ -178,8 +178,9 @@ export default function VendorAnalytics() {
                     cy="50%"
                     innerRadius={60}
                     outerRadius={100}
-                    paddingAngle={5}
+                    paddingAngle={sellThroughPieChartData.filter(d => d.value > 0).length > 1 ? 5 : 0}
                     dataKey="value"
+                    stroke="none"
                   >
                     {sellThroughPieChartData.map((_entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
