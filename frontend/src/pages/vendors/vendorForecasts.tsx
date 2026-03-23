@@ -119,17 +119,8 @@ export default function VendorForecasts() {
   return (
     <div className="min-h-screen bg-pattern pb-20 pt-10">
       <style>{`
-        .recharts-wrapper:focus, 
-        .recharts-surface:focus,
-        .recharts-layer:focus,
-        .recharts-bar-rectangle:focus,
-        .recharts-bar:focus,
-        svg:focus {
-          outline: none !important;
-        }
-        .recharts-wrapper * {
-          outline: none !important;
-          -webkit-tap-highlight-color: transparent;
+        .recharts-wrapper *:focus {
+        outline: none;
         }
       `}</style>
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -212,7 +203,7 @@ export default function VendorForecasts() {
 
             <div className="bg-white p-6 md:p-10 rounded-3xl shadow-sm border border-gray-100">
               <div className="flex items-center justify-between mb-8">
-                <h3 className="text-lg font-bold text-gray-700 flex items-center gap-2">
+                <h3 className="text-xl font-bold text-gray-700 flex items-center gap-2">
                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                   Week starting {data?.week_date}
                 </h3>
@@ -222,14 +213,14 @@ export default function VendorForecasts() {
                     disabled={graphPage === 0}
                     className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-gray-600 font-bold"
                   >
-                    ←
+                     ← 
                   </button>
                   <button 
                     onClick={() => handlePageChange(Math.min((data?.day_datapoints.length || 1) - 1, graphPage + 1))}
                     disabled={graphPage === (data?.day_datapoints.length|| 1) -1 }
                     className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-gray-600 font-bold"
                   >
-                    →
+                     → 
                   </button>
                 </div>
               </div>

@@ -93,13 +93,13 @@ day_datapoints: ForecastDayData[];
 }
 
 export interface AnalyticSellThrough {
-  weekly: {
+  weekly_proportions: {
     collected: number;
     no_show: number;
     expired: number;
     week_start_date: string;
   };
-  all_time: {
+  all_time_proportions: {
     collected: number;
     no_show: number;
     expired: number;
@@ -117,14 +117,14 @@ export interface AnalyticsDiscountCoordinate{
 }
 
 // Posting Windows
-export interface AnalyticsPostingWindows{
+export interface AnalyticsPostingWindow{
   posting_timeslot: string;
   weekly_average: number;
 }
 
-export interface AnalyticsPostingDate{
+export interface AnalyticsPostingData{
   top_post_window: string;
-  window_datapoints: AnalyticsPostingWindows[];
+  window_datapoints: AnalyticsPostingWindow[];
 }
 
 // Waste Proxy

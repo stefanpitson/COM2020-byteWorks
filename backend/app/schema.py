@@ -303,17 +303,17 @@ class waste_proxy_data(BaseModel):
 # for last week sell through proportions
 
 class week_sell_through_proportions(BaseModel):
-    num_collected: int
-    num_no_show: int
-    num_expired: int
+    collected: int
+    no_show: int
+    expired: int
     week_start_date: str
 
 
 # for all time sell through proportions
 class all_time_sell_through_proportions(BaseModel):
-    num_collected: int
-    num_no_show: int
-    num_expired: int
+    collected: int
+    no_show: int
+    expired: int
 
 
 # for combining the above 2

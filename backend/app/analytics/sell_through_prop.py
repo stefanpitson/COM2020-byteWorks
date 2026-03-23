@@ -44,16 +44,16 @@ def proportions_last_week(session: Session, vendor_id: int) -> week_sell_through
 
     if total == 0:
         return week_sell_through_proportions(
-            num_collected=0,
-            num_no_show=0,
-            num_expired=0,
+            collected=0,
+            no_show=0,
+            expired=0,
             week_start_date=start_date.isoformat()
         )   
     
     return week_sell_through_proportions(
-            num_collected=collected,
-            num_no_show=no_shows,
-            num_expired=expired,
+            collected=collected,
+            no_show=no_shows,
+            expired=expired,
             week_start_date=start_date.isoformat()
         )
         
@@ -92,15 +92,15 @@ def proportions_all_time(session: Session, vendor_id: int) -> all_time_sell_thro
 
     if total == 0:
         return all_time_sell_through_proportions(
-            num_collected=0,
-            num_no_show=0,
-            num_expired=0
+            collected=0,
+            no_show=0,
+            expired=0
         )   
     
     return all_time_sell_through_proportions(
-            num_collected=collected,
-            num_no_show=no_shows,
-            num_expired=expired
+            collected=collected,
+            no_show=no_shows,
+            expired=expired
         )
 
 

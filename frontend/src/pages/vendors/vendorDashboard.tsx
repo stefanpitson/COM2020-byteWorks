@@ -276,15 +276,29 @@ export default function VendorTemplateManager() {
                       </div>
                     )}
 
-                    <button 
-                      onClick={() => navigate('/vendor/forecasts')}
-                      className="flex items-center gap-2 bg-gray-800 text-white px-6 py-3.5 rounded-2xl hover:bg-black transition-all hover:shadow-lg active:scale-95 shadow-sm shrink-0 w-full sm:w-auto justify-center"
-                    >
-                      <span className="font-bold text-sm">View Forecasts</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                      </svg>
-                    </button>
+                    <div className="flex flex-col items-center gap-3">
+                      <button 
+                        onClick={() => navigate('/vendor/forecasts')}
+                        className="flex items-center gap-2 bg-gray-800 text-white px-6 py-3.5 rounded-2xl hover:bg-black transition-all hover:shadow-lg active:scale-95 shadow-sm shrink-0 w-full sm:w-auto justify-center"
+                      >
+                        <span className="font-bold text-sm">View Forecasts</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                      </button>
+
+                      <button 
+                        onClick={() => navigate('/vendor/analytics')}
+                        className="flex items-center gap-2 bg-gray-800 text-white px-6 py-3.5 rounded-2xl hover:bg-black transition-all hover:shadow-lg active:scale-95 shadow-sm shrink-0 w-full sm:w-auto justify-center"
+                      >
+                        <span className="font-bold text-sm">View Analytics</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    
                   </div>
                 </div>
               </div>

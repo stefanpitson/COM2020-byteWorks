@@ -1,4 +1,4 @@
-import type { AnalyticsBestBundles, AnalyticsDiscountData, AnalyticSellThrough, AnalyticsPostingWindows, AnalyticsWaste } from "../types";
+import type { AnalyticsBestBundles, AnalyticsDiscountData, AnalyticSellThrough, AnalyticsPostingData, AnalyticsWaste } from "../types";
 import api from "./axiosConfig";
 
 
@@ -19,7 +19,7 @@ export async function getPricingEffectiveness() {
 }
 
 export async function getPostingWindows() {
-  const response = await api.post<AnalyticsPostingWindows>("analytics/waste_proxy");
+  const response = await api.post<AnalyticsPostingData>("analytics/posting_windows");
   return response.data;
 }
 
