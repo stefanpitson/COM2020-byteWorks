@@ -213,8 +213,15 @@ export default function VendorAnalytics() {
                     label={{value: "Bundle Name", position: 'insideBottom', offset: -25}}
                   />
                   <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} />
-                  <Tooltip cursor={{ fill: '#f9fafb' }} />
-                  <Bar dataKey="weekly_average" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                  <Tooltip 
+                    labelFormatter={(label) => `Bundle :  ${label}`}
+                  />
+                  <Bar 
+                    dataKey="weekly_average" 
+                    fill="#3b82f6" 
+                    radius={[4, 4, 0, 0]} 
+                    name= "Weekly Average"  
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -256,7 +263,7 @@ export default function VendorAnalytics() {
                     />
                     <Tooltip 
                         formatter={(value) => value !== undefined ? `${value}%` : 'N/A'} 
-                        labelFormatter={(label) => `Discount:  ${label}%`}
+                        labelFormatter={(label) => `Discount :  ${label}%`}
                         />
                     <Line 
                         type="monotone" 
@@ -301,13 +308,13 @@ export default function VendorAnalytics() {
                     label={{ value: 'Avg. Weekly Bundles Sold', angle: -90, position: 'insideBottomLeft'}}
                   />
                   <Tooltip 
-                    labelFormatter={(label) => `Time Slot:  ${label}`}
+                    labelFormatter={(label) => `Time Slot :  ${label}`}
                   />
                   <Bar 
                     dataKey="weekly_average" 
                     fill="#8b5cf6" 
                     radius={[4, 4, 0, 0]} 
-                    name="Avg. Weekly Bundles Sold"/>
+                    name="Average. Weekly Bundles Sold"/>
                 </BarChart>
               </ResponsiveContainer>
             </div>

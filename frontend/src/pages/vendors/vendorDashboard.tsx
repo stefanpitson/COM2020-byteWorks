@@ -308,11 +308,11 @@ export default function VendorTemplateManager() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 transition-all hover:shadow-md group">
                 <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1 group-hover:text-green-600 transition-colors">Lifetime Revenue</p>
-                <h2 className="text-4xl font-black text-green-600">£{vendor?.total_revenue?.toLocaleString()}</h2>
+                <h2 className="text-4xl font-black text-green-600">£{vendor?.total_revenue?.toFixed(1) ?? "0.0"}</h2>
               </div>
               <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 transition-all hover:shadow-md group">
                 <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1 group-hover:text-orange-500 transition-colors">Waste Prevented</p>
-                <h2 className="text-4xl font-black text-orange-500">{vendor?.food_saved}kg</h2>
+                <h2 className="text-4xl font-black text-orange-500">{vendor?.food_saved?.toFixed(1) ?? "0.0"}kg</h2>
               </div>
               <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 transition-all hover:shadow-md group">
                 <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1 group-hover:text-blue-500 transition-colors">CO2e Offset</p>
