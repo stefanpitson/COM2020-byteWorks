@@ -237,7 +237,7 @@ export default function TemplateDetails() {
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             className={`${getInputClass(errors.description)} resize-y leading-relaxed`}
-                            placeholder="Describe the items in this bundle..."
+                            placeholder="Describe the items in this template..."
                         />
                         {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
                         </label>
@@ -396,7 +396,7 @@ export default function TemplateDetails() {
                     disabled={isLoading}
                     className="bg-primary text-white py-3 px-8 rounded-md font-medium hover:bg-primaryHover transition-colors shadow-sm min-w-[200px] disabled:opacity-50"
                     >
-                    {isLoading ? "Creating..." : "Create Bundle"}
+                    {isLoading ? "Creating..." : "Create Template"}
                     </button>
                 </div>
             </div>
