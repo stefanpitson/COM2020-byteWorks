@@ -81,6 +81,15 @@ export default function CustomerSignUp() {
         setErrors({ email: error.response.data.detail})
       } else {
         setErrors({ email: "An error occurred during sign up. Please try again."})
+        
+      const backendError = error.response?.data?.detail || "An error occurred during signup.";
+      
+      if (backendError.toLowerCase().includes("postcode") || backendError.toLowerCase().includes("post code")) {
+        setErrors((prev) => ({ ...prev, postCode: "Invalid or unrecognized Post Code." }));
+      } else if (backendError.toLowerCase().includes("email")) {
+        setErrors((prev) => ({ ...prev, email: backendError }));
+      } else {
+        setErrors((prev) => ({ ...prev, name: backendError })); 
       }
     } finally {
       setIsLoading(false);
