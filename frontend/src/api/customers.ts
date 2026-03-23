@@ -28,7 +28,7 @@ export interface CustomerUpdatePayload {
 export const updateCustomerProfile = async (data: CustomerUpdatePayload) => {
   const response = await api.patch("/customers/profile", data);
   return response.data;
-}
+};
 
 export const getOwnedBadges = async (): Promise<BadgeList> => {
   const response = await api.get<BadgeList>("/customers/badges/owned");

@@ -13,7 +13,6 @@ import uuid
 import shutil
 from datetime import datetime
 from app.core.security import verify_password, get_password_hash
-from ukpostcodeutils import validation
 from ukpostcodeio.client import UKPostCodeIO
 from geopy import distance
 from geopy.geocoders import Nominatim
