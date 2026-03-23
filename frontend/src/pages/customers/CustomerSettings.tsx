@@ -40,7 +40,7 @@ const SettingsRow = ({ label, value, onChange, type = "text", placeholder, error
             error 
               ? 'border-red-500 text-red-600 focus:border-red-600' 
               : 'border-transparent focus:border-gray-200 text-gray-800'
-          } ${isPassword ? 'pr-10' : ''}`}
+          } ${isPassword ? 'pr-10 tracking-widest' : ''}`}
         />
         {isPassword && (
           <button
@@ -49,7 +49,7 @@ const SettingsRow = ({ label, value, onChange, type = "text", placeholder, error
             onClick={() => setShowPassword(prev => !prev)}
             className="absolute inset-y-0 right-0 flex items-center pr-1 text-gray-500 hover:text-gray-700"
           >
-            {showPassword ? <EyeOffIcon className="size-5"/> : <EyeIcon className="size-5"/>}
+            {showPassword ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
           </button>
         )}
       </div>

@@ -58,6 +58,8 @@ export default function Login() {
           <label className="block mb-4">
             <span className="text-sm text-gray-700">Email</span>
             <input
+              type="email"
+              autoComplete="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className={getInputClass()}
@@ -70,9 +72,10 @@ export default function Login() {
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={getInputClass()}
+                className={`${getInputClass()} pr-10 tracking-widest`}
                 placeholder="••••••••"
               />
               <button
@@ -81,7 +84,7 @@ export default function Login() {
                 onClick={() => setShowPassword(prev => !prev)}
                 className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
               >
-                {showPassword ? <EyeOffIcon className="size-6"/> : <EyeIcon className="size-6"/>}
+                {showPassword ? <EyeIcon className="size-6"/> : <EyeOffIcon className="size-6"/>}
               </button>
             </div>
           </label>

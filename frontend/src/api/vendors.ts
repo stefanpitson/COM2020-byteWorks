@@ -60,3 +60,8 @@ export const uploadImage = async (
 
   return response.data;
 }
+
+export const getVendorDistance = async (vendorId: number, useMiles: boolean = true): Promise<number> => {
+  const response = await api.get<number>(`/vendors/${vendorId}/distance?useMiles=${useMiles}`);
+  return response.data;
+};
