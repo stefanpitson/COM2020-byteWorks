@@ -329,7 +329,7 @@ export default function VendorForecasts() {
                             </span>
                             <p className="text-xs font-bold text-blue-400 uppercase tracking-widest">Our Recommendation</p>
                           </div>
-                          <p className="text-m text-blue-900 leading-relaxed font-medium">
+                          <p className="text-m text-blue-900 leading-relaxed font-medium whitespace-pre-wrap">
                             {selectedDataPoint.recommendation.join("\n")}
                           </p>
                         </div>
@@ -337,7 +337,7 @@ export default function VendorForecasts() {
                       {selectedDataPoint.rationale && (
                         <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
                           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Rationale</p>
-                          <p className="text-sm text-gray-600 leading-relaxed italic">
+                          <p className="text-sm text-gray-600 leading-relaxed italic whitespace-pre-wrap">
                             "{selectedDataPoint.rationale.join("\n")}"
                           </p>
                         </div>

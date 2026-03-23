@@ -297,7 +297,7 @@ export default function VendorAnalytics() {
                     tick={{ fill: '#9ca3af', fontSize: 11 }} 
                     interval={0}
                     angle={-7}
-                    textAnchor="end"
+                    textAnchor="middle"
                     label={{value: "Time Slot (Start Time - End Time)", position: 'insideBottom', offset: -25}}
                   />
                   <YAxis 
