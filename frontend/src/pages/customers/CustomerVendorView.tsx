@@ -125,7 +125,7 @@ export default function VendorPage() {
         <div className="relative h-44 bg-gray-100 overflow-hidden">
             {template.photo ? (
                 <img
-                    src={resolveImageUrl(template.photo)}
+                    src={resolveImageUrl(template.photo) || undefined}
                     alt={template.title}
                     className="w-full h-full object-cover"
                 />
