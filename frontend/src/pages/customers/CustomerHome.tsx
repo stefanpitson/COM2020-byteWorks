@@ -96,6 +96,7 @@ export default function CustomerHome() {
           setDistance(dist);
         } catch (error) {
           console.error("Failed to fetch distance for vendor", vendor.vendor_id);
+          console.log(error)
         } finally {
           setDistLoading(false);
         }

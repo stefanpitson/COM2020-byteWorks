@@ -21,6 +21,7 @@ import AdminDashboard from "./pages/AdminDashboard"
 import CustomerReports from "./pages/customers/CustomerReports";
 import VendorReports from "./pages/vendors/VendorReports"
 import CustomerBadges from "./pages/customers/CustomerBadges";
+import TermsAndConditions from "./pages/TermsConditions";
 import VendorBundleView from "./pages/vendors/VendorBundleView";
 
 export default function App() {
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/vendor/signup" element={<VendorSignUp />} />
         <Route path="/customer/signup" element={<CustomerSignUp />} />
+        <Route path="/tos" element={<TermsAndConditions />} />
 
         {/* Applies the navbar */}
         <Route element={<MainLayout />}>
