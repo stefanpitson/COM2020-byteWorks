@@ -142,7 +142,7 @@ export default function CustomerReports() {
     }
 
     return (
-        <div className="min-h-screen bg-pattern pb-12 pt-24 px-4 sm:px-6">
+        <div className="min-h-screen bg-background pb-12 pt-24 px-4 sm:px-6">
             <div className="max-w-4xl mx-auto">
 
                 <div className="text-center mb-8">
