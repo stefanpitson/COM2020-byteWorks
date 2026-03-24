@@ -243,7 +243,7 @@ export default function VendorTemplateManager() {
   };
 
   return (
-    <div className="min-h-screen bg-pattern pb-20 ">
+    <div className="min-h-screen bg-background pb-20 ">
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 relative z-10">
         

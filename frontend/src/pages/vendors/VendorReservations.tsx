@@ -87,7 +87,7 @@ export default function VendorReservations() {
     );
 
   return (
-    <div className="min-h-screen bg-pattern pb-20">
+    <div className="min-h-screen bg-background pb-20">
       <div className="max-w-5xl mx-auto px-6 pt-10">
 
         <h1 className="text-3xl font-bold mb-10">Vendor Reservations</h1>

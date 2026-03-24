@@ -199,7 +199,7 @@ export default function CustomerCredit() {
 
     if (success) {
         return (
-        <div className="min-h-screen bg-pattern flex items-center justify-center p-4">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
             <div className="bg-white rounded-xl shadow-xl p-8 max-w-md w-full text-center animate-in zoom-in duration-300">
                 <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <CheckCircleIcon />
@@ -213,7 +213,7 @@ export default function CustomerCredit() {
     }
 
     return (
-        <div className="min-h-screen bg-pattern pb-12 pt-24 px-4 sm:px-6">
+        <div className="min-h-screen bg-background pb-12 pt-24 px-4 sm:px-6">
             <div className="max-w-3xl mx-auto">
 
                 {/* Header */}
