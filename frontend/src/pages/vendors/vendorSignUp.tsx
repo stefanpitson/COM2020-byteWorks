@@ -91,8 +91,20 @@ export default function VendorSignUp() {
 
     // Navigate to dashboard
     navigate("/vendor/dashboard")
-    } catch (error) {
+    } catch (error: any) {
       console.error("Signup failed" + error);
+      const backendError = error.response?.data?.detail || "An error occurred during signup.";
+      
+      if (backendError.toLowerCase().includes("postcode") || backendError.toLowerCase().includes("post code")) {
+        setStep(2); 
+        setErrors((prev) => ({ ...prev, post_code: "Invalid or unrecognized Post Code." }));
+      } 
+      else if (backendError.toLowerCase().includes("email")) {
+        setStep(1); 
+        setErrors((prev) => ({ ...prev, email: backendError }));
+      } else {
+        alert(backendError); 
+      }
     }
   }
 
@@ -206,6 +218,8 @@ export default function VendorSignUp() {
             <p>Email:</p>
             <input
               name="email"
+              type="email" // helps mobile keyboards with autofill
+              autoComplete="username" //Allows for autocomplete to work 
               placeholder="vendor@domain.com"
               className={getInputClass(errors.email)}
               value={formData.email}

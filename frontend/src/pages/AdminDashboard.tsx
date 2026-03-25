@@ -140,7 +140,7 @@ export default function AdminDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-pattern pb-12 pt-24 px-4 sm:px-6">
+        <div className="min-h-screen pb-12 bg-background pt-24 px-4 sm:px-6">
             <div className="max-w-5xl mx-auto">
                 
                 {/* Header & Navigation */}

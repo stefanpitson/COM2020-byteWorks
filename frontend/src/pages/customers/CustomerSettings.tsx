@@ -40,7 +40,7 @@ const SettingsRow = ({ label, value, onChange, type = "text", placeholder, error
             error 
               ? 'border-red-500 text-red-600 focus:border-red-600' 
               : 'border-transparent focus:border-gray-200 text-gray-800'
-          } ${isPassword ? 'pr-10' : ''}`}
+          } ${isPassword ? 'pr-10 tracking-widest' : ''}`}
         />
         {isPassword && (
           <button
@@ -49,7 +49,7 @@ const SettingsRow = ({ label, value, onChange, type = "text", placeholder, error
             onClick={() => setShowPassword(prev => !prev)}
             className="absolute inset-y-0 right-0 flex items-center pr-1 text-gray-500 hover:text-gray-700"
           >
-            {showPassword ? <EyeOffIcon className="size-5"/> : <EyeIcon className="size-5"/>}
+            {showPassword ? <EyeIcon className="size-5"/> : <EyeOffIcon className="size-5"/>}
           </button>
         )}
       </div>
@@ -240,7 +240,7 @@ export default function CustomerSettings() {
     (oldPassword.trim() !== "" && newPassword.trim() !== "");
 
   return (
-    <div className="min-h-screen bg-pattern pt-20 px-4 pb-20 ">
+    <div className="min-h-screen bg-background pt-20 px-4 pb-20 ">
       <div className="max-w-2xl mx-auto space-y-8"> 
         <div className="flex justify-between items-center"> 
           <h1 className="text-3xl font-bold text-center sm:text-left">Account Settings</h1>

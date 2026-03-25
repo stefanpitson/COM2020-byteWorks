@@ -142,7 +142,7 @@ export default function CustomerReports() {
     }
 
     return (
-        <div className="min-h-screen bg-pattern pb-12 pt-24 px-4 sm:px-6">
+        <div className="min-h-screen bg-background pb-12 pt-24 px-4 sm:px-6">
             <div className="max-w-4xl mx-auto">
 
                 <div className="text-center mb-8">
@@ -355,7 +355,7 @@ export default function CustomerReports() {
 
                                 <button
                                     type="submit"
-                                    disabled={submitting || message.length < 32 || subject.length < 5 || !target}
+                                    disabled={submitting || [...message.trim()].length < 32 || [...subject.trim()].length < 5 || !target}
                                     className="w-full bg-primary text-white font-bold text-lg py-3 rounded hover:bg-primaryHover hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 shadow-sm"
                                 >
                                     {submitting ? (

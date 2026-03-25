@@ -93,26 +93,26 @@ export default function CustomerCredit() {
     };
 
     const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let val = e.target.value.replace(/\D/g, "").slice(0, 19);
+        const value = e.target.value.replace(/\D/g, "").slice(0, 19);
 
-        const formatted = val.replace(/(\d{4})(?=\d)/g, "$1 ");
+        const formatted = value.replace(/(\d{4})(?=\d)/g, "$1 ");
 
         setCardNumber(formatted);
-        setCardType(getCardType(val));
+        setCardType(getCardType(value));
 
-        if (val.length > 12) {
-            setIsLuhnValid(isValidLuhn(val));
+        if (value.length > 12) {
+            setIsLuhnValid(isValidLuhn(value));
         } else {
             setIsLuhnValid(true);
         }
     };
 
     const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let val = e.target.value.replace(/\D/g, "");
-        if (val.length >= 2) {
-            val = val.slice(0, 2) + "/" + val.slice(2, 4);
+        let value = e.target.value.replace(/\D/g, "");
+        if (value.length >= 2) {
+            value = value.slice(0, 2) + "/" + value.slice(2, 4);
         }
-        setExpiry(val);
+        setExpiry(value);
     };
 
     const validateForm = () => {
@@ -199,7 +199,7 @@ export default function CustomerCredit() {
 
     if (success) {
         return (
-        <div className="min-h-screen bg-pattern flex items-center justify-center p-4">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
             <div className="bg-white rounded-xl shadow-xl p-8 max-w-md w-full text-center animate-in zoom-in duration-300">
                 <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <CheckCircleIcon />
@@ -213,7 +213,7 @@ export default function CustomerCredit() {
     }
 
     return (
-        <div className="min-h-screen bg-pattern pb-12 pt-24 px-4 sm:px-6">
+        <div className="min-h-screen bg-background pb-12 pt-24 px-4 sm:px-6">
             <div className="max-w-3xl mx-auto">
 
                 {/* Header */}
@@ -363,7 +363,7 @@ export default function CustomerCredit() {
                             <div className="space-y-3">
                                 <input
                                     type="text"
-                                    placeholder="Address Line 1"
+                                    placeholder="Street Address"
                                     value={address}
                                     onChange={(e) => setAddress(e.target.value)}
                                     className={getInputClass(errors.address)}
@@ -406,7 +406,7 @@ export default function CustomerCredit() {
                                 )}
                             </button>
                             <p className="text-center text-xs text-gray-400 mt-4 flex items-center justify-center gap-1">
-                                <LockClosedIcon /> Payments are secure and encrypted.
+                                <LockClosedIcon /> Payment details are not stored.
                             </p>
                         </div>
 

@@ -92,7 +92,6 @@ export default function BundleDetailsPage() {
     fetchUserProfile();
   }, []);
 
-  console.log(userStoreCredit);
 
   if (loading) {
     return (
@@ -170,7 +169,7 @@ const handleReserve = async () => {
 };
 
   return (
-    <div className="min-h-screen bg-pattern pb-32">
+    <div className="min-h-screen bg-background pb-32">
       <div className="max-w-6xl mx-auto px-6 pt-12">
         {bundle && 
           <div className="mb-8">

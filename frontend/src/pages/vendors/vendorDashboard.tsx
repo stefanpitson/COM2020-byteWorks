@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getVendorTemplates, getTemplateBundleCount } from "../../api/templates";
 import { getVendorProfile } from "../../api/vendors";
-import { createBundle } from "../../api/bundles"; 
+import { createBundle, deleteBundle } from "../../api/bundles"; 
 import type { Template, Vendor } from "../../types";
 import { resolveImageUrl } from "../../utils/imageUrl";
 import placeholder from "../../assets/placeholder.jpg";
@@ -20,6 +20,12 @@ const PlusIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
   </svg>
 );
+
+const MinusIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width={2.5} stroke="currentColor" className="w-5 h-5">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14" />
+  </svg>
+)
 
 
 const BagIcon = () => (
@@ -83,9 +89,9 @@ export default function VendorTemplateManager() {
   }, [refreshTrigger]);
 
 
-  const handleAddBundle = async (templateId: number, quantity: number) => {
+  const handleAddBundle = async (templateId: number) => {
     try {
-      await createBundle({template_id: templateId, amount: quantity});
+      await createBundle({template_id: templateId, amount: 1});
       
       setRefreshTrigger(prev => prev + 1);
     } catch (error) {
@@ -93,6 +99,18 @@ export default function VendorTemplateManager() {
         alert("Could not create bundle. Please try again.");
     }
   };
+
+  const handleSubBundle = async (templateId: number, ) => {
+    try {
+      await deleteBundle({template_id: templateId, amount: 1})
+
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+        console.error("Failed to delete bundle", error);
+        alert("Could not delete bundle. Please try again.");
+    }
+  }
+
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--background))]">
@@ -119,110 +137,113 @@ export default function VendorTemplateManager() {
     const showVeggie = !template.is_vegan && template.is_vegetarian;
     const isOutOfStock = template.available_count === 0;
 
-    const [addQuantity, setAddQuantity] = useState(1);
-
-    const increment = () => setAddQuantity((prev) => prev + 1);
-    const decrement = () => setAddQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-
     const handleAddStockClick = () => {
-      handleAddBundle(template.template_id, addQuantity);
-      setAddQuantity(1);
+      handleAddBundle(template.template_id);
     };
 
+    const handleSubStockClick = () => {
+      handleSubBundle(template.template_id);
+    };
+
+
+
     return (
-        <div className="flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-200 transition-all hover:shadow-md">
-        <div className="relative h-44 bg-gray-100 overflow-hidden">
-            {/* Template Image Placeholder */}
-            {template.photo ? (
-                <img 
-                    src={resolveImageUrl(template.photo) || placeholder} 
-                    alt={template.title} 
-                    className="w-full h-full object-cover" 
-                />
-            ) : (
-                <div className="absolute inset-0 bg-[hsl(var(--primary)/0.05)] flex items-center justify-center text-[hsl(var(--primary))]">
-                    <BagIcon />
-                </div>
-            )}
-            
-            <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-full shadow-sm ${isOutOfStock ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-white/95 text-[hsl(var(--accent))]'}`}>
-                <span className="text-xs font-bold">
-                {template.available_count} in stock
-                </span>
-            </div>
-
-            <div className="absolute top-3 left-3 flex gap-1">
-                {showVegan && <Badge type="VE" />}
-                {showVeggie && <Badge type="V" />}
-            </div>
-        </div>
-
-        <div className="p-4 flex flex-col flex-1">
-            <h2 className="text-base font-bold text-gray-800 leading-tight mb-1">
-            {template.title}
-            </h2>
-
-            <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed mb-3">
-                {template.description}
-            </p>
-
-            {(template.meat_percent > 0 || template.veg_percent > 0 || template.carb_percent > 0) && (
-                <div className="text-[10px] font-medium text-gray-400 mb-3 flex gap-2 items-center bg-gray-50 p-2 rounded-lg">
-                    {template.meat_percent > 0 && <span>{formatPercent(template.meat_percent)} Meat</span>}
-                    {template.meat_percent > 0 && (template.veg_percent > 0 || template.carb_percent > 0) && <span className="text-gray-300">•</span>}
-                    {template.veg_percent > 0 && <span>{formatPercent(template.veg_percent)} Veg</span>}
-                    {template.veg_percent > 0 && template.carb_percent > 0 && <span className="text-gray-300">•</span>}
-                    {template.carb_percent > 0 && <span>{formatPercent(template.carb_percent)} Carb</span>}
-                </div>
-            )}
-
-            <div className="mt-auto flex justify-between items-center border-t border-gray-100 pt-4">
-                <span className="block text-gray-800 font-bold text-lg">
-                    {formatCurrency(template.cost)}
-                </span>
+        <div 
+          className="flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-200 transition-all hover:shadow-md"
+        >
+          <div  
+            className="cursor-pointer flex flex-col flex-1"
+            onClick={() => {
+              navigate(`/vendor/template/${template.template_id}`);
+            }}
+            >
+              {/* Photo Section */}
+            <div className="relative h-44 bg-gray-100 overflow-hidden">
+                {/* Template Image Placeholder */}
+                {template.photo ? (
+                    <img 
+                        src={resolveImageUrl(template.photo) || placeholder} 
+                        alt={template.title} 
+                        className="w-full h-full object-cover" 
+                    />
+                ) : (
+                    <div className="absolute inset-0 bg-[hsl(var(--primary)/0.05)] flex items-center justify-center text-[hsl(var(--primary))]">
+                        <BagIcon />
+                    </div>
+                )}
                 
-                {/* Number Spinner and Add Button Container */}
-                <div className="flex items-center gap-2">
-                  
-                  {/* Number Spinner */}
-                  <div className="flex items-center bg-gray-100 rounded-lg p-1">
-                    <button
-                      onClick={decrement}
-                      disabled={addQuantity <= 1}
-                      className="w-7 h-7 flex items-center justify-center bg-white rounded shadow-sm text-gray-600 hover:text-black disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <span className="font-bold leading-none">-</span>
-                    </button>
-                    
-                    <span className="w-8 text-center text-sm font-bold text-gray-800">
-                      {addQuantity}
+                <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-full shadow-sm ${isOutOfStock ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-white/95 text-[hsl(var(--accent))]'}`}>
+                    <span className="text-xs font-bold">
+                    {template.available_count} in stock
                     </span>
-                    
+                </div>
+
+                <div className="absolute top-3 left-3 flex gap-1">
+                    {showVegan && <Badge type="VE" />}
+                    {showVeggie && <Badge type="V" />}
+                </div>
+            </div>
+
+            {/* Description section */}
+            <div className="p-4 flex flex-col flex-1">
+              <h2 className="text-base font-bold text-gray-800 leading-tight mb-1">
+              {template.title}
+              </h2>
+
+              <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed mb-3">
+                  {template.description}
+              </p>
+
+              {(template.meat_percent > 0 || template.veg_percent > 0 || template.carb_percent > 0) && (
+                  <div className="text-[10px] font-medium text-gray-400 mb-3 flex gap-2 items-center bg-gray-50 p-2 rounded-lg">
+                      {template.meat_percent > 0 && <span>{formatPercent(template.meat_percent)} Meat</span>}
+                      {template.meat_percent > 0 && (template.veg_percent > 0 || template.carb_percent > 0) && <span className="text-gray-300">•</span>}
+                      {template.veg_percent > 0 && <span>{formatPercent(template.veg_percent)} Veg</span>}
+                      {template.veg_percent > 0 && template.carb_percent > 0 && <span className="text-gray-300">•</span>}
+                      {template.carb_percent > 0 && <span>{formatPercent(template.carb_percent)} Carb</span>}
+                  </div>
+              )}
+            </div>
+          </div>
+          
+          <div 
+            className="p-4 flex flex-col flex-1"
+            >
+              <div className="mt-auto flex justify-between items-center border-t border-gray-100 pt-4">
+                  <span className="block text-gray-800 font-bold text-lg">
+                      {formatCurrency(template.cost)}
+                  </span>
+                  
+                  {/* Delete and Add Button Container */}
+                  <div className="flex items-center gap-2">
+
+                    {/* Delete Stock Button */}
                     <button
-                      onClick={increment}
-                      className="w-7 h-7 flex items-center justify-center bg-white rounded shadow-sm text-gray-600 hover:text-black"
+                      onClick={handleSubStockClick}
+                      disabled={template.available_count <= 0}
+                      className="flex items-center justify-center bg-red-600 text-white w-10 h-10 rounded-xl shadow-sm hover:bg-red-700 transition-colors active:scale-95 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Delete Stock"
                     >
-                      <span className="font-bold leading-none">+</span>
+                      <MinusIcon />
+                    </button>
+
+                    {/* Add Stock Button */}
+                    <button
+                      onClick={handleAddStockClick}
+                      className="flex items-center justify-center bg-blue-600 text-white w-10 h-10 rounded-xl shadow-sm hover:bg-blue-700 transition-colors active:scale-95 shrink-0"
+                      title="Add Stock"
+                    >
+                      <PlusIcon />
                     </button>
                   </div>
-
-                  {/* Add Stock Button */}
-                  <button
-                    onClick={handleAddStockClick}
-                    className="flex items-center justify-center bg-blue-600 text-white w-10 h-10 rounded-xl shadow-sm hover:bg-blue-700 transition-colors active:scale-95 shrink-0"
-                    title="Add Stock"
-                  >
-                    <PlusIcon />
-                  </button>
-                </div>
-            </div>
-        </div>
+              </div>
+          </div>
         </div>
     );
   };
 
   return (
-    <div className="min-h-screen bg-pattern pb-20 ">
+    <div className="min-h-screen bg-background pb-20 ">
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 relative z-10">
         
@@ -276,15 +297,29 @@ export default function VendorTemplateManager() {
                       </div>
                     )}
 
-                    <button 
-                      onClick={() => navigate('/vendor/analytics')}
-                      className="flex items-center gap-2 bg-gray-800 text-white px-6 py-3.5 rounded-2xl hover:bg-black transition-all hover:shadow-lg active:scale-95 shadow-sm shrink-0 w-full sm:w-auto justify-center"
-                    >
-                      <span className="font-bold text-sm">View Full Analytics</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                      </svg>
-                    </button>
+                    <div className="flex flex-col items-center gap-3">
+                      <button 
+                        onClick={() => navigate('/vendor/forecasts')}
+                        className="flex items-center gap-2 bg-gray-800 text-white px-6 py-3.5 rounded-2xl hover:bg-black transition-all hover:shadow-lg active:scale-95 shadow-sm shrink-0 w-full sm:w-auto justify-center"
+                      >
+                        <span className="font-bold text-sm">View Forecasts</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                      </button>
+
+                      <button 
+                        onClick={() => navigate('/vendor/analytics')}
+                        className="flex items-center gap-2 bg-gray-800 text-white px-6 py-3.5 rounded-2xl hover:bg-black transition-all hover:shadow-lg active:scale-95 shadow-sm shrink-0 w-full sm:w-auto justify-center"
+                      >
+                        <span className="font-bold text-sm">View Analytics</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    
                   </div>
                 </div>
               </div>
@@ -294,11 +329,11 @@ export default function VendorTemplateManager() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 transition-all hover:shadow-md group">
                 <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1 group-hover:text-green-600 transition-colors">Lifetime Revenue</p>
-                <h2 className="text-4xl font-black text-green-600">£{vendor?.total_revenue?.toLocaleString()}</h2>
+                <h2 className="text-4xl font-black text-green-600">£{vendor?.total_revenue?.toFixed(1) ?? "0.0"}</h2>
               </div>
               <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 transition-all hover:shadow-md group">
                 <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1 group-hover:text-orange-500 transition-colors">Waste Prevented</p>
-                <h2 className="text-4xl font-black text-orange-500">{vendor?.food_saved}kg</h2>
+                <h2 className="text-4xl font-black text-orange-500">{vendor?.food_saved?.toFixed(1) ?? "0.0"}kg</h2>
               </div>
               <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 transition-all hover:shadow-md group">
                 <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1 group-hover:text-blue-500 transition-colors">CO2e Offset</p>
