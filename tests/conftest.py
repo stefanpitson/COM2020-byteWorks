@@ -15,6 +15,7 @@ from app.api.templates import router as templates_router
 from app.api.vendors import router as vendors_router
 from app.api.bundles import router as bundles_router
 from app.api.reports import router as reports_router
+from app.api.reservations import router as reservations_router
 from app.core.database import get_session
 from app.core.security import get_password_hash
 from app.models import User, Vendor, Customer, Allergen # UserBase no longer exists
@@ -50,6 +51,7 @@ def app():
     app.include_router(templates_router, prefix="/templates")
     app.include_router(bundles_router, prefix="/bundles")
     app.include_router(reports_router, prefix="/reports")
+    app.include_router(reservations_router, prefix="/reservations")
     app.dependency_overrides[get_session] = get_test_session
     return app
 
@@ -67,6 +69,9 @@ def setup_test_db():
 def seed_allergens(setup_test_db):
     with Session(test_engine) as session:
         session.add_all([
+            Allergen(title="dairy"),
+            Allergen(title="milk"),
+            Allergen(title="gluten"),
             Allergen(title="Celery"),
             Allergen(title="Gluten"),
             Allergen(title="Crustaceans"),
@@ -96,7 +101,7 @@ def registered_vendor(test_client):
             "name": "vendorer",
             "street": "12 Pennsylvania road",
             "city": "Exeter",
-            "post_code": "EX4 6BH",
+            "post_code": "EX46BH",
             "phone_number": "44 020 1234 567",
             "opening_hours": "..",
             "photo": "https://www.fotor.com/blog/how-to-take-professional-photos/"
@@ -121,7 +126,7 @@ def registered_vendor_2(test_client):
             "name": "vendorer_2",
             "street": "12 Pennsylvania road",
             "city": "Exeter",
-            "post_code": "EX4 6BH",
+            "post_code": "EX46BH",
             "phone_number": "44 020 1234 567",
             "opening_hours": "..",
             "photo": "https://www.fotor.com/blog/how-to-take-professional-photos/"
@@ -144,7 +149,7 @@ def registered_customer(test_client):
         },
         "customer": {
             "name": "tester",
-            "post_code": "SW1A 1AA"
+            "post_code": "SW1A1AA"
         }
     }
     response = test_client.post("/register/customer", json=customer_data)
@@ -157,17 +162,26 @@ def registered_customer(test_client):
 def customer_login_response(test_client, registered_customer):
     default_user = registered_customer["customer_data"]["user"]
 
-    def login(email=None, password=None):
-        response = test_client.post(
-            "/login",
-            json={
-                "email": email or default_user["email"],
-                "password": password or default_user["password"],
-            },
-        )
-        return response.json()
+    class LoginResponse(dict):
+        def __call__(self, email=None, password=None): # to accomodate both formats
+            response = test_client.post(
+                "/login",
+                json={
+                    "email": email or default_user["email"],
+                    "password": password or default_user["password"],
+                },
+            )
+            return response.json()
 
-    return login
+    initial_response = test_client.post(
+        "/login",
+        json={
+            "email": default_user["email"],
+            "password": default_user["password"],
+        },
+    )
+
+    return LoginResponse(initial_response.json())
 
 @pytest.fixture
 def vendor_login_response(test_client, registered_vendor):
