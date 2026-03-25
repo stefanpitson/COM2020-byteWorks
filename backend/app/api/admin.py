@@ -100,7 +100,7 @@ def create_admin():
             print("admin already exists")
             return
         
-        admin = User(email = "admin@byte.com", password_hash= get_password_hash("adminPass"), role ="admin")
+        admin = User(email = "admin@byte.com", password_hash= get_password_hash("Admin123"), role ="admin")
         try:
             session.add(admin)
             session.commit()
