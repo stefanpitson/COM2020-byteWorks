@@ -14,6 +14,9 @@ import CustomerBundleView from "./pages/customers/CustomerBundleView"
 import CustomerReservations from "./pages/customers/CustomerReservations";
 import VendorReservations from "./pages/vendors/VendorReservations";
 import TemplateDetails from "./pages/vendors/templateDetails";
+import CustomerCredit from "./pages/customers/CustomerCredit";
+import CustomerReports from "./pages/customers/CustomerReports";
+import VendorReports from "./pages/vendors/VendorReports"
 import CustomerBadges from "./pages/customers/CustomerBadges";
 
 export default function App() {
@@ -22,24 +25,23 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
-
         <Route path="/vendor/signup" element={<VendorSignUp />} />
         <Route path="/customer/signup" element={<CustomerSignUp />} />
-
-        
 
         {/* Applies the navbar */}
         <Route element={<MainLayout />}>
 
-          <Route path="/customer/badges" element={<CustomerBadges />} />
+          
           {/* Only Customers allowed */}
           <Route element={<ProtectedRoute allowedRole="customer" />}>
             <Route path="/customer/home" element={<CustomerHome />} />
-
             <Route path="/customer/settings" element={<CustomerSignUp />} />
             <Route path="/vendor/:vendorId" element={<CustomerVendorView />} />
             <Route path="/bundle/:templateId" element={<CustomerBundleView />} />
             <Route path="/customer/reservations" element={<CustomerReservations />} />
+            <Route path="/customer/credit" element={<CustomerCredit />} />
+            <Route path="/customer/reports" element={<CustomerReports />} />
+            <Route path="/customer/badges" element={<CustomerBadges />} />
           </Route>
 
           {/* Only Vendors allowed */}
@@ -49,6 +51,7 @@ export default function App() {
             <Route path="/vendor/analytics" element={<VendorAnalytics />} />
             <Route path="/vendor/reservations" element={<VendorReservations />} />
             <Route path="/vendor/template" element={<TemplateDetails />} />
+            <Route path="/vendor/reports" element={<VendorReports />} />
           </Route>
         </Route>
       </Routes>

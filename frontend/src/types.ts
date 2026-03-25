@@ -49,21 +49,6 @@ export interface Template {
   }[];
 }
 
-export interface AnalyticDataPoint {
-  bundle_name: string;
-  no_show: number;
-  posted: number;
-  predicted: number;
-  recommendation: string;
-}
-
-
-export interface WeekData {
-  week_date: string; 
-  datapoints: AnalyticDataPoint[];
-}
-
-
 export interface Reservation {
   reservation_id: number;
   bundle_id: number;
@@ -87,20 +72,58 @@ export interface Streak {
   last: string; 
 }
 
-export interface AnalyticDataPoint {
+export interface ForecastDataPoint {
   bundle_name: string;
+  predicted_sales: number;
   no_show: number;
-  posted: number;
-  predicted: number;
+  chance_of_no_show: number;
+  day: string;
+  start_time: string;
+  end_time: string;
+  confidence: number;
   recommendation: string;
+  rationale: string;
 }
 
-export interface WeekData {
+export interface ForecastWeekData {
   week_date: string; 
-  datapoints: AnalyticDataPoint[];
+  datapoints: ForecastDataPoint[];
 }
 
-export interface Analytics {
-  week_data: WeekData[];
+export interface Report {
+  report_id: number;
+  title: string;
+  complaint: string;
+  response: string | null;
+  responded: boolean;
+  customer_id: number;
+  vendor_id: number;
+  date_made: string; 
+  date_responded: string | null;
 }
 
+export interface Badge {
+  badge_id: number;
+  title: string;
+  description: string;
+  metric: string;
+  threshold: number;
+}
+
+export interface BadgeList {
+  total_count: number;
+  badges: Badge[];
+}
+
+export interface LeaderboardEntry {
+  customer_id: number;
+  rank: number;
+  name: string;
+  food_saved: number;
+  is_you: boolean;
+}
+
+export interface LeaderboardList {
+  total_count: number;
+  entries: LeaderboardEntry[];
+}
