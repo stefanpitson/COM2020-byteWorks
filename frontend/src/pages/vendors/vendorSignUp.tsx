@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { registerVendor, loginUser, uploadImage} from "../../api/auth";
+import { registerVendor, loginUser } from "../../api/auth";
+import { uploadImage } from "../../api/vendors";
 import { saveAuthSession } from "../../utils/authSession";
 import EyeIcon from "../../assets/icons/eye.svg?react";
 import EyeOffIcon from "../../assets/icons/eye-off.svg?react";
@@ -90,8 +91,20 @@ export default function VendorSignUp() {
 
     // Navigate to dashboard
     navigate("/vendor/dashboard")
-    } catch (error) {
+    } catch (error: any) {
       console.error("Signup failed" + error);
+      const backendError = error.response?.data?.detail || "An error occurred during signup.";
+      
+      if (backendError.toLowerCase().includes("postcode") || backendError.toLowerCase().includes("post code")) {
+        setStep(2); 
+        setErrors((prev) => ({ ...prev, post_code: "Invalid or unrecognized Post Code." }));
+      } 
+      else if (backendError.toLowerCase().includes("email")) {
+        setStep(1); 
+        setErrors((prev) => ({ ...prev, email: backendError }));
+      } else {
+        alert(backendError); 
+      }
     }
   }
 
@@ -205,6 +218,8 @@ export default function VendorSignUp() {
             <p>Email:</p>
             <input
               name="email"
+              type="email" // helps mobile keyboards with autofill
+              autoComplete="username" //Allows for autocomplete to work 
               placeholder="vendor@domain.com"
               className={getInputClass(errors.email)}
               value={formData.email}
@@ -359,7 +374,7 @@ export default function VendorSignUp() {
               type="button"
               key="next-button"
               onClick={handleNext}
-              className="px-4 py-2 bg-green-600 text-white rounded"
+              className="px-4 py-2 bg-primary text-white rounded"
             >
               Next
             </button>
@@ -367,7 +382,7 @@ export default function VendorSignUp() {
             <button
               type="submit"
               key="submit-button"
-              className="px-4 py-2 bg-blue-600 text-white rounded"
+              className="px-4 py-2 bg-primary text-white rounded"
             >
               Submit Profile
             </button>

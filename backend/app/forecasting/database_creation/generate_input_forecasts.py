@@ -1,7 +1,7 @@
-from sqlmodel import Session, select, func
+from sqlmodel import Session, select
 from datetime import date, timedelta, time
 from collections import defaultdict
-from app.models import Forecast_Input, Bundle, Reservation, Template
+from app.models import Forecast_Input, Bundle, Reservation, Template, Vendor
 from app.core.database import engine
 
 def get_slot_from_time(t: time) -> tuple[time, time]:
@@ -48,7 +48,7 @@ def sync_forecast_inputs(session: Session, vendor_id: int, days_back: int = 30):
         
 
     # For each group, get the template to compute discount
-    template_cache = {}  # cache template_id sinve will be needed to calculate dicount
+    template_cache = {}  # cache template_id since will be needed to calculate dicount
     for key, agg in groups.items():
         rec_date, slot_start, slot_end, template_id = key  
 
@@ -100,4 +100,6 @@ def sync_forecast_inputs(session: Session, vendor_id: int, days_back: int = 30):
 
 if __name__ == "__main__":
     with Session(engine) as session:
-        sync_forecast_inputs(vendor_id=1, session=session, days_back=60)
+        vendor_ids = session.exec(select(Vendor.vendor_id))
+        for id in vendor_ids:
+            sync_forecast_inputs(vendor_id=id, session=session, days_back=45)

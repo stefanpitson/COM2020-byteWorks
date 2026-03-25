@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Customer, Vendor } from "../../types";
 import { getCustomerProfile } from "../../api/customers";
-import { getAllVendors } from "../../api/vendors";
+import { getAllVendors, getVendorDistance } from "../../api/vendors";
 import placeholder from "../../assets/placeholder.jpg";
 import { resolveImageUrl } from "../../utils/imageUrl";
 
@@ -86,6 +86,25 @@ export default function CustomerHome() {
   const VendorCard = ({ vendor, isSoldOut }: { vendor: HomeVendor; isSoldOut?: boolean }) => {
     const isLowStock = vendor.bundle_count > 0 && vendor.bundle_count < 5;
 
+    const [distance, setDistance] = useState<number | null>(null);
+    const [distLoading, setDistLoading] = useState(true);
+
+    useEffect(() => {
+      const fetchDistance = async () => {
+        try {
+          const dist = await getVendorDistance(vendor.vendor_id!, true);
+          setDistance(dist);
+        } catch (error) {
+          console.error("Failed to fetch distance for vendor", vendor.vendor_id);
+          console.log(error)
+        } finally {
+          setDistLoading(false);
+        }
+      };
+
+      fetchDistance();
+    }, [vendor.vendor_id]);
+
     return (
       <div
         onClick={() => !isSoldOut && navigate(`/vendor/${vendor.vendor_id}`)}
@@ -138,9 +157,15 @@ export default function CustomerHome() {
           
           {/* Location */}
           <div className="flex items-center gap-1 text-gray-400 text-xs mb-4">
-              <span className="text-[hsl(var(--accent))]"><MapPinIcon /></span>
-              <span>0.8 miles away</span>
-          </div>
+            <span className="text-[hsl(var(--accent))]"><MapPinIcon /></span>
+            <span>
+              {distLoading 
+                ? "Calculating..." 
+                : distance !== null 
+                  ? `${distance.toFixed(1)} miles away` 
+                  : "Distance unavailable"}
+            </span>
+        </div>
 
           <div className="mt-auto border-t border-gray-100 pt-3 flex justify-between items-center">
              {isSoldOut ? (
@@ -166,7 +191,7 @@ export default function CustomerHome() {
   );
 
   return (
-    <div className="min-h-screen bg-pattern pb-12">
+    <div className="min-h-screen bg-background pb-12">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10">
         
@@ -192,8 +217,21 @@ export default function CustomerHome() {
                   </div>
                 </div>
               </div>
+
+              <div className="mb-10 flex justify-center">
+                <button 
+                  onClick={() => navigate("/customer/badges")}
+                  className="bg-[hsl(var(--primary))] text-white font-extrabold py-3.5 px-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-lg hover:-translate-y-1 hover:bg-[hsl(var(--primary-dark))] transition-all duration-300 flex items-center gap-3"
+                >
+                  <span className="text-xl drop-shadow-sm">🏆</span> 
+                  View Badges & Leaderboard
+                  <span className="text-white/70 ml-1 font-bold">&rarr;</span>
+                </button>
+              </div>
             </>
           )}
+
+            
     
             <h1 className="text-3xl md:text-4xl font-extrabold text-[hsl(var(--text-main))] mb-6 leading-tight">
                 Save food, <span className="text-[hsl(var(--accent))] underline decoration-4 decoration-[hsl(var(--accent)/0.3)]">save money.</span>

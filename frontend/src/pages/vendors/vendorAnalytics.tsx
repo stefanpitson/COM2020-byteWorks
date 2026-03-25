@@ -2,129 +2,126 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, 
-  Tooltip, Legend, ResponsiveContainer
+  Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line
 } from "recharts";
-import type { NameType, ValueType, Payload } from "recharts/types/component/DefaultTooltipContent";
-import { getVendorAnalytics } from "../../api/analytics";
-import type { Vendor, ForecastWeekData, ForecastDataPoint} from "../../types";
-import { getVendorProfile } from "../../api/vendors";
+import type { 
+  AnalyticSellThrough, AnalyticsDiscountData, 
+  AnalyticsPostingData, AnalyticsBestBundles, AnalyticsWaste 
+} from "../../types";
+import { 
+  getSellThrough, getPricingEffectiveness, 
+  getPostingWindows, getBestSellers, getWasteProxy 
+} from "../../api/analytics";
 
-
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: Payload<ValueType, NameType>[];
-  label?: string;
-}
-
-const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
-  if (active && payload && payload.length) {
-    // Access the raw data point from the first item in the payload array
-    const templateDatapoint = payload[0].payload as ForecastDataPoint;
-
-    return (
-      <div className="bg-white p-4 shadow-xl rounded-2xl border border-gray-100 max-w-sm">
-        <p className="font-bold text-gray-800 mb-2">{label}</p>
-        
-        {/* Render the standard bars (Predicted Sold, No Shows) */}
-        <div className="space-y-1 mb-3 border-b border-gray-50 pb-3">
-          {payload.map((entry: Payload<ValueType, NameType>, index: number) => (
-            <p key={index} className="text-sm flex justify-between gap-4" style={{ color: entry.color }}>
-              <span className="capitalize">{entry.name}:</span>
-              <span className="font-mono font-bold">{entry.value}</span>
-            </p>
-          ))}
-          <p className="text-sm flex justify-between gap-4 text-purple-600">
-            <span>No Show Prob:</span>
-            <span className="font-mono font-bold">{(templateDatapoint.chance_of_no_show * 100).toFixed(1)}%</span>
-          </p>
-        </div>
-
-        {/* Render the Recommendation if it exists */}
-        {templateDatapoint.recommendation && (
-          <div className="bg-blue-50 p-2.5 rounded-xl mb-2">
-            <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">
-              Recommendation
-            </p>
-            <p className="text-xs text-blue-700 leading-relaxed">
-              {templateDatapoint.recommendation}
-            </p>
-          </div>
-        )}
-
-        {/* Render the Rationale if it exists */}
-        {templateDatapoint.rationale && (
-          <div className="bg-gray-50 p-2.5 rounded-xl mb-2">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
-              Rationale
-            </p>
-            <p className="text-xs text-gray-600 leading-relaxed italic">
-              {templateDatapoint.rationale}
-            </p>
-          </div>
-        )}
-
-        {/* Render the Confidence if it exists */}
-        {templateDatapoint.confidence && (
-          <div className="bg-gray-50 p-2.5 rounded-xl">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
-              Confidence
-            </p>
-            <p className="text-xs text-gray-600 leading-relaxed italic">
-              {templateDatapoint.confidence}
-            </p>
-          </div>
-        )}
-      </div>
-    );
-  }
-  return null;
-};
+const COLORS = ['#22c55e', '#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6'];
 
 export default function VendorAnalytics() {
   const navigate = useNavigate();
-  const [data, setData] = useState<ForecastWeekData | null>(null);
   const [loading, setLoading] = useState(true);
-    const [vendor, setVendor] = useState<Vendor>();
+  const [sellView, setSellView] = useState<string>("weekly_proportions")
+  const [sellThroughLabel, setSellThroughLabel] = useState<string>("")
+  
+  const [sellThrough, setSellThrough] = useState<AnalyticSellThrough | null>(null);
+  const [pricingEffectiveness, setPricingEffectiveness] = useState<AnalyticsDiscountData | null>(null);
+  const [postingWindows, setPostingWindows] = useState<AnalyticsPostingData| null>(null);
+  const [bestSellers, setBestSellers] = useState<AnalyticsBestBundles | null>(null);
+  const [waste, setWaste] = useState<AnalyticsWaste | null>(null);
+  const [sellThroughPieChartData, setSellThroughPieChartData] = useState<Array<{ name: string; value: number }>>([])
 
   useEffect(() => {
-    const fetchAnalytics = async () => {
+    const fetchAllData = async () => {
       try {
-
-        const vendorData = await getVendorProfile();
-        vendorData.carbon_saved = vendorData.carbon_saved ?? 0;
-        setVendor(vendorData);
-        
-        if (!vendorData || vendorData.vendor_id === undefined) {
-            console.error("Vendor profile or ID is missing");
-            return;
+        const [
+            sellThroughData,
+            pricingData,
+            postingWindowData,
+            bestSellersData,
+            wasteData
+        ] = await Promise.all([
+          getSellThrough(),
+          getPricingEffectiveness(),
+          getPostingWindows(),
+          getBestSellers(),
+          getWasteProxy()
+        ]);
+        setSellThrough(sellThroughData);
+        setPricingEffectiveness(pricingData);
+        setPostingWindows(postingWindowData);
+        setBestSellers(bestSellersData);
+        setWaste(wasteData);
+        if (sellThroughData) {
+          setSellThroughPieChartData([
+          { name: 'Collected', value: sellThroughData.weekly_proportions.collected },
+          { name: 'No-Shows', value: sellThroughData.weekly_proportions.no_show },
+          { name: 'Expired', value: sellThroughData.weekly_proportions.expired },
+          ])
+          const weekDate = sellThroughData.weekly_proportions.week_start_date
+          setSellThroughLabel(`Week Starting ${dayOfWeek(weekDate)} ${weekDate}`)
         }
-
-        const result = await getVendorAnalytics();
-        setData(result);
       } catch (error) {
-        console.error("Failed to load analytics", error);
+        console.error("Failed to load analytics data", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchAnalytics();
+
+    fetchAllData();
   }, []);
 
+  const handleViewChange = () => {
+    if (sellView === "weekly_proportions") {
+      setSellView("all_time_proportions")
+      if (sellThrough) {
+        setSellThroughPieChartData([
+        { name: 'Collected', value: sellThrough.all_time_proportions.collected },
+        { name: 'No-Shows', value: sellThrough.all_time_proportions.no_show },
+        { name: 'Expired', value: sellThrough.all_time_proportions.expired },
+        ])
+        setSellThroughLabel(`All Time`)
+      }
+    } else {
+      setSellView("weekly_proportions")
+      if (sellThrough) {
+        setSellThroughPieChartData([
+        { name: 'Collected', value: sellThrough.weekly_proportions.collected },
+        { name: 'No-Shows', value: sellThrough.weekly_proportions.no_show },
+        { name: 'Expired', value: sellThrough.weekly_proportions.expired },
+        ])
+        const weekDate = sellThrough.weekly_proportions.week_start_date
+        setSellThroughLabel(`Week Starting ${dayOfWeek(weekDate)} ${weekDate}`)
+      }
+    }
+  }
+
+  const dayOfWeek = (inDate?: string) => {
+    const dateObject = new Date(inDate || "");
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayName = daysOfWeek[dateObject.getDay()]
+    return dayName;
+  }
+
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-pattern">
+    <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="animate-spin w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full"></div>
     </div>
   );
 
+
   return (
-    <div className="min-h-screen bg-pattern pb-20 pt-10">
+    <div className="min-h-screen bg-background pb-20 pt-10">
+      <style>{`
+        .recharts-wrapper *:focus {
+        outline: none;
+        }
+      `}</style>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         
         {/* HEADER */}
         <div className="flex justify-between items-end mb-10">
           <div>
             <h1 className="text-4xl font-extrabold text-gray-800">Business Analytics</h1>
-            <p className="text-gray-500 mt-2">Track your impact and sales performance</p>
+            <p className="text-gray-500 mt-2">Deep dive into your shop's performance</p>
           </div>
           <button 
             onClick={() => navigate(-1)}
@@ -134,64 +131,198 @@ export default function VendorAnalytics() {
           </button>
         </div>
 
-        {/* Big stats from vendor */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Lifetime Revenue</p>
-            <h2 className="text-4xl font-black text-green-600">£{vendor?.total_revenue?.toLocaleString()}</h2>
+        {/* QUICK STATS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 transition-all hover:shadow-md">
+            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Top Selling Bundle</p>
+            <h2 className="text-2xl font-black text-blue-600 truncate">{bestSellers?.top_bundle || "N/A"}</h2>
           </div>
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Waste Prevented</p>
-            <h2 className="text-4xl font-black text-orange-500">{vendor?.food_saved}kg</h2>
+          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 transition-all hover:shadow-md">
+            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Avg. Bundle Weight</p>
+            <h2 className="text-4xl font-black text-orange-500">{waste?.average_bundle_weight?.toFixed(1) ?? "0.0"}kg</h2>
           </div>
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">CO2e Offset</p>
-            <h2 className="text-4xl font-black text-blue-500">{vendor?.carbon_saved}kg</h2>
+          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 transition-all hover:shadow-md">
+            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Total Waste Saved</p>
+            <h2 className="text-4xl font-black text-green-600">{waste?.total_waste_avoided?.toFixed(1) ?? "0.0"}kg</h2>
+          </div>
+          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 transition-all hover:shadow-md">
+            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Best Posting Window</p>
+            <h2 className="text-2xl font-black text-purple-600">{postingWindows?.top_post_window || "N/A"}</h2>
           </div>
         </div>
 
-        {/* Bar charts */}
-        <div className="space-y-10">
-          <div className="flex items-center gap-4">
-            <h2 className="text-2xl font-bold text-gray-800">Weekly Breakdown</h2>
-            <div className="h-px bg-gray-200 flex-1"></div>
+        {/* ANALYTICS GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          
+          {/* Sell-Through Proportion */}
+          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col">
+            <h3 className="text-xl font-bold text-gray-800 mb-6">Sell-Through Rate</h3>
+            <div className="flex justify-between items-center w-full mb-6">
+              <h3 className="text-sm font-bold text-gray-400 tracking-wider">
+                {sellThroughLabel}
+              </h3>
+              <button 
+                className="bg-green-500 hover:bg-green-600 text-white text-xs font-bold px-4 py-2 rounded-full transition-all shadow-sm active:scale-95 border-2 border-green-600"
+                onClick={() => handleViewChange()}
+              >
+                Change Timeframe
+              </button>
+            </div>
+            
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={sellThroughPieChartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={sellThroughPieChartData.filter(d => d.value > 0).length > 1 ? 5 : 0}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {sellThroughPieChartData.map((_entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="text-gray-500 text-sm mt-4 italic text-center">
+              Overview of bundle statuses: collected, missed, or expired.
+            </p>
           </div>
 
-            <div className="bg-white p-6 md:p-10 rounded-3xl shadow-sm border border-gray-100">
-              <h3 className="text-lg font-bold text-gray-700 mb-8 flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                Week of {data?.week_date}
-              </h3>
-              
-              <div className="h-[350px] w-full">
-                {data?.datapoints.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full text-gray-500 space-y-2"> 
-                  <p className="text-lg font-medium">No data points available for this week</p> 
-                  <p className="text-sm">New analytics will appear once transactions occur.</p>     
-                  </div> 
-                ):(
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={data?.datapoints} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          {/* Best Sellers */}
+          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col">
+            <h3 className="text-xl font-bold text-gray-800 mb-6">Popular Bundles</h3>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart 
+                  margin={{bottom: 30}}
+                  data={bestSellers?.bundle_datapoints || []}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                  <XAxis 
+                    dataKey="bundle_title" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#9ca3af', fontSize: 12 }} 
+                    label={{value: "Bundle Name", position: 'insideBottom', offset: -25}}
+                  />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} />
+                  <Tooltip 
+                    labelFormatter={(label) => `Bundle :  ${label}`}
+                  />
+                  <Bar 
+                    dataKey="weekly_average" 
+                    fill="#3b82f6" 
+                    radius={[4, 4, 0, 0]} 
+                    name= "Weekly Average"  
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="text-gray-500 text-sm mt-4 italic text-center">
+              Average weekly sales per bundle template.
+            </p>
+          </div>
+
+          {/* Pricing Effectiveness */}
+          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col">
+            <h3 className="text-xl font-bold text-gray-800 mb-6">Pricing Effectiveness</h3>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart 
+                margin={{ top: 10, right: 10, left: 10, bottom: 30 }}
+                data={pricingEffectiveness?.coordinates.map(coord => ({
+                ...coord,
+                discount: (coord.discount * 100).toFixed(1),
+                sell_through: +(coord.sell_through * 100).toFixed(1)
+                })) || []}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
                     <XAxis 
-                      dataKey="bundle_name" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fill: '#9ca3af', fontSize: 12 }} 
-                      dy={10}
+                        dataKey="discount" 
+                        name="Discount" 
+                        unit="%" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fill: '#9ca3af', fontSize: 12 }} 
+                        label={{value: "Discount (%)", position: 'insideBottom', offset: -25}}
                     />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 12 }} />
-                    <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f9fafb' }} />
-                    <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ paddingBottom: '20px' }} />
-                    
-                    <Bar name="Predicted Sold" dataKey="predicted_sales" fill="#22c55e" radius={[4, 4, 0, 0]} barSize={20} />
-                    <Bar name="Predicted No Shows" dataKey="no_show" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={20} />
-                  </BarChart>
-                </ResponsiveContainer>)
-              }
-              </div>
+                    <YAxis 
+                        dataKey="sell_through" 
+                        name="Sell-Through Rate" 
+                        unit="%" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fill: '#9ca3af', fontSize: 12 }}
+                        label={{ value: 'Sell Through Rate (%)', angle: -90, position: 'insideBottomLeft'}}
+                    />
+                    <Tooltip 
+                        formatter={(value) => value !== undefined ? `${value}%` : 'N/A'} 
+                        labelFormatter={(label) => `Discount :  ${label}%`}
+                        />
+                    <Line 
+                        type="monotone" 
+                        dataKey="sell_through" 
+                        stroke="#f59e0b" 
+                        strokeWidth={3} dot={{ r: 6 }} 
+                        activeDot={{ r: 8 }} 
+                        name="Sell-Through Rate"/>
+                </LineChart>
+              </ResponsiveContainer>
             </div>
-  
+            <p className="text-gray-500 text-sm mt-4 italic text-center">
+              Relationship between discount percentage and sell-through success.
+            </p>
+          </div>
+
+          {/* Posting Windows */}
+          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col">
+            <h3 className="text-xl font-bold text-gray-800 mb-6">Peak Posting Times</h3>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart 
+                  margin={{ top: 10, right: 10, left: 10, bottom: 30 }}
+                  data={postingWindows?.window_datapoints || []}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                  <XAxis 
+                    dataKey="posting_timeslot" 
+                    name="Weekly Average Bundles Sold"
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#9ca3af', fontSize: 11 }} 
+                    interval={0}
+                    angle={-7}
+                    textAnchor="middle"
+                    label={{value: "Time Slot (Start Time - End Time)", position: 'insideBottom', offset: -25}}
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    name="Time Slot"
+                    tickLine={false} 
+                    tick={{ fill: '#9ca3af', fontSize: 12 }} 
+                    label={{ value: 'Avg. Weekly Bundles Sold', angle: -90, position: 'insideBottomLeft'}}
+                  />
+                  <Tooltip 
+                    labelFormatter={(label) => `Time Slot :  ${label}`}
+                  />
+                  <Bar 
+                    dataKey="weekly_average" 
+                    fill="#8b5cf6" 
+                    radius={[4, 4, 0, 0]} 
+                    name="Average. Weekly Bundles Sold"/>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="text-gray-500 text-sm mt-4 italic text-center">
+              Best performing times to post bundles for maximum engagement.
+            </p>
+          </div>
+
         </div>
       </div>
     </div>

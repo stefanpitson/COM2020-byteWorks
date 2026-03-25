@@ -75,19 +75,73 @@ export interface Streak {
 export interface ForecastDataPoint {
   bundle_name: string;
   predicted_sales: number;
-  no_show: number;
+  predicted_no_show: number;
   chance_of_no_show: number;
-  day: string;
-  start_time: string;
-  end_time: string;
   confidence: number;
-  recommendation: string;
-  rationale: string;
+  recommendation: string[];
+  rationale: string[];
+}
+
+export interface ForecastDayData {
+  date: string; 
+  datapoints: ForecastDataPoint[];
 }
 
 export interface ForecastWeekData {
-  week_date: string; 
-  datapoints: ForecastDataPoint[];
+week_date: string; 
+day_datapoints: ForecastDayData[];
+}
+
+export interface AnalyticSellThrough {
+  weekly_proportions: {
+    collected: number;
+    no_show: number;
+    expired: number;
+    week_start_date: string;
+  };
+  all_time_proportions: {
+    collected: number;
+    no_show: number;
+    expired: number;
+  }
+}
+
+// Price Effectiveness
+export interface AnalyticsDiscountData{
+  coordinates: AnalyticsDiscountCoordinate[];
+}
+
+export interface AnalyticsDiscountCoordinate{
+  discount: number;
+  sell_through: number;
+}
+
+// Posting Windows
+export interface AnalyticsPostingWindow{
+  posting_timeslot: string;
+  weekly_average: number;
+}
+
+export interface AnalyticsPostingData{
+  top_post_window: string;
+  window_datapoints: AnalyticsPostingWindow[];
+}
+
+// Waste Proxy
+export interface AnalyticsWaste {
+total_waste_avoided: number;
+average_bundle_weight: number;
+}
+
+// Best Sellers
+export interface AnalyticsPopularBundle {
+  bundle_title: string;
+  weekly_average: number;
+}
+
+export interface AnalyticsBestBundles {
+  top_bundle: string;
+  bundle_datapoints: AnalyticsPopularBundle[];
 }
 
 export interface Report {
@@ -102,3 +156,28 @@ export interface Report {
   date_responded: string | null;
 }
 
+export interface Badge {
+  badge_id: number;
+  title: string;
+  description: string;
+  metric: string;
+  threshold: number;
+}
+
+export interface BadgeList {
+  total_count: number;
+  badges: Badge[];
+}
+
+export interface LeaderboardEntry {
+  customer_id: number;
+  rank: number;
+  name: string;
+  food_saved: number;
+  is_you: boolean;
+}
+
+export interface LeaderboardList {
+  total_count: number;
+  entries: LeaderboardEntry[];
+}

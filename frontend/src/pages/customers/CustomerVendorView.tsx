@@ -125,7 +125,7 @@ export default function VendorPage() {
         <div className="relative h-44 bg-gray-100 overflow-hidden">
             {template.photo ? (
                 <img
-                    src={resolveImageUrl(template.photo)}
+                    src={resolveImageUrl(template.photo) || undefined}
                     alt={template.title}
                     className="w-full h-full object-cover"
                 />
@@ -199,7 +199,7 @@ export default function VendorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-pattern pb-20">
+    <div className="min-h-screen bg-background pb-20">
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 relative z-10">
         
@@ -262,7 +262,7 @@ export default function VendorPage() {
                  {vendor.carbon_saved > 0 && (
                      <div className="mt-6 inline-flex items-center gap-2 bg-[hsl(var(--primary)/0.1)] text-[hsl(var(--primary-dark))] px-5 py-3 rounded-2xl font-bold self-start border border-[hsl(var(--primary)/0.2)]">
                          <LeafIcon />
-                         <span>This vendor has saved {vendor.carbon_saved}kg of CO2e!</span>
+                         <span>This vendor has saved {vendor.carbon_saved?.toFixed(1) ?? "0.0"}kg of CO2e!</span>
                      </div>
                  )}
             </div>
