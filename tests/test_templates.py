@@ -39,7 +39,7 @@ def test_create_template_with_valid_allergies_success(test_client, vendor_login_
             "weight": 1.0,
             "is_vegan": False,
             "is_vegetarian": False,
-            "allergen_titles": ["dairy", "gluten"]
+            "allergen_titles": ["milk", "gluten"]
         }                 
     )
     template_response_data = template_response.json()
